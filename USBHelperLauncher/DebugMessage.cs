@@ -26,16 +26,17 @@ namespace USBHelperLauncher
         {
             ComputerInfo info = new ComputerInfo();
             StringBuilder sb = new StringBuilder();
-            TimeZone zone = TimeZone.CurrentTimeZone;
             Exception exception = await TryReachProxy();
+            DateTime now = DateTime.UtcNow;
             sb.Append('-', 10).Append(" Wii U USB Helper Loader Debug Information ").Append('-', 10).AppendLine();
-            sb.AppendLine("Debug generated on " + zone.ToUniversalTime(DateTime.Now) + " (UTC)");
+            sb.AppendLine("Debug Time: " + now + " (UTC)");
+            sb.AppendLine("Session Length: " + (now - Program.GetSessionStart()).ToString(@"hh\:mm\:ss"));
             sb.AppendLine("Session GUID: " + Program.GetSessionGuid().ToString());
-            sb.AppendLine("Proxy reachable: " + (exception == null ? "Yes" : "No (" + exception.Message + ")"));
+            sb.AppendLine("Proxy Available: " + (exception == null ? "Yes" : "No (" + exception.Message + ")"));
             sb.AppendLine("Version: " + Assembly.GetExecutingAssembly().GetName().Version.ToString());
             sb.AppendLine("Helper Version: " + Program.GetHelperVersion());
             sb.AppendLine(".NET Framework Version: " + Get45or451FromRegistry());
-            sb.AppendLine("Opearting System: " + info.OSFullName);
+            sb.AppendLine("Operating System: " + info.OSFullName);
             sb.AppendLine("Platform: " + info.OSPlatform);
             sb.AppendLine("System Language: " + info.InstalledUICulture);
             sb.AppendLine("Total Memory: " + info.TotalPhysicalMemory);

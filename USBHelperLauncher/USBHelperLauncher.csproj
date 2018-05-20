@@ -118,6 +118,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icon.ico" />
+    <Content Include="redist\vcredist_x64.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="redist\vcredist_x86.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="data\blackList.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

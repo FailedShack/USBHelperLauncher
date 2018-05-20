@@ -41,6 +41,7 @@ namespace USBHelperLauncher
 
         public void Start()
         {
+            FiddlerApplication.Prefs.SetBoolPref("fiddler.certmaker.CleanupServerCertsOnExit", true);
             FiddlerApplication.CreateProxyEndpoint(7777, true, "localhost");
             FiddlerCoreStartupSettings startupSettings =
                 new FiddlerCoreStartupSettingsBuilder()
@@ -72,14 +73,26 @@ namespace USBHelperLauncher
                 {
                     folder = "\\emulators";
                 }
+                else if (path.StartsWith("/res/prerequisites/"))
+                {
+                    folder = "\\redist";
+                }
                 else
                 {
                     folder = "\\data";
                 }
                 string localPath = Path.Combine(Program.GetLauncherPath() + folder, fileName);
                 oS.utilCreateResponseAndBypassServer();
-                logRequest(oS, "Sending local copy of " + fileName + " (found: " + File.Exists(localPath) + ")");
-                oS.LoadResponseFromFile(localPath);
+                if (File.Exists(localPath))
+                {
+                    logRequest(oS, "Sending local copy of " + fileName);
+                    oS.LoadResponseFromFile(localPath);
+                }
+                else
+                {
+                    logRequest(oS, "Missing resource requested: " + oS.PathAndQuery);
+                    oS.responseCode = 404;
+                }
             }
             else if (oS.HostnameIs("registration.wiiuusbhelper.com"))
             {

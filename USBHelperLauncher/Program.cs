@@ -18,6 +18,7 @@ namespace USBHelperLauncher
         private static readonly Guid sessionGuid = Guid.NewGuid();
         private static readonly Logger logger = new Logger();
 
+        private static DateTime sessionStart;
         private static Process process;
         private static string helperVersion;
         private static Thread backgroundThread;
@@ -71,7 +72,7 @@ namespace USBHelperLauncher
             {
                 MessageBox.Show(
                     "You will now be prompted to install an SSL certificate, this is required to allow other programs to make HTTPS requests while Wii U USB Helper is open.\n" +
-                    "This is part of the initial setup process.\n", "First run", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+                    "This is part of the initial setup process.\n", "First run - Read carefully!", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
                 while (true)
                 {
                     if (!CertMaker.createRootCert() || !CertMaker.trustRootCert())
@@ -101,12 +102,16 @@ namespace USBHelperLauncher
             proxy.Start();
 
             // Time to launch Wii U USB Helper
+            sessionStart = DateTime.UtcNow;
             process = StartProcess("WiiU_USB_Helper.exe", helperVersion);
             ContextMenu trayMenu = new ContextMenu();
+            MenuItem advanced = new MenuItem("Advanced");
+            advanced.MenuItems.Add("Toggle Console", OnVisibilityChange);
+            advanced.MenuItems.Add("Clear Install", OnClearInstall);
+            advanced.MenuItems.Add("Remove Certificate", OnRemoveCertificate);
             trayMenu.MenuItems.Add("Exit", OnExit);
-            trayMenu.MenuItems.Add("Toggle Console", OnVisibilityChange);
-            trayMenu.MenuItems.Add("Clear Install", OnClearInstall);
             trayMenu.MenuItems.Add("Report Issue", OnDebugMessage);
+            trayMenu.MenuItems.Add(advanced);
             trayIcon.Text = "Wii U USB Helper Launcher";
             trayIcon.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             trayIcon.ContextMenu = trayMenu;
@@ -141,7 +146,8 @@ namespace USBHelperLauncher
 
         static string GetFirefoxExecutable()
         {
-            RegistryKey regKey = Registry.CurrentUser.OpenSubKey("Software\\Mozilla\\Mozilla Firefox");
+            RegistryKey localMachine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+            RegistryKey regKey = localMachine.OpenSubKey("SOFTWARE\\Mozilla\\Mozilla Firefox");
             if (regKey == null)
             {
                 return null;
@@ -227,6 +233,16 @@ namespace USBHelperLauncher
             }
         }
 
+        private static void OnRemoveCertificate(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("The SSL certificate is required to intercept HTTPS requests from Wii U USB Helper. The launcher will not work without it.\nAre you sure you want to remove it?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.Yes && CertMaker.removeFiddlerGeneratedCerts())
+            {
+                Cleanup();
+                Application.Exit();
+            }
+        }
+
         private async static void OnDebugMessage(object sender, EventArgs e)
         {
             DebugMessage debug = new DebugMessage(logger.GetLog());
@@ -273,6 +289,11 @@ namespace USBHelperLauncher
         public static Logger GetLogger()
         {
             return logger;
+        }
+
+        public static DateTime GetSessionStart()
+        {
+            return sessionStart;
         }
 
         public static Guid GetSessionGuid()
