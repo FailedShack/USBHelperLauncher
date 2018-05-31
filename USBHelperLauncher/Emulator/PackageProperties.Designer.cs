@@ -47,7 +47,7 @@
             this.basicDetailsBox.Controls.Add(this.versionText);
             this.basicDetailsBox.Location = new System.Drawing.Point(12, 12);
             this.basicDetailsBox.Name = "basicDetailsBox";
-            this.basicDetailsBox.Size = new System.Drawing.Size(300, 90);
+            this.basicDetailsBox.Size = new System.Drawing.Size(310, 90);
             this.basicDetailsBox.TabIndex = 0;
             this.basicDetailsBox.TabStop = false;
             this.basicDetailsBox.Text = "Basic Details";
@@ -93,7 +93,7 @@
             this.metadataBox.Controls.Add(this.metadata);
             this.metadataBox.Location = new System.Drawing.Point(12, 108);
             this.metadataBox.Name = "metadataBox";
-            this.metadataBox.Size = new System.Drawing.Size(300, 90);
+            this.metadataBox.Size = new System.Drawing.Size(310, 90);
             this.metadataBox.TabIndex = 1;
             this.metadataBox.TabStop = false;
             this.metadataBox.Text = "Metadata";
@@ -104,14 +104,14 @@
             this.metadata.FormattingEnabled = true;
             this.metadata.Location = new System.Drawing.Point(3, 16);
             this.metadata.Name = "metadata";
-            this.metadata.Size = new System.Drawing.Size(294, 71);
+            this.metadata.Size = new System.Drawing.Size(304, 71);
             this.metadata.TabIndex = 0;
             // 
             // PackageProperties
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(324, 211);
+            this.ClientSize = new System.Drawing.Size(334, 211);
             this.Controls.Add(this.basicDetailsBox);
             this.Controls.Add(this.metadataBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;

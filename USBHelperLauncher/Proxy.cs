@@ -1,8 +1,10 @@
 ﻿using Fiddler;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using USBHelperLauncher.Emulator;
@@ -15,6 +17,7 @@ namespace USBHelperLauncher
 
         private X509Certificate2 certificate;
         private readonly Logger logger = Program.GetLogger();
+        private readonly Database database = Program.GetDatabase();
 
         public Proxy(X509Certificate2 certificate)
         {
@@ -60,7 +63,7 @@ namespace USBHelperLauncher
             {
                 string path = oS.PathAndQuery;
                 string fileName = Path.GetFileName(path);
-                string folder;
+                string folder = "\\data";
                 if (path.StartsWith("/wiiu/info/icons/"))
                 {
                     folder = "\\images\\wiiu\\icons";
@@ -77,9 +80,32 @@ namespace USBHelperLauncher
                 {
                     folder = "\\redist";
                 }
-                else
+                else if (path.StartsWith("/res/db/"))
                 {
-                    folder = "\\data";
+                    Match match = Regex.Match(fileName, @"datav(\d).enc");
+                    if (match.Success)
+                    {
+                        Database.EncryptionVersion version;
+                        switch (match.Groups[1].Value)
+                        {
+                            case "4":
+                                version = Database.EncryptionVersion.DATA_V4;
+                                break;
+                            case "6":
+                                version = Database.EncryptionVersion.DATA_V6;
+                                break;
+                            default:
+                                oS.responseCode = 500;
+                                logRequest(oS, "Invalid encryption version requested.");
+                                return;
+                        }
+                        logRequest(oS, "Sending database contents with " + version.ToString() + " encryption");
+                        oS.utilCreateResponseAndBypassServer();
+                        byte[] bytes = database.Encrypt(version).ToArray();
+                        oS.oResponse["Content-Length"] = bytes.Length.ToString();
+                        oS.responseBodyBytes = bytes;
+                        return;
+                    }
                 }
                 string localPath = Path.Combine(Program.GetLauncherPath() + folder, fileName);
                 oS.utilCreateResponseAndBypassServer();
@@ -156,6 +182,14 @@ namespace USBHelperLauncher
                                 Application.Run(dialog);
                             }
                         }).Start();
+                    }
+                }
+                else if (path == "/res/prerequisites/java.exe")
+                {
+                    DialogResult result = MessageBox.Show("To download this game you need Java installed on your computer. Install now?\nCancel the download to prevent additional messages.", "Java required", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (result == DialogResult.Yes)
+                    {
+                        Process.Start("https://www.java.com/en/download/");
                     }
                 }
             }

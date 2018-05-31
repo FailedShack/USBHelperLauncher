@@ -1,15 +1,19 @@
 ﻿using Fiddler;
 using Microsoft.Win32;
+using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using USBHelperLauncher.Emulator;
+using USBHelperLauncher.Utils;
 
 namespace USBHelperLauncher
 {
@@ -17,6 +21,7 @@ namespace USBHelperLauncher
     {
         private static readonly Guid sessionGuid = Guid.NewGuid();
         private static readonly Logger logger = new Logger();
+        private static readonly Database database = new Database();
 
         private static DateTime sessionStart;
         private static Process process;
@@ -34,6 +39,17 @@ namespace USBHelperLauncher
 
             logger.WriteLine("Made by FailedShack");
             SetConsoleVisibility(false);
+
+            try
+            {
+                database.LoadFromDir(Path.Combine(GetLauncherPath(), "data"));
+            }
+            catch (FileNotFoundException e)
+            {
+                MessageBox.Show(e.Message + "\nMake sure this file is under the data directory.", "Initialization error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+            }
+
             if (!File.Exists("ver") || !File.Exists("WiiU_USB_Helper.exe"))
             {
                 MessageBox.Show("Could not find Wii U USB Helper, please make sure this executable is in the correct folder.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -105,12 +121,20 @@ namespace USBHelperLauncher
             sessionStart = DateTime.UtcNow;
             process = StartProcess("WiiU_USB_Helper.exe", helperVersion);
             ContextMenu trayMenu = new ContextMenu();
+            MenuItem dlEmulator = new MenuItem("Download Emulator");
+            foreach (EmulatorConfiguration.Emulator emulator in Enum.GetValues(typeof(EmulatorConfiguration.Emulator)))
+            {
+                EmulatorConfiguration config = EmulatorConfiguration.GetConfiguration(emulator);
+                dlEmulator.MenuItems.Add(config.GetName(), (sender, e) => OnDownloadEmulator(config));
+            }
             MenuItem advanced = new MenuItem("Advanced");
             advanced.MenuItems.Add("Toggle Console", OnVisibilityChange);
             advanced.MenuItems.Add("Clear Install", OnClearInstall);
             advanced.MenuItems.Add("Remove Certificate", OnRemoveCertificate);
             trayMenu.MenuItems.Add("Exit", OnExit);
+            trayMenu.MenuItems.Add("Check for Updates", OnUpdateCheck);
             trayMenu.MenuItems.Add("Report Issue", OnDebugMessage);
+            trayMenu.MenuItems.Add(dlEmulator);
             trayMenu.MenuItems.Add(advanced);
             trayIcon.Text = "Wii U USB Helper Launcher";
             trayIcon.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
@@ -177,6 +201,40 @@ namespace USBHelperLauncher
             Environment.Exit(0);
         }
 
+        private async static void OnUpdateCheck(object sender, EventArgs e)
+        {
+            JObject release;
+            try
+            {
+                release = await GithubUtil.GetRelease("FailedShack", "USBHelperLauncher", "latest");
+            }
+            catch (WebException ex)
+            {
+                MessageBox.Show("Could not check for updates.\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            string newVersion = (string) release["tag_name"];
+            string[] rawVersion = Application.ProductVersion.Split('.');
+            string version = rawVersion[0] + "." + rawVersion[1];
+            int revision = int.Parse(rawVersion[3]);
+            if (revision > 0)
+            {
+                version += (char)(97 + revision);
+            }
+            if (newVersion.CompareTo(version) > 0)
+            {
+                DialogResult result = MessageBox.Show("New version found: " + newVersion + "\nCurrent version: " + version + "\nDo you want to open the download site?", "Update Checker", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                if (result == DialogResult.Yes)
+                {
+                    Process.Start((string) release["html_url"]);
+                }
+            }
+            else
+            {
+                MessageBox.Show("No update found.", "Update Checker", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
         private static void OnVisibilityChange(object sender, EventArgs e)
         {
             SetConsoleVisibility(!showConsole);
@@ -189,8 +247,7 @@ namespace USBHelperLauncher
             {
                 backgroundThread.Interrupt();
                 Cleanup();
-                ProgressDialog dialog = new ProgressDialog(true);
-                dialog.SetHeader("Removing...");
+                ProgressDialog dialog = new ProgressDialog();
                 ProgressBar progressBar = dialog.GetProgressBar();
                 BackgroundWorker worker = dialog.GetWorker();
                 worker.DoWork += delegate (object obj, DoWorkEventArgs args)
@@ -201,13 +258,14 @@ namespace USBHelperLauncher
                         if (Directory.Exists(dir))
                         {
                             DirectoryInfo dirInfo = new DirectoryInfo(dir);
-                            var files = dirInfo.GetFiles();
+                            var files = dirInfo.GetFiles("*.*", SearchOption.AllDirectories);
                             dialog.BeginInvoke(new Action(() => dialog.Reset(files.Length)));
 
                             foreach (FileInfo file in files)
                             {
+                                dialog.SetHeader("Removing: " + file.Name);
                                 file.Delete();
-                                worker.ReportProgress(0);
+                                dialog.BeginInvoke(new Action(() => progressBar.PerformStep()));
                             }
 
                             var subDirs = dirInfo.GetDirectories();
@@ -215,8 +273,9 @@ namespace USBHelperLauncher
 
                             foreach (DirectoryInfo subDir in subDirs)
                             {
+                                dialog.SetHeader("Removing: " + subDir.Name);
                                 subDir.Delete(true);
-                                worker.ReportProgress(0);
+                                dialog.BeginInvoke(new Action(() => progressBar.PerformStep()));
                             }
 
                             Directory.Delete(dir);
@@ -224,12 +283,15 @@ namespace USBHelperLauncher
                     }
                     dialog.BeginInvoke(new Action(() => dialog.Close()));
                 };
+                worker.RunWorkerCompleted += delegate (object obj, RunWorkerCompletedEventArgs args)
+                {
+                    Application.Exit();
+                };
                 new Thread(() =>
                 {
                     Application.Run(dialog);
                 }).Start();
                 worker.RunWorkerAsync();
-                Application.Exit();
             }
         }
 
@@ -248,6 +310,21 @@ namespace USBHelperLauncher
             DebugMessage debug = new DebugMessage(logger.GetLog());
             Clipboard.SetText(await debug.PublishAsync());
             MessageBox.Show("Debug message created and published, the link has been stored in your clipboard.\nProvide this link when reporting an issue.", "Debug message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private static void OnDownloadEmulator(EmulatorConfiguration config)
+        {
+            string emulatorPath = Path.Combine("emulators", config.GetName() + ".zip");
+            if (File.Exists(emulatorPath))
+            {
+                DialogResult result = MessageBox.Show("This emulator has already been downloaded. Do you want to replace it?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (result == DialogResult.No)
+                {
+                    return;
+                }
+                File.Delete(emulatorPath);
+            }
+            new EmulatorConfigurationDialog(config).Show();
         }
 
         public static string GetLauncherPath()
@@ -289,6 +366,11 @@ namespace USBHelperLauncher
         public static Logger GetLogger()
         {
             return logger;
+        }
+
+        public static Database GetDatabase()
+        {
+            return database;
         }
 
         public static DateTime GetSessionStart()

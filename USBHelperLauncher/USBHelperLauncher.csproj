@@ -59,9 +59,11 @@
       <HintPath>..\..\..\..\Documents\FiddlerCoreAPI\FiddlerCore45.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Downloads\Wii U USB Helper 0.6.1.653-FINAL\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpCompress, Version=0.18.2.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCompress.0.18.2\lib\net45\SharpCompress.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -77,9 +79,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Database.cs" />
     <Compile Include="DebugMessage.cs" />
     <Compile Include="Emulator\CemuConfiguration.cs" />
     <Compile Include="Emulator\CitraConfiguration.cs" />
+    <Compile Include="Emulator\InnoPackage.cs" />
     <Compile Include="Emulator\Package.cs" />
     <Compile Include="Emulator\PackageProperties.cs">
       <SubType>Form</SubType>
@@ -87,6 +91,9 @@
     <Compile Include="Emulator\PackageProperties.Designer.cs">
       <DependentUpon>PackageProperties.cs</DependentUpon>
     </Compile>
+    <Compile Include="Emulator\Project64Configuration.cs" />
+    <Compile Include="Emulator\SevenZipPackage.cs" />
+    <Compile Include="Emulator\ZipPackage.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ProgressDialog.cs">
       <SubType>Form</SubType>
@@ -109,6 +116,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Proxy.cs" />
+    <Compile Include="Utils\CitraRepoUtil.cs" />
     <Compile Include="Utils\GithubUtil.cs" />
     <Compile Include="Utils\IOUtil.cs" />
     <Compile Include="Utils\WinUtil.cs" />
@@ -118,6 +126,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icon.ico" />
+    <Content Include="innounp.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="redist\vcredist_x64.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -127,7 +138,34 @@
     <None Include="data\blackList.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="data\customs.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="data\dlcs.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="data\dlcs3ds.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="data\forceCFW.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="data\games.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="data\games3ds.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="data\gamesWii.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="data\injections.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="data\updates.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="data\updates3ds.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="images\3ds\icons\0004000000031900.png">
@@ -2002,15 +2040,10 @@
     <None Include="data\cache.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="data\datav4.enc">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="data\datav6.enc">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="emulators\extract_toolkit.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="packages.config" />
     <None Include="Resources\Loading.gif" />
   </ItemGroup>
   <ItemGroup>

@@ -74,7 +74,7 @@ namespace USBHelperLauncher.Emulator
                 MessageBox.Show("You must first select a version.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            dlDialog = new ProgressDialog(false);
+            dlDialog = new ProgressDialog();
             dlDialog.Show();
             dlDialog.SetHeader("Downloading...");
             Enabled = false;
@@ -119,17 +119,19 @@ namespace USBHelperLauncher.Emulator
             tempFolder = Path.GetTempFileName();
             File.Delete(tempFolder);
             Directory.CreateDirectory(tempFolder);
+            string buildDir = Path.Combine(tempFolder, "build");
             using (WebClient client = new WebClient())
             {
                 client.DownloadProgressChanged += Client_DownloadProgressChanged;
                 foreach (Package package in packages.CheckedItems)
                 {
-                    string file = Path.Combine(tempFolder, package.GetName() + ".zip");
                     try
                     {
-                        await client.DownloadFileTaskAsync(package.GetURI(), file);
+                        await package.Download(client, tempFolder);
+                        DirectoryInfo dir = await package.Unpack();
+                        AddToBuild(Path.Combine(buildDir, package.GetInstallPath()), dir);
                     }
-                    catch (WebException ex)
+                    catch (Exception ex)
                     {
                         MessageBox.Show("Could not download package " + package.GetName() +  ".\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         dlDialog.BeginInvoke(new Action(() => dlDialog.Close()));
@@ -138,42 +140,29 @@ namespace USBHelperLauncher.Emulator
                     }
                 }
             }
-            string buildDir = Path.Combine(tempFolder, "build");
-            worker.DoWork += (obj, e) =>
-            {
-                foreach (Package package in packages.CheckedItems)
-                {
-                    AddToBuild(Path.Combine(buildDir, package.GetInstallPath()), Path.Combine(tempFolder, package.GetName() + ".zip"));
-                }
-            };
             string build = Path.Combine(tempFolder, "build.zip");
-            worker.RunWorkerCompleted += delegate (object sender, RunWorkerCompletedEventArgs e)
+            ZipFile.CreateFromDirectory(buildDir, build);
+            string emulatorsDir = "emulators";
+            if (!Directory.Exists(emulatorsDir))
             {
-                ZipFile.CreateFromDirectory(buildDir, build);
-                string emulatorsDir = "emulators";
-                if (!Directory.Exists(emulatorsDir))
-                {
-                    Directory.CreateDirectory(emulatorsDir);
-                }
-                File.Move(build, Path.Combine(emulatorsDir, config.GetName() + ".zip"));
-                dlDialog.BeginInvoke(new Action(() => dlDialog.Close()));
-                Close();
-            };
-            worker.RunWorkerAsync();
+                Directory.CreateDirectory(emulatorsDir);
+            }
+            File.Move(build, Path.Combine(emulatorsDir, config.GetName() + ".zip"));
+            dlDialog.BeginInvoke(new Action(() => dlDialog.Close()));
+            Close();
         }
 
-        private void AddToBuild(string buildDir, string zipFile)
+        private void AddToBuild(string buildDir, DirectoryInfo dir)
         {
-            string zipFolder = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(zipFile));
-            Directory.CreateDirectory(zipFolder);
-            ZipFile.ExtractToDirectory(zipFile, zipFolder);
-            if (Directory.GetFiles(zipFolder).Length == 0)
+            // Handle archives that don't have their contents in the root
+            DirectoryInfo[] dirs = dir.GetDirectories();
+            if (dir.GetFiles().Length == 0 && dirs.Length == 1)
             {
-                IOUtil.MoveDirectory(Directory.GetDirectories(zipFolder)[0], buildDir);
+                IOUtil.MoveDirectory(dirs[0].FullName, buildDir);
             }
             else
             {
-                IOUtil.MoveDirectory(zipFolder, buildDir);
+                IOUtil.MoveDirectory(dir.FullName, buildDir);
             }
         }
 

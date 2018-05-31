@@ -33,7 +33,7 @@ namespace USBHelperLauncher.Emulator
             Match mUrl = Regex.Match(html, "<a href=\"(.+?)\".+?name=\"download\"");
             string url = mUrl.Groups[1].Value;
             Match mVersion = Regex.Match(url, @"cemu_(.+?)\.zip");
-            return new Package(new Uri(url), GetName(), mVersion.Groups[1].Value);
+            return new ZipPackage(new Uri(url), GetName(), mVersion.Groups[1].Value);
         }
 
         public async Task<Package> GetCemuHookPackageAsync()
@@ -68,7 +68,7 @@ namespace USBHelperLauncher.Emulator
             }
             string cemuVersion = latestMatch.Groups[2].Value;
             string url = latestMatch.Groups[1].Value + "cemuhook_" + cemuVersion + "_" + latest + ".zip";
-            Package package = new Package(new Uri(url), "CemuHook", string.Join(".", latest.ToCharArray()));
+            Package package = new ZipPackage(new Uri(url), "CemuHook", string.Join(".", latest.ToCharArray()));
             package.SetMeta("CemuVersion", ParseCemuVersion(cemuVersion));
             return package;
         }
@@ -78,7 +78,7 @@ namespace USBHelperLauncher.Emulator
             JObject release = await GithubUtil.GetRelease("slashiee", "cemu_graphic_packs", "latest");
             string version = "v2-" + ((string)release["tag_name"]).Replace("appveyor", "");
             string dlUrl = (string)release["assets"][0]["browser_download_url"];
-            return new Package(new Uri(dlUrl), "Graphic Packs", version, "graphicPacks");
+            return new ZipPackage(new Uri(dlUrl), "Graphic Packs", version, "graphicPacks");
         }
 
         private string ParseCemuVersion(string version)

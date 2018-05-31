@@ -12,20 +12,14 @@ namespace USBHelperLauncher
 {
     public partial class ProgressDialog : Form
     {
-        public ProgressDialog(bool reportProgress)
+        public ProgressDialog()
         {
             InitializeComponent();
-            backgroundWorker.WorkerReportsProgress = reportProgress;
-            backgroundWorker.ProgressChanged += BackgroundWorker_ProgressChanged;
-        }
-
-        private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            progressBar.PerformStep();
         }
 
         public void Reset(int maximum)
         {
+            progressBar.Step = 1;
             progressBar.Value = 0;
             progressBar.Maximum = maximum;
         }
