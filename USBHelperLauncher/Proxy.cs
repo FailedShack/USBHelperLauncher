@@ -58,7 +58,18 @@ namespace USBHelperLauncher
 
         private void FiddlerApplication_BeforeRequest(Session oS)
         {
-            if (oS.HTTPMethodIs("CONNECT")) { oS.oFlags["X-ReplyWithTunnel"] = "Fake for HTTPS Tunnel"; return; }
+            if (oS.HTTPMethodIs("CONNECT"))
+            {
+                if(oS.hostname.EndsWith("wiiuusbhelper.com"))
+                {
+                    oS.oFlags["X-ReplyWithTunnel"] = "Fake for HTTPS Tunnel";
+                }
+                else
+                {
+                    oS.oFlags["x-no-decrypt"] = "Passthrough for non-relevant hosts";
+                }
+                return;
+            }
             if (oS.HostnameIs("cdn.wiiuusbhelper.com"))
             {
                 string path = oS.PathAndQuery;
