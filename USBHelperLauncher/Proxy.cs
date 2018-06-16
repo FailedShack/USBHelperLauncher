@@ -1,11 +1,15 @@
 ﻿using Fiddler;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Web;
 using System.Windows.Forms;
 using USBHelperLauncher.Emulator;
 using USBHelperLauncher.Utils;
@@ -134,13 +138,26 @@ namespace USBHelperLauncher
             else if (oS.HostnameIs("registration.wiiuusbhelper.com"))
             {
                 string path = oS.PathAndQuery;
-                oS.utilCreateResponseAndBypassServer();
-                logger.WriteLine(path);
                 if (path == "/getContributors.php")
                 {
+                    oS.utilCreateResponseAndBypassServer();
                     oS.utilSetResponseBody("Wii U USB Helper Launcher made by\n!FailedShack\n© 2018");
+                    logRequest(oS, "Sent credits.");
                 }
-                logRequest(oS, "Sent credits.");
+                else if (path == "/verifyDonationKey.php")
+                {
+                    var data = HttpUtility.ParseQueryString(oS.GetRequestBodyAsString());
+                    oS.utilCreateResponseAndBypassServer();
+                    string key = data.Get("key");
+                    JObject resp = new JObject(
+                        new JProperty("Accepted", true),
+                        new JProperty("Message", "This key can be used."),
+                        new JProperty("DonationDate", DateTime.Now.ToString("yyyy-MM-dd")),
+                        new JProperty("Email", WindowsIdentity.GetCurrent().Name.Split('\\').Last() + "@localhost"),
+                        new JProperty("DonatorKey", key));
+                    oS.utilSetResponseBody(resp.ToString());
+                    logRequest(oS, "Sent key validation.");
+                }
             }
             else if (oS.HostnameIs("localhost"))
             {
