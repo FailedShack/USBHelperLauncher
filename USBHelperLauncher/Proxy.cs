@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
@@ -28,22 +27,6 @@ namespace USBHelperLauncher
             this.certificate = certificate;
             FiddlerApplication.BeforeRequest += FiddlerApplication_BeforeRequest;
             FiddlerApplication.AfterSessionComplete += FiddlerApplication_AfterSessionComplete;
-            FiddlerApplication.OnValidateServerCertificate += FiddlerApplication_OnValidateServerCertificate;
-        }
-
-        private void FiddlerApplication_OnValidateServerCertificate(object sender, ValidateServerCertificateEventArgs e)
-        {
-            if (SslPolicyErrors.None == e.CertificatePolicyErrors)
-            {
-                return;
-            }
-            // This endpoint uses an invalid certificate, we need to let it slide
-            // Required for most images to load properly
-            if (e.Session.HostnameIs("kanzashi-wup.cdn.nintendo.net"))
-            {
-                e.ValidityState = CertificateValidity.ForceValid;
-                logRequest(e.Session, "Force forwarded request.");
-            }
         }
 
         public void Start()
