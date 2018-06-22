@@ -114,5 +114,10 @@ namespace USBHelperLauncher
         {
             return new MemoryStream(zip);
         }
+
+        public byte[] ToArray()
+        {
+            return zip;
+        }
     }
 }

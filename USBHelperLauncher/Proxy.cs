@@ -57,7 +57,10 @@ namespace USBHelperLauncher
                 }
                 return;
             }
-            if (oS.HostnameIs("cdn.wiiuusbhelper.com"))
+            // Newer versions use cdn.wiiuusbhelper.com to retrieve important data files
+            // and application.wiiuusbhelper.com for other non-critical tasks.
+            // Older versions use application.wiiuusbhelper.com for both.
+            if (oS.HostnameIs("cdn.wiiuusbhelper.com") || oS.HostnameIs("application.wiiuusbhelper.com"))
             {
                 string path = oS.PathAndQuery;
                 string fileName = Path.GetFileName(path);
@@ -80,26 +83,37 @@ namespace USBHelperLauncher
                 }
                 else if (path.StartsWith("/res/db/"))
                 {
-                    Match match = Regex.Match(fileName, @"datav(\d).enc");
-                    if (match.Success)
+                    Database.EncryptionVersion? version = null;
+                    byte[] bytes = null;
+                    if (fileName == "data.usb")
                     {
-                        Database.EncryptionVersion version;
-                        switch (match.Groups[1].Value)
+                        bytes = database.ToArray();
+                    }
+                    else
+                    {
+                        Match match = Regex.Match(fileName, @"datav(\d).enc");
+                        if (match.Success)
                         {
-                            case "4":
-                                version = Database.EncryptionVersion.DATA_V4;
-                                break;
-                            case "6":
-                                version = Database.EncryptionVersion.DATA_V6;
-                                break;
-                            default:
-                                oS.responseCode = 500;
-                                logRequest(oS, "Invalid encryption version requested.");
-                                return;
+                            switch (match.Groups[1].Value)
+                            {
+                                case "4":
+                                    version = Database.EncryptionVersion.DATA_V4;
+                                    break;
+                                case "6":
+                                    version = Database.EncryptionVersion.DATA_V6;
+                                    break;
+                                default:
+                                    oS.responseCode = 500;
+                                    logRequest(oS, "Invalid encryption version requested.");
+                                    return;
+                            }
+                            bytes = database.Encrypt(version.Value).ToArray();
                         }
-                        logRequest(oS, "Sending database contents with " + version.ToString() + " encryption");
+                    }
+                    if (bytes != null)
+                    {
+                        logRequest(oS, "Sending database contents " + (version.HasValue ? "with " + version.ToString() : "without") + " encryption");
                         oS.utilCreateResponseAndBypassServer();
-                        byte[] bytes = database.Encrypt(version).ToArray();
                         oS.oResponse["Content-Length"] = bytes.Length.ToString();
                         oS.responseBodyBytes = bytes;
                         return;
@@ -114,7 +128,11 @@ namespace USBHelperLauncher
                 }
                 else
                 {
-                    logRequest(oS, "Missing resource requested: " + oS.PathAndQuery);
+                    // We only really care about the cdn.
+                    if (oS.HostnameIs("cdn.wiiuusbhelper.com"))
+                    {
+                        logRequest(oS, "Missing resource requested: " + oS.PathAndQuery);
+                    }
                     oS.responseCode = 404;
                 }
             }
@@ -203,6 +221,10 @@ namespace USBHelperLauncher
                         Process.Start("https://www.java.com/en/download/");
                     }
                 }
+            }
+            else if (oS.HostnameIs("application.wiiuusbhelper.com") && oS.PathAndQuery == "/res/db/data.usb")
+            {
+                MessageBox.Show("You're using a legacy version of Wii U USB Helper.\nSupport for this version is limited which means some features may not work correctly.\nPlease update to a more recent version for better stability.", "Legacy version detected", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
             }
         }
 
