@@ -94,6 +94,7 @@
     </Compile>
     <Compile Include="Emulator\Project64Configuration.cs" />
     <Compile Include="Emulator\SevenZipPackage.cs" />
+    <Compile Include="Emulator\Snes9xConfiguration.cs" />
     <Compile Include="Emulator\ZipPackage.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ProgressDialog.cs">

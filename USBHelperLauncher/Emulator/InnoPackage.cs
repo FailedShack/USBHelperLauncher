@@ -42,6 +42,7 @@ namespace USBHelperLauncher.Emulator
             process.Start();
             await tcs.Task;
             Directory.Move(Path.Combine(path, "{app}"), dir.FullName);
+            RaisePostUnpack(dir);
             return dir;
         }
     }

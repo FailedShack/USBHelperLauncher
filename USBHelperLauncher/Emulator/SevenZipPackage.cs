@@ -44,6 +44,7 @@ namespace USBHelperLauncher.Emulator
                     }
                 }
             });
+            RaisePostUnpack(dir);
             return dir;
         }
     }

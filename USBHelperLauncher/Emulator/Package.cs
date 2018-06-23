@@ -18,6 +18,9 @@ namespace USBHelperLauncher.Emulator
         private Dictionary<string, string> metadata = new Dictionary<string, string>();
         protected FileInfo packageFile;
 
+        public event PostUnpackHandler PostUnpack;
+        public delegate void PostUnpackHandler(DirectoryInfo dir);
+
         public Package(Uri uri, string name, string version)
         {
             this.uri = uri;
@@ -103,6 +106,11 @@ namespace USBHelperLauncher.Emulator
         }
 
         public abstract Task<DirectoryInfo> Unpack();
+
+        protected void RaisePostUnpack(DirectoryInfo dir)
+        {
+            PostUnpack?.Invoke(dir);
+        }
 
         public override string ToString()
         {

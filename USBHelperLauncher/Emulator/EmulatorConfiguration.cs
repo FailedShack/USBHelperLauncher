@@ -8,14 +8,15 @@ namespace USBHelperLauncher.Emulator
     {
         public enum Emulator
         {
-            Citra, Cemu, Project64
+            Citra, Cemu, Project64, Snes9x
         }
 
         private static Dictionary<Emulator, EmulatorConfiguration> emulators = new Dictionary<Emulator, EmulatorConfiguration>()
         {
             { Emulator.Citra, new CitraConfiguration() },
             { Emulator.Cemu, new CemuConfiguration() },
-            { Emulator.Project64, new Project64Configuration() }
+            { Emulator.Project64, new Project64Configuration() },
+            { Emulator.Snes9x, new Snes9xConfiguration() }
         };
 
         private string name;
