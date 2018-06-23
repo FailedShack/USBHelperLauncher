@@ -84,6 +84,7 @@
     <Compile Include="DebugMessage.cs" />
     <Compile Include="Emulator\CemuConfiguration.cs" />
     <Compile Include="Emulator\CitraConfiguration.cs" />
+    <Compile Include="Emulator\DolphinConfiguration.cs" />
     <Compile Include="Emulator\InnoPackage.cs" />
     <Compile Include="Emulator\Package.cs" />
     <Compile Include="Emulator\PackageProperties.cs">
