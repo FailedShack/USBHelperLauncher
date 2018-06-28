@@ -43,5 +43,15 @@ namespace USBHelperLauncher
         {
             progressBar.Value = progress;
         }
+
+        public void SetStyle(ProgressBarStyle style)
+        {
+            progressBar.Style = style;
+        }
+
+        private void ProgressDialog_Load(object sender, EventArgs e)
+        {
+            Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+        }
     }
 }

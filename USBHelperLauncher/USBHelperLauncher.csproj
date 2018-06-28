@@ -66,6 +66,7 @@
       <HintPath>..\packages\SharpCompress.0.18.2\lib\net45\SharpCompress.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
@@ -98,6 +99,7 @@
     <Compile Include="Emulator\Snes9xConfiguration.cs" />
     <Compile Include="Emulator\ZipPackage.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="Net\SiteEndpoint.cs" />
     <Compile Include="ProgressDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -118,7 +120,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Proxy.cs" />
+    <Compile Include="Net\Proxy.cs" />
+    <Compile Include="Net\ApplicationEndpoint.cs" />
+    <Compile Include="Net\ContentEndpoint.cs" />
+    <Compile Include="Net\Endpoint.cs" />
+    <Compile Include="Net\RegistrationEndpoint.cs" />
+    <Compile Include="Net\Request.cs" />
+    <Compile Include="RSAPatcher.cs" />
     <Compile Include="Utils\CitraRepoUtil.cs" />
     <Compile Include="Utils\GithubUtil.cs" />
     <Compile Include="Utils\IOUtil.cs" />
@@ -2077,5 +2085,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

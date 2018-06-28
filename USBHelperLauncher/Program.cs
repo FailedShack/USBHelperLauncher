@@ -9,11 +9,15 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Linq;
 using USBHelperLauncher.Emulator;
 using USBHelperLauncher.Utils;
+using System.Text.RegularExpressions;
 
 namespace USBHelperLauncher
 {
@@ -28,8 +32,9 @@ namespace USBHelperLauncher
         private static string helperVersion;
         private static Thread backgroundThread;
         private static bool showConsole = true;
+        private static bool patch = true;
         private static NotifyIcon trayIcon = new NotifyIcon();
-        private static Proxy proxy;
+        private static Net.Proxy proxy = new Net.Proxy();
 
         [STAThread]
         static void Main(string[] args)
@@ -39,6 +44,7 @@ namespace USBHelperLauncher
 
             logger.WriteLine("Made by FailedShack");
             SetConsoleVisibility(false);
+            Application.EnableVisualStyles();
 
             try
             {
@@ -108,18 +114,67 @@ namespace USBHelperLauncher
                 if (firefox != null)
                 {
                     logger.WriteLine("Firefox: " + firefox);
-                    DialogResult result = MessageBox.Show("You will now also be prompted to install the certificate on Firefox.\nMake sure to check 'Trust this CA to identify websites'.", "First run", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    StartProcess(firefox, "localhost");
+                    MessageBox.Show("You will now also be prompted to install the certificate on Firefox.\nMake sure to check 'Trust this CA to identify websites'.", "First run", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    proxy.Start();
+                    while (!FiddlerApplication.IsStarted())
+                    {
+                        Thread.Sleep(30);
+                    }
+                    StartProcess(firefox, "http://www.wiiuusbhelper.com/certificate");
                 }
             }
             logger.WriteLine("Found trusted SSL Certificate.");
 
-            proxy = new Proxy(CertMaker.GetRootCertificate());
-            proxy.Start();
+            if (!FiddlerApplication.IsStarted())
+            {
+                proxy.Start();
+            }
+
+            string executable = Path.Combine(GetLauncherPath(), "WiiU_USB_Helper.exe");
+
+            // Patching
+            if (args.Length == 1)
+            {
+                var group = Regex.Match(args[0], "[-]{1,2}(.*)").Groups[1];
+                if (group.Success && group.Value == "nopatch")
+                {
+                    patch = false;
+                    logger.WriteLine("Patching has been disabled.");
+                }
+            }
+            if (patch)
+            {
+                ProgressDialog dialog = new ProgressDialog();
+                dialog.SetHeader("Patching...");
+                dialog.SetStyle(ProgressBarStyle.Marquee);
+                dialog.GetProgressBar().MarqueeAnimationSpeed = 30;
+                new Thread(() => {
+                    dialog.ShowDialog();
+                }).Start();
+                RSAPatcher patcher = new RSAPatcher(executable);
+                RSACryptoServiceProvider rsa = GetRSA();
+                string xml = rsa.ToXmlString(false);
+                rsa.Dispose();
+                var builder = new StringBuilder();
+                var element = XElement.Parse(xml);
+                var settings = new XmlWriterSettings
+                {
+                    OmitXmlDeclaration = true,
+                    Indent = true
+                };
+                using (var xmlWriter = XmlWriter.Create(builder, settings))
+                {
+                    element.Save(xmlWriter);
+                }
+                executable = Path.Combine(GetLauncherPath(), "Patched.exe");
+                patcher.SetPublicKey(builder.ToString(), executable);
+                dialog.Invoke(new Action(() => dialog.Close()));
+                logger.WriteLine("Patched public key.");
+            }
 
             // Time to launch Wii U USB Helper
             sessionStart = DateTime.UtcNow;
-            process = StartProcess("WiiU_USB_Helper.exe", helperVersion);
+            process = StartProcess(executable, helperVersion);
             ContextMenu trayMenu = new ContextMenu();
             MenuItem dlEmulator = new MenuItem("Download Emulator");
             foreach (EmulatorConfiguration.Emulator emulator in Enum.GetValues(typeof(EmulatorConfiguration.Emulator)))
@@ -134,6 +189,7 @@ namespace USBHelperLauncher
             trayMenu.MenuItems.Add("Exit", OnExit);
             trayMenu.MenuItems.Add("Check for Updates", OnUpdateCheck);
             trayMenu.MenuItems.Add("Report Issue", OnDebugMessage);
+            trayMenu.MenuItems.Add("Generate Donation Key", OnGenerateKey).Enabled = patch;
             trayMenu.MenuItems.Add(dlEmulator);
             trayMenu.MenuItems.Add(advanced);
             trayIcon.Text = "Wii U USB Helper Launcher";
@@ -155,11 +211,17 @@ namespace USBHelperLauncher
                 Application.Exit();
             });
             backgroundThread.Start();
-            Application.EnableVisualStyles();
             Application.Run();
         }
 
-        static Process StartProcess(String path, String arguments)
+        private static RSACryptoServiceProvider GetRSA()
+        {
+            CspParameters cp = new CspParameters();
+            cp.KeyContainerName = "USBHelper";
+            return new RSACryptoServiceProvider(2048, cp);
+        }
+
+        static Process StartProcess(string path, string arguments)
         {
             Process process = new Process();
             process.StartInfo.FileName = path;
@@ -214,13 +276,7 @@ namespace USBHelperLauncher
                 return;
             }
             string newVersion = (string) release["tag_name"];
-            string[] rawVersion = Application.ProductVersion.Split('.');
-            string version = rawVersion[0] + "." + rawVersion[1];
-            int revision = int.Parse(rawVersion[3]);
-            if (revision > 0)
-            {
-                version += (char)(97 + revision);
-            }
+            string version = GetVersion();
             if (newVersion.CompareTo(version) > 0)
             {
                 DialogResult result = MessageBox.Show("New version found: " + newVersion + "\nCurrent version: " + version + "\nDo you want to open the download site?", "Update Checker", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
@@ -312,6 +368,21 @@ namespace USBHelperLauncher
             MessageBox.Show("Debug message created and published, the link has been stored in your clipboard.\nProvide this link when reporting an issue.", "Debug message", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+        private static void OnGenerateKey(object sender, EventArgs e)
+        {
+            byte[] key = new byte[272];
+            byte[] buffer = new byte[16];
+            Random random = new Random();
+            random.NextBytes(buffer);
+            RSACryptoServiceProvider rsa = GetRSA();
+            byte[] signature = rsa.SignData(buffer, CryptoConfig.MapNameToOID("SHA1"));
+            rsa.Dispose();
+            Buffer.BlockCopy(buffer, 0, key, 0, 16);
+            Buffer.BlockCopy(signature, 0, key, 16, 256);
+            Clipboard.SetText(Convert.ToBase64String(key));
+            MessageBox.Show("Donation key generated and stored in your clipboard!", "Donation key", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
         private static void OnDownloadEmulator(EmulatorConfiguration config)
         {
             string emulatorPath = Path.Combine("emulators", config.GetName() + ".zip");
@@ -361,6 +432,18 @@ namespace USBHelperLauncher
             trayIcon.Visible = false;
             trayIcon.Dispose();
             logger.Dispose();
+        }
+
+        public static string GetVersion()
+        {
+            string[] rawVersion = Application.ProductVersion.Split('.');
+            string version = rawVersion[0] + "." + rawVersion[1];
+            int revision = int.Parse(rawVersion[3]);
+            if (revision > 0)
+            {
+                version += (char)(97 + revision);
+            }
+            return version;
         }
 
         public static Logger GetLogger()

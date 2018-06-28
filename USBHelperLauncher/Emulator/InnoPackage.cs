@@ -15,7 +15,7 @@ namespace USBHelperLauncher.Emulator
 
         public InnoPackage(Uri uri, string name, string version, string installPath) : base(uri, name, version, installPath) { }
 
-        public async override Task<DirectoryInfo> Unpack()
+        public async override Task<DirectoryInfo> DoUnpack()
         {
             if (!File.Exists("innounp.exe"))
             {
@@ -42,7 +42,6 @@ namespace USBHelperLauncher.Emulator
             process.Start();
             await tcs.Task;
             Directory.Move(Path.Combine(path, "{app}"), dir.FullName);
-            RaisePostUnpack(dir);
             return dir;
         }
     }

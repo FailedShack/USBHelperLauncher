@@ -105,12 +105,14 @@ namespace USBHelperLauncher.Emulator
             packageFile = new FileInfo(file);
         }
 
-        public abstract Task<DirectoryInfo> Unpack();
-
-        protected void RaisePostUnpack(DirectoryInfo dir)
+        public async Task<DirectoryInfo> Unpack()
         {
+            var dir = await DoUnpack();
             PostUnpack?.Invoke(dir);
+            return dir;
         }
+
+        public abstract Task<DirectoryInfo> DoUnpack();
 
         public override string ToString()
         {

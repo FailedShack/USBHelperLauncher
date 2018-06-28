@@ -15,7 +15,7 @@ namespace USBHelperLauncher.Emulator
 
         public SevenZipPackage(Uri uri, string name, string version, string installPath) : base(uri, name, version, installPath) { }
 
-        public async override Task<DirectoryInfo> Unpack()
+        public async override Task<DirectoryInfo> DoUnpack()
         {
             if (packageFile == null || !packageFile.Exists)
             {
@@ -44,7 +44,6 @@ namespace USBHelperLauncher.Emulator
                     }
                 }
             });
-            RaisePostUnpack(dir);
             return dir;
         }
     }

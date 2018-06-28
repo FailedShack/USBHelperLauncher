@@ -33,7 +33,7 @@ namespace USBHelperLauncher
             sb.AppendLine("Session Length: " + (now - Program.GetSessionStart()).ToString(@"hh\:mm\:ss"));
             sb.AppendLine("Session GUID: " + Program.GetSessionGuid().ToString());
             sb.AppendLine("Proxy Available: " + (exception == null ? "Yes" : "No (" + exception.Message + ")"));
-            sb.AppendLine("Version: " + Assembly.GetExecutingAssembly().GetName().Version.ToString());
+            sb.AppendLine("Version: " + Program.GetVersion());
             sb.AppendLine("Helper Version: " + Program.GetHelperVersion());
             sb.AppendLine(".NET Framework Version: " + Get45or451FromRegistry());
             sb.AppendLine("Operating System: " + info.OSFullName);
@@ -59,7 +59,7 @@ namespace USBHelperLauncher
             HttpResponseMessage response;
             try
             {
-                response = await client.GetAsync("http://www.wiiuusbhelper.com");
+                response = await client.GetAsync("http://www.wiiuusbhelper.com/session");
             }
             catch (HttpRequestException e)
             {

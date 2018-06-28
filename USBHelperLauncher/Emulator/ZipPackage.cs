@@ -14,7 +14,7 @@ namespace USBHelperLauncher.Emulator
 
         public ZipPackage(Uri uri, string name, string version, string installPath) : base(uri, name, version, installPath) { }
 
-        public async override Task<DirectoryInfo> Unpack()
+        public async override Task<DirectoryInfo> DoUnpack()
         {
             if (packageFile == null || !packageFile.Exists)
             {
@@ -25,7 +25,6 @@ namespace USBHelperLauncher.Emulator
             DirectoryInfo dir = new DirectoryInfo(Path.Combine(path, Path.GetFileNameWithoutExtension(filePath)));
             dir.Create();
             await Task.Run(() => ZipFile.ExtractToDirectory(filePath, dir.FullName));
-            RaisePostUnpack(dir);
             return dir;
         }
     }
