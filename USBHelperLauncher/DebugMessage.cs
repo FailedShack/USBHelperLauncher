@@ -15,11 +15,12 @@ namespace USBHelperLauncher
     class DebugMessage
     {
         private static readonly HttpClient client = new HttpClient();
-        private string log;
+        private string log, fiddlerLog;
 
-        public DebugMessage(string log)
+        public DebugMessage(string log, string fiddlerLog)
         {
             this.log = log;
+            this.fiddlerLog = fiddlerLog;
         }
 
         public async Task<string> Build()
@@ -43,6 +44,8 @@ namespace USBHelperLauncher
             sb.AppendLine("Available Memory: " + info.AvailablePhysicalMemory);
             sb.Append('-', 26).Append(" Log Start ").Append('-', 26).AppendLine();
             sb.Append(log);
+            sb.Append('-', 22).Append(" Fiddler Log Start ").Append('-', 22).AppendLine();
+            sb.Append(fiddlerLog);
             return sb.ToString();
         }
 

@@ -363,7 +363,7 @@ namespace USBHelperLauncher
 
         private async static void OnDebugMessage(object sender, EventArgs e)
         {
-            DebugMessage debug = new DebugMessage(logger.GetLog());
+            DebugMessage debug = new DebugMessage(logger.GetLog(), proxy.GetLog());
             Clipboard.SetText(await debug.PublishAsync());
             MessageBox.Show("Debug message created and published, the link has been stored in your clipboard.\nProvide this link when reporting an issue.", "Debug message", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }

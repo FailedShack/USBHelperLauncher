@@ -30,8 +30,12 @@ namespace USBHelperLauncher.Net
             new SiteEndpoint()
         };
 
+        private TextWriter log;
+
         public Proxy()
         {
+            log = new StringWriter();
+            FiddlerApplication.Log.OnLogString += Log_OnLogString;
             FiddlerApplication.BeforeRequest += FiddlerApplication_BeforeRequest;
             FiddlerApplication.AfterSessionComplete += FiddlerApplication_AfterSessionComplete;
         }
@@ -131,6 +135,11 @@ namespace USBHelperLauncher.Net
             }
         }
 
+        private void Log_OnLogString(object sender, LogEventArgs e)
+        {
+            log.WriteLine(e.LogString);
+        }
+
         public static void LogRequest(Session oS, Endpoint endpoint, string message)
         {
             logger.WriteLine(String.Format("[{0}] {1}: {2}", oS.RequestMethod, endpoint.GetType().Name, message));
@@ -139,6 +148,11 @@ namespace USBHelperLauncher.Net
         public static string GetCertificateBase64()
         {
             return Convert.ToBase64String(CertMaker.GetRootCertificate().GetRawCertData());
+        }
+
+        public string GetLog()
+        {
+            return log.ToString();
         }
 
         public void Dispose()
