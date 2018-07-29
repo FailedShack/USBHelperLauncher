@@ -103,6 +103,7 @@
     <Compile Include="Emulator\ZipPackage.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ModuleInitInjector.cs" />
+    <Compile Include="Net\WiiUShopEndpoint.cs" />
     <Compile Include="Net\SiteEndpoint.cs" />
     <Compile Include="ProgressDialog.cs">
       <SubType>Form</SubType>

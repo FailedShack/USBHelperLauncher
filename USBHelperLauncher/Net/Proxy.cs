@@ -27,7 +27,8 @@ namespace USBHelperLauncher.Net
             new ContentEndpoint(),
             new ApplicationEndpoint(),
             new RegistrationEndpoint(),
-            new SiteEndpoint()
+            new SiteEndpoint(),
+            new WiiUShopEndpoint()
         };
 
         private ushort port;
@@ -59,7 +60,7 @@ namespace USBHelperLauncher.Net
         {
             if (oS.HTTPMethodIs("CONNECT"))
             {
-                if(oS.hostname.EndsWith("wiiuusbhelper.com"))
+                if (oS.hostname.EndsWith("wiiuusbhelper.com"))
                 {
                     oS.oFlags["X-ReplyWithTunnel"] = "Fake for HTTPS Tunnel";
                 }
