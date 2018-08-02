@@ -151,15 +151,21 @@ namespace USBHelperLauncher
                     logger.WriteLine("Patching has been disabled.");
                 }
             }
+
+            ProgressDialog dialog = new ProgressDialog();
+            dialog.SetStyle(ProgressBarStyle.Marquee);
+            dialog.GetProgressBar().MarqueeAnimationSpeed = 30;
+            dialog.SetHeader("Injecting...");
+            new Thread(() => {
+                dialog.ShowDialog();
+            }).Start();
+            var injector = new ModuleInitInjector(executable);
+            executable = Path.Combine(GetLauncherPath(), "Patched.exe");
+            injector.Inject(executable);
+            logger.WriteLine("Injected module initializer.");
             if (patch)
             {
-                ProgressDialog dialog = new ProgressDialog();
-                dialog.SetHeader("Patching...");
-                dialog.SetStyle(ProgressBarStyle.Marquee);
-                dialog.GetProgressBar().MarqueeAnimationSpeed = 30;
-                new Thread(() => {
-                    dialog.ShowDialog();
-                }).Start();
+                dialog.Invoke(new Action(() => dialog.SetHeader("Patching...")));
                 RSAPatcher patcher = new RSAPatcher(executable);
                 RSACryptoServiceProvider rsa = GetRSA();
                 string xml = rsa.ToXmlString(false);
@@ -175,11 +181,10 @@ namespace USBHelperLauncher
                 {
                     element.Save(xmlWriter);
                 }
-                executable = Path.Combine(GetLauncherPath(), "Patched.exe");
-                patcher.SetPublicKey(builder.ToString(), executable);
-                dialog.Invoke(new Action(() => dialog.Close()));
+                patcher.SetPublicKey(builder.ToString());
                 logger.WriteLine("Patched public key.");
             }
+            dialog.Invoke(new Action(() => dialog.Close()));
 
             // Time to launch Wii U USB Helper
             sessionStart = DateTime.UtcNow;

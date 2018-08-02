@@ -33,16 +33,15 @@ namespace USBHelperLauncher
             }
         }
 
-        public void SetPublicKey(string xml, string outputPath)
+        public void SetPublicKey(string xml)
         {
-            File.Copy(path, outputPath, true);
             byte[] bytes = Encoding.UTF8.GetBytes(xml);
             if (bytes.Length != 425)
             {
                 throw new ArgumentException("Invalid string length.");
             }
             long pos = FindPosition();
-            using (FileStream fs = File.OpenWrite(outputPath))
+            using (FileStream fs = File.OpenWrite(path))
             {
                 fs.Seek(pos, SeekOrigin.Begin);
                 fs.Write(bytes, 0, bytes.Length);
