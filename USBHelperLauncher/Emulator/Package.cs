@@ -100,7 +100,8 @@ namespace USBHelperLauncher.Emulator
             string file = Path.Combine(path, fileName);
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            client.Headers.Add("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2;)");
+            // Use non-browser user agent to avoid being redirected to HTML page (e.g. SourceForge)
+            client.Headers.Add("User-Agent", "USBHelperLauncher");
             await client.DownloadFileTaskAsync(uri, file);
             packageFile = new FileInfo(file);
         }

@@ -85,7 +85,9 @@
     <Compile Include="DebugMessage.cs" />
     <Compile Include="Emulator\CemuConfiguration.cs" />
     <Compile Include="Emulator\CitraConfiguration.cs" />
+    <Compile Include="Emulator\DesmumeConfiguration.cs" />
     <Compile Include="Emulator\DolphinConfiguration.cs" />
+    <Compile Include="Emulator\FceuxConfiguration.cs" />
     <Compile Include="Emulator\InnoPackage.cs" />
     <Compile Include="Emulator\Package.cs" />
     <Compile Include="Emulator\PackageProperties.cs">
@@ -97,8 +99,10 @@
     <Compile Include="Emulator\Project64Configuration.cs" />
     <Compile Include="Emulator\SevenZipPackage.cs" />
     <Compile Include="Emulator\Snes9xConfiguration.cs" />
+    <Compile Include="Emulator\VbaConfiguration.cs" />
     <Compile Include="Emulator\ZipPackage.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="Net\ProxyConfig.cs" />
     <Compile Include="Net\SiteEndpoint.cs" />
     <Compile Include="ProgressDialog.cs">
       <SubType>Form</SubType>
@@ -130,6 +134,7 @@
     <Compile Include="Utils\CitraRepoUtil.cs" />
     <Compile Include="Utils\GithubUtil.cs" />
     <Compile Include="Utils\IOUtil.cs" />
+    <Compile Include="Utils\SourceforgeUtil.cs" />
     <Compile Include="Utils\WinUtil.cs" />
   </ItemGroup>
   <ItemGroup>

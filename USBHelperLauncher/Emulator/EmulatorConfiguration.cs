@@ -8,7 +8,7 @@ namespace USBHelperLauncher.Emulator
     {
         public enum Emulator
         {
-            Citra, Cemu, Project64, Snes9x, Dolphin
+            Citra, Cemu, Project64, Snes9x, Dolphin, DeSmuME, Fceux, VisualBoyAdvance
         }
 
         private static Dictionary<Emulator, EmulatorConfiguration> emulators = new Dictionary<Emulator, EmulatorConfiguration>()
@@ -17,7 +17,10 @@ namespace USBHelperLauncher.Emulator
             { Emulator.Cemu, new CemuConfiguration() },
             { Emulator.Project64, new Project64Configuration() },
             { Emulator.Snes9x, new Snes9xConfiguration() },
-            { Emulator.Dolphin, new DolphinConfiguration() }
+            { Emulator.Dolphin, new DolphinConfiguration() },
+            { Emulator.DeSmuME, new DesmumeConfiguration() },
+            { Emulator.Fceux, new FceuxConfiguration() },
+            { Emulator.VisualBoyAdvance, new VbaConfiguration() }
         };
 
         private string name;

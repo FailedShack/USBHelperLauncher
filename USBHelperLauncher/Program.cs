@@ -18,6 +18,7 @@ using System.Xml.Linq;
 using USBHelperLauncher.Emulator;
 using USBHelperLauncher.Utils;
 using System.Text.RegularExpressions;
+using USBHelperLauncher.Net;
 
 namespace USBHelperLauncher
 {
@@ -45,6 +46,9 @@ namespace USBHelperLauncher
             logger.WriteLine("Made by FailedShack");
             SetConsoleVisibility(false);
             Application.EnableVisualStyles();
+            // Override certificate information to avoid confusion
+            ProxyConfig.CertCommonName = "USBHelperLauncher";
+            ProxyConfig.CertOrganization = "";
 
             try
             {
@@ -90,14 +94,19 @@ namespace USBHelperLauncher
                     }
                 }
             }
-            if (!CertMaker.rootCertExists() || !CertMaker.rootCertIsTrusted())
+            if (!CertMaker.rootCertIsTrusted())
             {
+                if (!CertMaker.rootCertExists() && !CertMaker.createRootCert())
+                {
+                    MessageBox.Show("Creation of the interception certificate failed.", "Unable to generate certificate.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Environment.Exit(0);
+                }
                 MessageBox.Show(
                     "You will now be prompted to install an SSL certificate, this is required to allow other programs to make HTTPS requests while Wii U USB Helper is open.\n" +
                     "This is part of the initial setup process.\n", "First run - Read carefully!", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
                 while (true)
                 {
-                    if (!CertMaker.createRootCert() || !CertMaker.trustRootCert())
+                    if (!CertMaker.trustRootCert())
                     {
                         DialogResult result = MessageBox.Show("The setup process cannot continue without an SSL certificate.\nAre you sure you want to cancel?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
                         if (result == DialogResult.Yes)
