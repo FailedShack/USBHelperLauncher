@@ -46,6 +46,14 @@
   <ItemGroup>
     <Compile Include="Injector.cs" />
     <Compile Include="Overrides.cs" />
+    <Compile Include="Pipes\Packets\ActionPacket.cs" />
+    <Compile Include="Pipes\Packets\CertificateAuthorityPacket.cs" />
+    <Compile Include="Pipes\DataStream.cs" />
+    <Compile Include="Pipes\Packets\DonationKeyPacket.cs" />
+    <Compile Include="Pipes\PipeClient.cs" />
+    <Compile Include="Pipes\PipeServerListener.cs" />
+    <Compile Include="Pipes\Packets\ProxyPacket.cs" />
+    <Compile Include="Pipes\Packets\TerminationPacket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

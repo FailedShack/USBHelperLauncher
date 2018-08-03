@@ -4,13 +4,17 @@ using System.Net;
 using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Windows.Forms;
+using USBHelperInjector.Pipes;
 
 namespace USBHelperInjector
 {
     public class Injector
     {
         private static X509Certificate2 CaCert { get; set; }
+
+        private static PipeServerListener server;
 
         public static void Init()
         {
@@ -34,8 +38,17 @@ namespace USBHelperInjector
             harmony.Patch(proxy.GetSetMethod(true), prefix: new HarmonyMethod(Overrides.GetMethod("SetProxy", typeof(WebProxy).MakeByRefType())));
 
             harmony.PatchAll();
+
+            server = new PipeServerListener();
+            server.Listen();
         }
 
+        public static void TerminateServer()
+        {
+            server.Shutdown();
+        }
+
+        // Should make the given CA certificate be trusted (currently only disables HTTPs validation)
         public static void TrustCertificateAuthority(X509Certificate2 cert)
         {
             CaCert = cert;
@@ -44,27 +57,8 @@ namespace USBHelperInjector
 
         private static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
-            if (sslPolicyErrors == SslPolicyErrors.None)
-                return true;
-
-            X509Chain privateChain = new X509Chain();
-            privateChain.ChainPolicy.RevocationMode = X509RevocationMode.Offline;
-
-            privateChain.ChainPolicy.ExtraStore.Add(CaCert);
-            privateChain.Build(new X509Certificate2(certificate));
-
-            bool isValid = true;
-
-            foreach (X509ChainStatus chainStatus in privateChain.ChainStatus)
-            {
-                if (chainStatus.Status != X509ChainStatusFlags.NoError)
-                {
-                    isValid = false;
-                    break;
-                }
-            }
-
-            return isValid;
+            // Disable HTTPs validation
+            return true;
         }
     }
 }

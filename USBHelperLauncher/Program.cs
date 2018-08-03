@@ -19,6 +19,8 @@ using USBHelperLauncher.Emulator;
 using USBHelperLauncher.Utils;
 using System.Text.RegularExpressions;
 using USBHelperLauncher.Net;
+using USBHelperInjector.Pipes;
+using USBHelperInjector.Pipes.Packets;
 
 namespace USBHelperLauncher
 {
@@ -35,7 +37,7 @@ namespace USBHelperLauncher
         private static bool showConsole = true;
         private static bool patch = true;
         private static NotifyIcon trayIcon = new NotifyIcon();
-        private static Net.Proxy proxy = new Net.Proxy();
+        private static Net.Proxy proxy = new Net.Proxy(8877);
 
         [STAThread]
         static void Main(string[] args)
@@ -46,9 +48,6 @@ namespace USBHelperLauncher
             logger.WriteLine("Made by FailedShack");
             SetConsoleVisibility(false);
             Application.EnableVisualStyles();
-            // Override certificate information to avoid confusion
-            ProxyConfig.CertCommonName = "USBHelperLauncher";
-            ProxyConfig.CertOrganization = "";
 
             try
             {
@@ -94,50 +93,13 @@ namespace USBHelperLauncher
                     }
                 }
             }
-            if (!CertMaker.rootCertIsTrusted())
+            if (!CertMaker.rootCertExists() && !CertMaker.createRootCert())
             {
-                if (!CertMaker.rootCertExists() && !CertMaker.createRootCert())
-                {
-                    MessageBox.Show("Creation of the interception certificate failed.", "Unable to generate certificate.", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Environment.Exit(0);
-                }
-                MessageBox.Show(
-                    "You will now be prompted to install an SSL certificate, this is required to allow other programs to make HTTPS requests while Wii U USB Helper is open.\n" +
-                    "This is part of the initial setup process.\n", "First run - Read carefully!", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
-                while (true)
-                {
-                    if (!CertMaker.trustRootCert())
-                    {
-                        DialogResult result = MessageBox.Show("The setup process cannot continue without an SSL certificate.\nAre you sure you want to cancel?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
-                        if (result == DialogResult.Yes)
-                        {
-                            Environment.Exit(0);
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                string firefox = GetFirefoxExecutable();
-                if (firefox != null)
-                {
-                    logger.WriteLine("Firefox: " + firefox);
-                    MessageBox.Show("You will now also be prompted to install the certificate on Firefox.\nMake sure to check 'Trust this CA to identify websites'.", "First run", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    proxy.Start();
-                    while (!FiddlerApplication.IsStarted())
-                    {
-                        Thread.Sleep(30);
-                    }
-                    StartProcess(firefox, "http://www.wiiuusbhelper.com/certificate");
-                }
+                MessageBox.Show("Creation of the interception certificate failed.", "Unable to generate certificate.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
             }
-            logger.WriteLine("Found trusted SSL Certificate.");
 
-            if (!FiddlerApplication.IsStarted())
-            {
-                proxy.Start();
-            }
+            proxy.Start();
 
             string executable = Path.Combine(GetLauncherPath(), "WiiU_USB_Helper.exe");
 
@@ -189,6 +151,39 @@ namespace USBHelperLauncher
             // Time to launch Wii U USB Helper
             sessionStart = DateTime.UtcNow;
             process = StartProcess(executable, helperVersion);
+
+            new Thread(() =>
+            {
+                logger.WriteLine("Sending information to injector...");
+                var client = new PipeClient();
+                if (patch)
+                {
+                    var keyPacket = new DonationKeyPacket();
+                    keyPacket.DonationKey = GenerateDonationKey();
+                    if (client.SendPacket(keyPacket))
+                    {
+                        logger.WriteLine("Donation key sent!");
+                    }
+                }
+                var certPacket = new CertificateAuthorityPacket();
+                certPacket.CaCert = CertMaker.GetRootCertificate();
+                if (client.SendPacket(certPacket))
+                {
+                    logger.WriteLine("Certificate sent!");
+                }
+                var proxyPacket = new ProxyPacket();
+                proxyPacket.Proxy = proxy.GetWebProxy();
+                if (client.SendPacket(proxyPacket))
+                {
+                    logger.WriteLine("Proxy sent!");
+                }
+                var terminationPacket = new TerminationPacket();
+                if (client.SendPacket(terminationPacket))
+                {
+                    logger.WriteLine("Terminated injection server.");
+                }
+            }).Start();
+
             ContextMenu trayMenu = new ContextMenu();
             MenuItem dlEmulator = new MenuItem("Download Emulator");
             foreach (EmulatorConfiguration.Emulator emulator in Enum.GetValues(typeof(EmulatorConfiguration.Emulator)))
@@ -199,11 +194,10 @@ namespace USBHelperLauncher
             MenuItem advanced = new MenuItem("Advanced");
             advanced.MenuItems.Add("Toggle Console", OnVisibilityChange);
             advanced.MenuItems.Add("Clear Install", OnClearInstall);
-            advanced.MenuItems.Add("Remove Certificate", OnRemoveCertificate);
+            advanced.MenuItems.Add("Generate Donation Key", OnGenerateKey).Enabled = patch;
             trayMenu.MenuItems.Add("Exit", OnExit);
             trayMenu.MenuItems.Add("Check for Updates", OnUpdateCheck);
             trayMenu.MenuItems.Add("Report Issue", OnDebugMessage);
-            trayMenu.MenuItems.Add("Generate Donation Key", OnGenerateKey).Enabled = patch;
             trayMenu.MenuItems.Add(dlEmulator);
             trayMenu.MenuItems.Add(advanced);
             trayIcon.Text = "Wii U USB Helper Launcher";
@@ -242,23 +236,6 @@ namespace USBHelperLauncher
             process.StartInfo.Arguments = arguments;
             process.Start();
             return process;
-        }
-
-        static string GetFirefoxExecutable()
-        {
-            RegistryKey localMachine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
-            RegistryKey regKey = localMachine.OpenSubKey("SOFTWARE\\Mozilla\\Mozilla Firefox");
-            if (regKey == null)
-            {
-                return null;
-            }
-            string version = regKey.GetValue("CurrentVersion") as string;
-            RegistryKey mainRegKey = regKey.OpenSubKey(version + "\\Main");
-            if (mainRegKey == null)
-            {
-                return null;
-            }
-            return mainRegKey.GetValue("PathToExe") as string;
         }
 
         public static Process GetHelperProcess()
@@ -365,16 +342,6 @@ namespace USBHelperLauncher
             }
         }
 
-        private static void OnRemoveCertificate(object sender, EventArgs e)
-        {
-            DialogResult result = MessageBox.Show("The SSL certificate is required to intercept HTTPS requests from Wii U USB Helper. The launcher will not work without it.\nAre you sure you want to remove it?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            if (result == DialogResult.Yes && CertMaker.removeFiddlerGeneratedCerts())
-            {
-                Cleanup();
-                Application.Exit();
-            }
-        }
-
         private async static void OnDebugMessage(object sender, EventArgs e)
         {
             DebugMessage debug = new DebugMessage(logger.GetLog(), proxy.GetLog());
@@ -384,16 +351,7 @@ namespace USBHelperLauncher
 
         private static void OnGenerateKey(object sender, EventArgs e)
         {
-            byte[] key = new byte[272];
-            byte[] buffer = new byte[16];
-            Random random = new Random();
-            random.NextBytes(buffer);
-            RSACryptoServiceProvider rsa = GetRSA();
-            byte[] signature = rsa.SignData(buffer, CryptoConfig.MapNameToOID("SHA1"));
-            rsa.Dispose();
-            Buffer.BlockCopy(buffer, 0, key, 0, 16);
-            Buffer.BlockCopy(signature, 0, key, 16, 256);
-            Clipboard.SetText(Convert.ToBase64String(key));
+            Clipboard.SetText(GenerateDonationKey());
             MessageBox.Show("Donation key generated and stored in your clipboard!", "Donation key", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -448,6 +406,20 @@ namespace USBHelperLauncher
             logger.Dispose();
         }
 
+        public static string GenerateDonationKey()
+        {
+            byte[] key = new byte[272];
+            byte[] buffer = new byte[16];
+            Random random = new Random();
+            random.NextBytes(buffer);
+            RSACryptoServiceProvider rsa = GetRSA();
+            byte[] signature = rsa.SignData(buffer, CryptoConfig.MapNameToOID("SHA1"));
+            rsa.Dispose();
+            Buffer.BlockCopy(buffer, 0, key, 0, 16);
+            Buffer.BlockCopy(signature, 0, key, 16, 256);
+            return Convert.ToBase64String(key);
+        }
+
         public static string GetVersion()
         {
             string[] rawVersion = Application.ProductVersion.Split('.');
@@ -468,6 +440,11 @@ namespace USBHelperLauncher
         public static Database GetDatabase()
         {
             return database;
+        }
+
+        public static Net.Proxy GetProxy()
+        {
+            return proxy;
         }
 
         public static DateTime GetSessionStart()
