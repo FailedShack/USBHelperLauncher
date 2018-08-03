@@ -27,7 +27,8 @@ namespace USBHelperLauncher.Net
             new ContentEndpoint(),
             new ApplicationEndpoint(),
             new RegistrationEndpoint(),
-            new SiteEndpoint()
+            new SiteEndpoint(),
+            new WiiUShopEndpoint()
         };
 
         private ushort port;
@@ -40,6 +41,7 @@ namespace USBHelperLauncher.Net
             FiddlerApplication.Log.OnLogString += Log_OnLogString;
             FiddlerApplication.BeforeRequest += FiddlerApplication_BeforeRequest;
             FiddlerApplication.AfterSessionComplete += FiddlerApplication_AfterSessionComplete;
+            FiddlerApplication.ResponseHeadersAvailable += FiddlerApplication_ResponseHeadersAvailable;
         }
 
         public void Start()
@@ -59,7 +61,7 @@ namespace USBHelperLauncher.Net
         {
             if (oS.HTTPMethodIs("CONNECT"))
             {
-                if(oS.hostname.EndsWith("wiiuusbhelper.com"))
+                if (oS.hostname.EndsWith("wiiuusbhelper.com"))
                 {
                     oS.oFlags["X-ReplyWithTunnel"] = "Fake for HTTPS Tunnel";
                 }
@@ -139,6 +141,22 @@ namespace USBHelperLauncher.Net
         private void Log_OnLogString(object sender, LogEventArgs e)
         {
             log.WriteLine(e.LogString);
+        }
+
+        private void FiddlerApplication_ResponseHeadersAvailable(Session oS)
+        {
+            if (oS.oResponse.headers.Exists("Content-Length"))
+            {
+                if (long.TryParse(oS.oResponse["Content-Length"], out long len))
+                {
+                    // Don't cache responses > 50MB
+                    if (len > 50 * 1024 * 1024)
+                    {
+                        oS.bBufferResponse = false;
+                        oS["log-drop-response-body"] = "save memory";
+                    }
+                }
+            }
         }
 
         public static void LogRequest(Session oS, Endpoint endpoint, string message)
