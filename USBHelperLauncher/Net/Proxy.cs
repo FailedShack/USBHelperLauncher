@@ -30,10 +30,12 @@ namespace USBHelperLauncher.Net
             new SiteEndpoint()
         };
 
+        private ushort port;
         private TextWriter log;
 
-        public Proxy()
+        public Proxy(ushort port)
         {
+            this.port = port;
             log = new StringWriter();
             FiddlerApplication.Log.OnLogString += Log_OnLogString;
             FiddlerApplication.BeforeRequest += FiddlerApplication_BeforeRequest;
@@ -46,8 +48,7 @@ namespace USBHelperLauncher.Net
             FiddlerApplication.CreateProxyEndpoint(7777, true, "localhost");
             FiddlerCoreStartupSettings startupSettings =
                 new FiddlerCoreStartupSettingsBuilder()
-                    .ListenOnPort(8877)
-                    .RegisterAsSystemProxy()
+                    .ListenOnPort(port)
                     .DecryptSSL()
                     .OptimizeThreadPool()
                     .Build();
@@ -143,6 +144,11 @@ namespace USBHelperLauncher.Net
         public static void LogRequest(Session oS, Endpoint endpoint, string message)
         {
             logger.WriteLine(String.Format("[{0}] {1}: {2}", oS.RequestMethod, endpoint.GetType().Name, message));
+        }
+
+        public WebProxy GetWebProxy()
+        {
+            return new WebProxy(string.Format("http://127.0.0.1:{0}", port));
         }
 
         public static string GetCertificateBase64()

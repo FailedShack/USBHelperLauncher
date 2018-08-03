@@ -102,7 +102,7 @@
     <Compile Include="Emulator\VbaConfiguration.cs" />
     <Compile Include="Emulator\ZipPackage.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="Net\ProxyConfig.cs" />
+    <Compile Include="ModuleInitInjector.cs" />
     <Compile Include="Net\SiteEndpoint.cs" />
     <Compile Include="ProgressDialog.cs">
       <SubType>Form</SubType>
@@ -2090,6 +2090,15 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\dnlib\src\dnlib.csproj">
+      <Project>{fdfc1237-143f-4919-8318-4926901f4639}</Project>
+      <Name>dnlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\USBHelperInjector\USBHelperInjector.csproj">
+      <Project>{6488b1de-2b46-4ae0-9a8a-429daa2bb43e}</Project>
+      <Name>USBHelperInjector</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

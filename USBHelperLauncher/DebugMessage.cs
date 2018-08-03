@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
@@ -14,7 +15,6 @@ namespace USBHelperLauncher
 {
     class DebugMessage
     {
-        private static readonly HttpClient client = new HttpClient();
         private string log, fiddlerLog;
 
         public DebugMessage(string log, string fiddlerLog)
@@ -51,33 +51,40 @@ namespace USBHelperLauncher
 
         public async Task<string> PublishAsync()
         {
-            StringContent content = new StringContent(await Build(), Encoding.UTF8, "application/x-www-form-urlencoded");
-            var response = await client.PostAsync("https://hastebin.com/documents", content);
-            JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
-            return "https://hastebin.com/" + (string) json["key"];
+            using (var client = new HttpClient())
+            {
+                StringContent content = new StringContent(await Build(), Encoding.UTF8, "application/x-www-form-urlencoded");
+                var response = await client.PostAsync("https://hastebin.com/documents", content);
+                JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
+                return "https://hastebin.com/" + (string)json["key"];
+            }
         }
 
         public async Task<Exception> TryReachProxy()
         {
-            HttpResponseMessage response;
-            try
+            using (var client = new WebClient())
             {
-                response = await client.GetAsync("http://www.wiiuusbhelper.com/session");
-            }
-            catch (HttpRequestException e)
-            {
-                return e;
-            }
-            string respString = await response.Content.ReadAsStringAsync();
-            Guid guid;
-            if (Guid.TryParse(respString, out guid))
-            {
-                if (Program.GetSessionGuid() == guid)
+                client.Proxy = Program.GetProxy().GetWebProxy();
+                string respString;
+                try
                 {
-                    return null;
+                    respString = await client.DownloadStringTaskAsync("http://www.wiiuusbhelper.com/session");
                 }
+                catch (WebException e)
+                {
+                    return e;
+                }
+                Guid guid;
+                if (Guid.TryParse(respString, out guid))
+                {
+                    if (Program.GetSessionGuid() == guid)
+                    {
+                        return null;
+                    }
+                }
+                return new InvalidOperationException("Invalid response: " + Regex.Replace(string.Concat(respString.Take(40)), @"\s+", " ") + "...");
+
             }
-            return new InvalidOperationException("Invalid response: " + Regex.Replace(string.Concat(respString.Take(40)), @"\s+", " ") + "...");
         }
 
         private static string CheckFor45DotVersion(int releaseKey)
