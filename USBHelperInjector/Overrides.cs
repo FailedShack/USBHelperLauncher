@@ -1,12 +1,12 @@
 ﻿using Harmony;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace USBHelperInjector
 {
@@ -56,6 +56,12 @@ namespace USBHelperInjector
             return true;
         }
 
+        private static bool CompareStrings(ref bool __result, string __0, string ___0)
+        {
+            __result = CultureInfo.CurrentCulture.CompareInfo.IndexOf(__0, ___0, CompareOptions.IgnoreNonSpace) > -1;
+            return false;
+        }
+
         public static MethodInfo GetMethod(string name, params Type[] types)
         {
             return typeof(Overrides).GetMethod(name, BindingFlags.NonPublic | BindingFlags.Static, null, types, null);
@@ -80,6 +86,42 @@ namespace USBHelperInjector
                 if (Proxy != null)
                 {
                     proxy = Proxy;
+                }
+                return true;
+            }
+        }
+
+        // Allows us to replace text displayed on message boxes
+        // by intercepting them before they are displayed.
+        [HarmonyPatch]
+        internal class MessageBoxPatch
+        {
+            private static Dictionary<string, string> hashes = new Dictionary<string, string>();
+
+            public static void Replace(string hash, string replacement)
+            {
+                hashes.Add(hash, replacement);
+            }
+
+            static MethodBase TargetMethod()
+            {
+                var assembly = Assembly.Load("Telerik.WinControls.UI");
+                var type = assembly.GetType("Telerik.WinControls.RadMessageBox");
+                return (from method in type.GetMethods(BindingFlags.NonPublic | BindingFlags.Static)
+                        where method.Name == "ShowCore" select method).FirstOrDefault();
+            }
+
+            static bool Prefix(ref string text)
+            {
+                string hash;
+                using (var md5 = MD5.Create())
+                {
+                    byte[] bytes = md5.ComputeHash(Encoding.UTF8.GetBytes(text));
+                    hash = Convert.ToBase64String(bytes);
+                }
+                if (hashes.ContainsKey(hash))
+                {
+                    text = hashes[hash];
                 }
                 return true;
             }

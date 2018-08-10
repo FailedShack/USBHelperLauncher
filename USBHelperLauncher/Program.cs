@@ -21,6 +21,7 @@ using System.Text.RegularExpressions;
 using USBHelperLauncher.Net;
 using USBHelperInjector.Pipes;
 using USBHelperInjector.Pipes.Packets;
+using System.Linq;
 
 namespace USBHelperLauncher
 {
@@ -39,6 +40,8 @@ namespace USBHelperLauncher
         private static NotifyIcon trayIcon = new NotifyIcon();
         private static Net.Proxy proxy = new Net.Proxy(8877);
 
+        public static Hosts Hosts { get; set; }
+
         [STAThread]
         static void Main(string[] args)
         {
@@ -48,6 +51,23 @@ namespace USBHelperLauncher
             logger.WriteLine("Made by FailedShack");
             SetConsoleVisibility(false);
             Application.EnableVisualStyles();
+
+            string hostsFile = GetHostsFile();
+            if (File.Exists(hostsFile))
+            {
+                try
+                {
+                    Hosts = Hosts.Load(hostsFile);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("Could not load hosts file: " + e.Message, "Malformed hosts file", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                Hosts = new Hosts();
+            }
 
             try
             {
@@ -195,6 +215,7 @@ namespace USBHelperLauncher
             advanced.MenuItems.Add("Toggle Console", OnVisibilityChange);
             advanced.MenuItems.Add("Clear Install", OnClearInstall);
             advanced.MenuItems.Add("Generate Donation Key", OnGenerateKey).Enabled = patch;
+            advanced.MenuItems.Add("Hosts Editor", OnOpenHostsEditor);
             trayMenu.MenuItems.Add("Exit", OnExit);
             trayMenu.MenuItems.Add("Check for Updates", OnUpdateCheck);
             trayMenu.MenuItems.Add("Report Issue", OnDebugMessage);
@@ -355,6 +376,18 @@ namespace USBHelperLauncher
             MessageBox.Show("Donation key generated and stored in your clipboard!", "Donation key", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+        private static void OnOpenHostsEditor(object sender, EventArgs e)
+        {
+            var window = Application.OpenForms.OfType<HostsDialog>().FirstOrDefault();
+            if (window != null)
+            {
+                window.WindowState = FormWindowState.Normal;
+                window.Activate();
+                return;
+            }
+            new HostsDialog().ShowDialog();
+        }
+
         private static void OnDownloadEmulator(EmulatorConfiguration config)
         {
             string emulatorPath = Path.Combine("emulators", config.GetName() + ".zip");
@@ -368,6 +401,11 @@ namespace USBHelperLauncher
                 File.Delete(emulatorPath);
             }
             new EmulatorConfigurationDialog(config).Show();
+        }
+
+        public static string GetHostsFile()
+        {
+            return Path.Combine(GetLauncherPath(), "hosts.json");
         }
 
         public static string GetLauncherPath()

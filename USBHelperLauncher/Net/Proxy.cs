@@ -72,6 +72,14 @@ namespace USBHelperLauncher.Net
                 return;
             }
 
+            if (Program.Hosts.GetHosts().Contains(oS.hostname))
+            {
+                string ip = Program.Hosts.Get(oS.hostname).ToString();
+                oS.bypassGateway = true;
+                oS.oFlags["x-overrideHost"] = ip;
+                LogRequest(oS, "Redirected request to " + ip);
+            }
+
             foreach (Endpoint endpoint in endpoints)
             {
                 if (endpoint.Matches(oS))
@@ -162,6 +170,11 @@ namespace USBHelperLauncher.Net
         public static void LogRequest(Session oS, Endpoint endpoint, string message)
         {
             logger.WriteLine(String.Format("[{0}] {1}: {2}", oS.RequestMethod, endpoint.GetType().Name, message));
+        }
+
+        public static void LogRequest(Session oS, string message)
+        {
+            logger.WriteLine(String.Format("[{0}] {1}: {2}", oS.RequestMethod, oS.hostname, message));
         }
 
         public WebProxy GetWebProxy()
