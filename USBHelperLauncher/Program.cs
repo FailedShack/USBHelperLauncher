@@ -470,6 +470,14 @@ namespace USBHelperLauncher
             return version;
         }
 
+        // Displays a form as a child of Wii U USB Helper
+        public static void ShowChildDialog(Form dialog)
+        {
+            var process = GetHelperProcess();
+            WinUtil.SetWindowLong(dialog.Handle, -8 /*GWL_HWNDPARENT*/, process.MainWindowHandle);
+            Application.Run(dialog);
+        }
+
         public static Logger GetLogger()
         {
             return logger;

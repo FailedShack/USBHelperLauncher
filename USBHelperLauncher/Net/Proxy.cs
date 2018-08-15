@@ -126,7 +126,7 @@ namespace USBHelperLauncher.Net
                             {
                                 EmulatorConfiguration config = EmulatorConfiguration.GetConfiguration(emulator);
                                 EmulatorConfigurationDialog dialog = new EmulatorConfigurationDialog(config);
-                                Application.Run(dialog);
+                                Program.ShowChildDialog(dialog);
                             }
                         }).Start();
                     }

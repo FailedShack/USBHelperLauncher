@@ -46,6 +46,13 @@
   <ItemGroup>
     <Compile Include="Injector.cs" />
     <Compile Include="Overrides.cs" />
+    <Compile Include="Patches\DownloaderPatch.cs" />
+    <Compile Include="Patches\DownloaderQueuePatch.cs" />
+    <Compile Include="Patches\MessageBoxPatch.cs" />
+    <Compile Include="Patches\SearchPatch.cs" />
+    <Compile Include="Patches\ServicePointPatch.cs" />
+    <Compile Include="Patches\SettingsDonationKeyPatches.cs" />
+    <Compile Include="Patches\SettingsProxyPatches.cs" />
     <Compile Include="Pipes\Packets\ActionPacket.cs" />
     <Compile Include="Pipes\Packets\CertificateAuthorityPacket.cs" />
     <Compile Include="Pipes\DataStream.cs" />
@@ -60,6 +67,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ReflectionHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
