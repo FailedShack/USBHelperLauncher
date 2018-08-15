@@ -53,6 +53,7 @@
     <Compile Include="Patches\ServicePointPatch.cs" />
     <Compile Include="Patches\SettingsDonationKeyPatches.cs" />
     <Compile Include="Patches\SettingsProxyPatches.cs" />
+    <Compile Include="Patches\SpeedChartPatch.cs" />
     <Compile Include="Pipes\Packets\ActionPacket.cs" />
     <Compile Include="Pipes\Packets\CertificateAuthorityPacket.cs" />
     <Compile Include="Pipes\DataStream.cs" />
