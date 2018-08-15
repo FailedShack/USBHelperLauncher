@@ -6,7 +6,7 @@ using System.Reflection;
 namespace USBHelperInjector.Patches
 {
     // Forces a Proxy for all web requests
-    [HarmonyPatch(typeof(ServicePointManager))]
+    [HarmonyPatch]
     internal class ServicePointPatch
     {
         // This is intended to get FindServicePoint(Uri, IWebProxy, ProxyChain, HttpAbortDelegate, Int32)

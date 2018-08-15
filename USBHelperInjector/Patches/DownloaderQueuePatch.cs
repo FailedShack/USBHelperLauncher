@@ -7,6 +7,7 @@ using System.Reflection.Emit;
 
 namespace USBHelperInjector.Patches
 {
+    [HarmonyPatch]
     class DownloaderQueuePatch
     {
         static MethodBase TargetMethod()
