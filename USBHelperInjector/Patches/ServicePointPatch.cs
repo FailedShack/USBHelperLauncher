@@ -1,4 +1,5 @@
 ﻿using Harmony;
+using System;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -19,9 +20,9 @@ namespace USBHelperInjector.Patches
                     select method).FirstOrDefault();
         }
 
-        static bool Prefix(ref IWebProxy proxy)
+        static bool Prefix(Uri address, ref IWebProxy proxy)
         {
-            if (Overrides.Proxy != null)
+            if ((address.Scheme == "http" || address.Scheme == "https") && Overrides.Proxy != null)
             {
                 proxy = Overrides.Proxy;
             }
