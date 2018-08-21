@@ -22,6 +22,9 @@ using USBHelperLauncher.Net;
 using USBHelperInjector.Pipes;
 using USBHelperInjector.Pipes.Packets;
 using System.Linq;
+using USBHelperLauncher.Configuration;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace USBHelperLauncher
 {
@@ -45,12 +48,43 @@ namespace USBHelperLauncher
         [STAThread]
         static void Main(string[] args)
         {
+            Settings.Load();
+            Settings.Save();
             _handler += new EventHandler(Handler);
             SetConsoleCtrlHandler(_handler, true);
 
             logger.WriteLine("Made by FailedShack");
             SetConsoleVisibility(false);
             Application.EnableVisualStyles();
+
+            if (Settings.ShowUpdateNag)
+            {
+                Task.Run(async () =>
+                {
+                    JObject release;
+                    try
+                    {
+                        release = await GithubUtil.GetRelease("FailedShack", "USBHelperLauncher", "latest");
+                    }
+                    catch
+                    {
+                        return;
+                    }
+                    string newVersion = (string)release["tag_name"];
+                    string version = GetVersion();
+                    if (newVersion.CompareTo(version) > 0)
+                    {
+                        var updateNag = new CheckboxDialog("New version found: " + newVersion + "\nCurrent version: " + version + "\nDo you want to open the download site?", "Do not show this again.", "Update Checker", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                        DialogResult result = updateNag.ShowDialog();
+                        if (result == DialogResult.Yes)
+                        {
+                            Process.Start((string)release["html_url"]);
+                        }
+                        Settings.ShowUpdateNag = !updateNag.Checked;
+                        Settings.Save();
+                    }
+                });
+            }
 
             string hostsFile = GetHostsFile();
             if (File.Exists(hostsFile))
@@ -67,6 +101,16 @@ namespace USBHelperLauncher
             else
             {
                 Hosts = new Hosts();
+                if (Settings.ShowHostsWarning)
+                {
+                    var hostsWarning = new CheckboxDialog(
+                        "It appears you don't currently have a hosts redirector file. This file may be required to route obsolete hostnames to their correct destination.\n" +
+                        "If you intended to use this feature, make sure a file named 'hosts.json' is located in the same directory as this executable.\n" +
+                        "You may also use the built-in editor located in the Advanced section in the tray icon's context menu.", "Do not show this again.", "Hosts file missing", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    hostsWarning.ShowDialog();
+                    Settings.ShowHostsWarning = !hostsWarning.Checked;
+                    Settings.Save();
+                }
             }
 
             try
@@ -119,9 +163,21 @@ namespace USBHelperLauncher
                 Environment.Exit(0);
             }
 
-            proxy.Start();
-
             string executable = Path.Combine(GetLauncherPath(), "WiiU_USB_Helper.exe");
+
+            var running = Process.GetProcessesByName("Patched").FirstOrDefault(p => p.GetMainModuleFileName().StartsWith(GetLauncherPath(), StringComparison.OrdinalIgnoreCase));
+
+            if (running != default(Process))
+            {
+                DialogResult result = MessageBox.Show("An instance of Wii U USB Helper is already running.\nWould you like to close it?", "Already running", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+                if (result == DialogResult.No)
+                {
+                    Environment.Exit(0);
+                }
+                running.Kill();
+            }
+
+            proxy.Start();
 
             // Patching
             if (args.Length == 1)
@@ -172,35 +228,50 @@ namespace USBHelperLauncher
             sessionStart = DateTime.UtcNow;
             process = StartProcess(executable, helperVersion);
 
+            if (Settings.DisableOptionalPatches)
+            {
+                logger.WriteLine("Optional patches have been disabled.");
+            }
+
             new Thread(() =>
             {
                 logger.WriteLine("Sending information to injector...");
                 var client = new PipeClient();
+                var packets = new List<ActionPacket>();
                 if (patch)
                 {
-                    var keyPacket = new DonationKeyPacket();
-                    keyPacket.DonationKey = GenerateDonationKey();
-                    if (client.SendPacket(keyPacket))
+                    packets.Add(new DonationKeyPacket()
                     {
-                        logger.WriteLine("Donation key sent!");
+                        DonationKey = GenerateDonationKey()
+                    });
+                }
+                packets.AddRange(new List<ActionPacket>()
+                {
+                    new CertificateAuthorityPacket()
+                    {
+                        CaCert = CertMaker.GetRootCertificate()
+                    },
+                    new ProxyPacket()
+                    {
+                        Proxy = proxy.GetWebProxy()
+                    },
+                    new DownloaderSettingsPacket()
+                    {
+                        MaxRetries = Settings.MaxRetries,
+                        DelayBetweenRetries = Settings.DelayBetweenRetries
+                    },
+                    new OptionalPatchesPacket()
+                    {
+                        DisableOptionalPatches = Settings.DisableOptionalPatches
+                    },
+                    new TerminationPacket()
+                });
+                foreach (ActionPacket packet in packets)
+                {
+                    if (!client.SendPacket(packet))
+                    {
+                        logger.WriteLine(string.Format("Could not send IPC packet of type {0}", packet.GetType().Name));
                     }
-                }
-                var certPacket = new CertificateAuthorityPacket();
-                certPacket.CaCert = CertMaker.GetRootCertificate();
-                if (client.SendPacket(certPacket))
-                {
-                    logger.WriteLine("Certificate sent!");
-                }
-                var proxyPacket = new ProxyPacket();
-                proxyPacket.Proxy = proxy.GetWebProxy();
-                if (client.SendPacket(proxyPacket))
-                {
-                    logger.WriteLine("Proxy sent!");
-                }
-                var terminationPacket = new TerminationPacket();
-                if (client.SendPacket(terminationPacket))
-                {
-                    logger.WriteLine("Terminated injection server.");
                 }
             }).Start();
 
@@ -475,7 +546,7 @@ namespace USBHelperLauncher
         {
             var process = GetHelperProcess();
             WinUtil.SetWindowLong(dialog.Handle, -8 /*GWL_HWNDPARENT*/, process.MainWindowHandle);
-            Application.Run(dialog);
+            dialog.ShowDialog();
         }
 
         public static Logger GetLogger()

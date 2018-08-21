@@ -14,7 +14,9 @@ namespace USBHelperInjector.Pipes.Packets
             typeof(DonationKeyPacket),
             typeof(CertificateAuthorityPacket),
             typeof(ProxyPacket),
-            typeof(TerminationPacket)
+            typeof(TerminationPacket),
+            typeof(DownloaderSettingsPacket),
+            typeof(OptionalPatchesPacket)
         };
 
         public abstract void Execute();

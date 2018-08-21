@@ -6,6 +6,7 @@ using System.Reflection;
 
 namespace USBHelperInjector.Patches
 {
+    [Optional]
     [HarmonyPatch]
     internal class SpeedChartPatch
     {

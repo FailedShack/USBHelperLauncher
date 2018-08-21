@@ -19,22 +19,19 @@ namespace USBHelperInjector.Pipes
 
         public void Listen()
         {
-            new Thread(() =>
+            while (!shutdown)
             {
-                while (!shutdown)
+                using (var server = new NamedPipeServerStream("USBHelperLauncher", PipeDirection.InOut))
                 {
-                    using (var server = new NamedPipeServerStream("USBHelperLauncher", PipeDirection.InOut))
-                    {
-                        server.WaitForConnection();
-                        DataStream ds = new DataStream(server);
-                        byte[] data = ds.ReadByteArray();
-                        string xml = Encoding.UTF8.GetString(data);
-                        XDocument doc = XDocument.Parse(xml);
-                        bool success = HandlePacket(doc);
-                        server.WriteByte(Convert.ToByte(success));
-                    }
+                    server.WaitForConnection();
+                    DataStream ds = new DataStream(server);
+                    byte[] data = ds.ReadByteArray();
+                    string xml = Encoding.UTF8.GetString(data);
+                    XDocument doc = XDocument.Parse(xml);
+                    bool success = HandlePacket(doc);
+                    server.WriteByte(Convert.ToByte(success));
                 }
-            }).Start();
+            }
         }
 
         public bool HandlePacket(XDocument doc)

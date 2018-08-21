@@ -10,6 +10,7 @@ namespace USBHelperInjector.Patches
 {
     // Allows us to replace text displayed on message boxes
     // by intercepting them before they are displayed.
+    [Optional]
     [HarmonyPatch]
     internal class MessageBoxPatch
     {

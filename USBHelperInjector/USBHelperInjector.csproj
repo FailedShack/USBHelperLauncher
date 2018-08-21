@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Injector.cs" />
+    <Compile Include="Optional.cs" />
     <Compile Include="Overrides.cs" />
     <Compile Include="Patches\DownloaderPatch.cs" />
     <Compile Include="Patches\DownloaderQueuePatch.cs" />
@@ -58,6 +59,8 @@
     <Compile Include="Pipes\Packets\CertificateAuthorityPacket.cs" />
     <Compile Include="Pipes\DataStream.cs" />
     <Compile Include="Pipes\Packets\DonationKeyPacket.cs" />
+    <Compile Include="Pipes\Packets\DownloaderSettingsPacket.cs" />
+    <Compile Include="Pipes\Packets\OptionalPatchesPacket.cs" />
     <Compile Include="Pipes\PipeClient.cs" />
     <Compile Include="Pipes\PipeServerListener.cs" />
     <Compile Include="Pipes\Packets\ProxyPacket.cs" />

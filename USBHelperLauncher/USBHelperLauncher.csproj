@@ -81,6 +81,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CheckboxDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CheckboxDialog.Designer.cs">
+      <DependentUpon>CheckboxDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Configuration\Setting.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="DebugMessage.cs" />
     <Compile Include="Emulator\CemuConfiguration.cs" />
@@ -139,6 +146,7 @@
     <Compile Include="Net\RegistrationEndpoint.cs" />
     <Compile Include="Net\Request.cs" />
     <Compile Include="RSAPatcher.cs" />
+    <Compile Include="Configuration\Settings.cs" />
     <Compile Include="Utils\CitraRepoUtil.cs" />
     <Compile Include="Utils\GithubUtil.cs" />
     <Compile Include="Utils\IOUtil.cs" />
@@ -2077,6 +2085,9 @@
     <None Include="Resources\Loading.gif" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="CheckboxDialog.resx">
+      <DependentUpon>CheckboxDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Emulator\PackageProperties.resx">
       <DependentUpon>PackageProperties.cs</DependentUpon>
     </EmbeddedResource>

@@ -6,6 +6,7 @@ namespace USBHelperInjector.Patches
 {
     // Allows us to override the number of tries
     // and time between tries of the downloader.
+    [Optional]
     [HarmonyPatch]
     internal class DownloaderPatch
     {
@@ -21,8 +22,8 @@ namespace USBHelperInjector.Patches
 
         static bool Prefix(ref int __1, ref int __2)
         {
-            __1 = 3; // 3 tries
-            __2 = 0; // 0 ms between tries
+            __1 = Overrides.MaxRetries;
+            __2 = Overrides.DelayBetweenRetries;
             return true;
         }
     }

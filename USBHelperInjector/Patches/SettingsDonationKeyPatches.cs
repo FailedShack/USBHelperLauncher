@@ -11,7 +11,7 @@ namespace USBHelperInjector.Patches
             return AccessTools.DeclaredProperty(ReflectionHelper.Settings, "DonationKey").GetGetMethod(true);
         }
 
-        static bool GetDonationKey(ref string __result)
+        static bool Prefix(ref string __result)
         {
             if (Overrides.DonationKey != null)
             {
