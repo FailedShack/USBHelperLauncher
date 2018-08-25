@@ -297,11 +297,10 @@ namespace USBHelperLauncher
             advanced.MenuItems.Add("Clear Install", OnClearInstall);
             advanced.MenuItems.Add("Generate Donation Key", OnGenerateKey).Enabled = patch;
             advanced.MenuItems.Add("Hosts Editor", OnOpenHostsEditor);
+            advanced.MenuItems.Add("Export Sessions", OnExportSessions).Enabled = Verbose;
             trayMenu.MenuItems.Add("Exit", OnExit);
             trayMenu.MenuItems.Add("Check for Updates", OnUpdateCheck);
             trayMenu.MenuItems.Add("Report Issue", OnDebugMessage);
-            if (Verbose)
-                trayMenu.MenuItems.Add("Export Sessions", OnExportSessions);
             trayMenu.MenuItems.Add(dlEmulator);
             trayMenu.MenuItems.Add(advanced);
             trayIcon.Text = "Wii U USB Helper Launcher";
@@ -455,20 +454,27 @@ namespace USBHelperLauncher
 
         private static void OnExportSessions(object sender, EventArgs e)
         {
-            logger.WriteLine("Exporting Sessions...");
-
-            Session[] sessions = proxy.GetSessions();
-            FiddlerApplication.oTranscoders.ImportTranscoders(Assembly.Load("BasicFormatsForCore"));
-
-            var options = new Dictionary<string, object>()
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "HTTPArchive (*.har)|*.har";
+            saveFileDialog.DefaultExt = "har";
+            saveFileDialog.AddExtension = true;
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                { "Filename", "export.har" },
-                { "MaxTextBodyLength", 100*1024*1024 },
-                { "MaxBinaryBodyLength", 100*1024*1024 }
-            };
-            FiddlerApplication.DoExport("HTTPArchive v1.2", sessions, options, null);
+                logger.WriteLine("Exporting Sessions...");
 
-            logger.WriteLine("Export successful.");
+                Session[] sessions = proxy.GetSessions();
+                FiddlerApplication.oTranscoders.ImportTranscoders(Assembly.Load("BasicFormatsForCore"));
+
+                var options = new Dictionary<string, object>
+                {
+                    { "Filename", saveFileDialog.FileName },
+                    { "MaxTextBodyLength", 10*1024*1024 },
+                    { "MaxBinaryBodyLength", 10*1024*1024 }
+                };
+                FiddlerApplication.DoExport("HTTPArchive v1.2", sessions, options, null);
+
+                MessageBox.Show("Session Export successful.", "Session Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private static void OnGenerateKey(object sender, EventArgs e)

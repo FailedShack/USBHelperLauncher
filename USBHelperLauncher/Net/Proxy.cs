@@ -65,7 +65,9 @@ namespace USBHelperLauncher.Net
         private void FiddlerApplication_BeforeRequest(Session oS)
         {
             if (Program.Verbose)
+            {
                 sessions.Add(oS);
+            }
 
             if (oS.HTTPMethodIs("CONNECT"))
             {
