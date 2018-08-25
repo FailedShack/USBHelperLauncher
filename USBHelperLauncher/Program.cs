@@ -300,6 +300,8 @@ namespace USBHelperLauncher
             trayMenu.MenuItems.Add("Exit", OnExit);
             trayMenu.MenuItems.Add("Check for Updates", OnUpdateCheck);
             trayMenu.MenuItems.Add("Report Issue", OnDebugMessage);
+            if (Verbose)
+                trayMenu.MenuItems.Add("Export Sessions", OnExportSessions);
             trayMenu.MenuItems.Add(dlEmulator);
             trayMenu.MenuItems.Add(advanced);
             trayIcon.Text = "Wii U USB Helper Launcher";
@@ -449,6 +451,24 @@ namespace USBHelperLauncher
             DebugMessage debug = new DebugMessage(logger.GetLog(), proxy.GetLog());
             Clipboard.SetText(await debug.PublishAsync());
             MessageBox.Show("Debug message created and published, the link has been stored in your clipboard.\nProvide this link when reporting an issue.", "Debug message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private static void OnExportSessions(object sender, EventArgs e)
+        {
+            logger.WriteLine("Exporting Sessions...");
+
+            Session[] sessions = proxy.GetSessions();
+            FiddlerApplication.oTranscoders.ImportTranscoders(Assembly.Load("BasicFormatsForCore"));
+
+            var options = new Dictionary<string, object>()
+            {
+                { "Filename", "export.har" },
+                { "MaxTextBodyLength", 100*1024*1024 },
+                { "MaxBinaryBodyLength", 100*1024*1024 }
+            };
+            FiddlerApplication.DoExport("HTTPArchive v1.2", sessions, options, null);
+
+            logger.WriteLine("Export successful.");
         }
 
         private static void OnGenerateKey(object sender, EventArgs e)
