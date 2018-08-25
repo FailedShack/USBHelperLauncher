@@ -36,7 +36,9 @@ namespace USBHelperInjector.Patches
             {
                 new CodeInstruction(OpCodes.Ldfld, list),
                 new CodeInstruction(OpCodes.Ldc_I4_0),
-                new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(list.FieldType, "RemoveAt", new Type[] { typeof(int) }))
+                new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(list.FieldType, "RemoveAt", new Type[] { typeof(int) })),
+                new CodeInstruction(OpCodes.Ldc_I4_0),
+                new CodeInstruction(OpCodes.Stloc_1)
             };
             codes.InsertRange(148, toInsert);
             return codes;

@@ -44,6 +44,7 @@ namespace USBHelperLauncher
         private static Net.Proxy proxy = new Net.Proxy(8877);
 
         public static Hosts Hosts { get; set; }
+        public static bool Verbose { get; set; }
 
         [STAThread]
         static void Main(string[] args)
@@ -180,13 +181,22 @@ namespace USBHelperLauncher
             proxy.Start();
 
             // Patching
-            if (args.Length == 1)
+            for (int i = 0; i < args.Length; i++)
             {
-                var group = Regex.Match(args[0], "[-]{1,2}(.*)").Groups[1];
-                if (group.Success && group.Value == "nopatch")
+                var group = Regex.Match(args[i], "[-]{1,2}(.*)").Groups[1];
+                if (group.Success)
                 {
-                    patch = false;
-                    logger.WriteLine("Patching has been disabled.");
+                    switch(group.Value)
+                    {
+                        case "nopatch":
+                            patch = false;
+                            logger.WriteLine("Patching has been disabled.");
+                            break;
+                        case "verbose":
+                            Verbose = true;
+                            logger.WriteLine("Verbose logging enabled.");
+                            break;
+                    }
                 }
             }
 
