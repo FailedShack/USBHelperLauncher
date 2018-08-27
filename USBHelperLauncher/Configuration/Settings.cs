@@ -22,6 +22,12 @@ namespace USBHelperLauncher.Configuration
         [Setting("Launcher", true)]
         public static bool ShowCloudWarning { get; set; }
 
+        [Setting("Launcher", 1000)]
+        public static int SessionBufferSize { get; set; }
+
+        [Setting("Launcher", 64 * 1000)]
+        public static int SessionSizeLimit { get; set; }
+
         [Setting("Injector", false)]
         public static bool DisableOptionalPatches { get; set; }
 

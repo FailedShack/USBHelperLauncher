@@ -150,6 +150,7 @@
     <Compile Include="Net\Request.cs" />
     <Compile Include="RSAPatcher.cs" />
     <Compile Include="Configuration\Settings.cs" />
+    <Compile Include="Utils\Buffer.cs" />
     <Compile Include="Utils\CitraRepoUtil.cs" />
     <Compile Include="Utils\GithubUtil.cs" />
     <Compile Include="Utils\IOUtil.cs" />

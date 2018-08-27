@@ -38,24 +38,41 @@ namespace USBHelperLauncher
         private static Process process;
         private static string helperVersion;
         private static Thread backgroundThread;
-        private static bool showConsole = true;
+        private static bool showConsole = false;
         private static bool patch = true;
-        private static NotifyIcon trayIcon = new NotifyIcon();
-        private static Net.Proxy proxy = new Net.Proxy(8877);
+        private static NotifyIcon trayIcon;
+        private static Net.Proxy proxy;
 
         public static Hosts Hosts { get; set; }
-        public static bool Verbose { get; set; }
 
         [STAThread]
         static void Main(string[] args)
         {
             Settings.Load();
             Settings.Save();
+            proxy = new Net.Proxy(8877);
             _handler += new EventHandler(Handler);
             SetConsoleCtrlHandler(_handler, true);
 
+            for (int i = 0; i < args.Length; i++)
+            {
+                var group = Regex.Match(args[i], "[-]{1,2}(.*)").Groups[1];
+                if (group.Success)
+                {
+                    switch (group.Value)
+                    {
+                        case "nopatch":
+                            patch = false;
+                            break;
+                        case "showconsole":
+                            showConsole = true;
+                            break;
+                    }
+                }
+            }
+
             logger.WriteLine("Made by FailedShack");
-            SetConsoleVisibility(false);
+            SetConsoleVisibility(showConsole);
             Application.EnableVisualStyles();
 
             if (Settings.ShowUpdateNag)
@@ -181,25 +198,6 @@ namespace USBHelperLauncher
             proxy.Start();
 
             // Patching
-            for (int i = 0; i < args.Length; i++)
-            {
-                var group = Regex.Match(args[i], "[-]{1,2}(.*)").Groups[1];
-                if (group.Success)
-                {
-                    switch(group.Value)
-                    {
-                        case "nopatch":
-                            patch = false;
-                            logger.WriteLine("Patching has been disabled.");
-                            break;
-                        case "verbose":
-                            Verbose = true;
-                            logger.WriteLine("Verbose logging enabled.");
-                            break;
-                    }
-                }
-            }
-
             ProgressDialog dialog = new ProgressDialog();
             dialog.SetStyle(ProgressBarStyle.Marquee);
             dialog.GetProgressBar().MarqueeAnimationSpeed = 30;
@@ -231,6 +229,10 @@ namespace USBHelperLauncher
                 }
                 patcher.SetPublicKey(builder.ToString());
                 logger.WriteLine("Patched public key.");
+            }
+            else
+            {
+                logger.WriteLine("Patching has been disabled.");
             }
             dialog.Invoke(new Action(() => dialog.Close()));
 
@@ -297,12 +299,13 @@ namespace USBHelperLauncher
             advanced.MenuItems.Add("Clear Install", OnClearInstall);
             advanced.MenuItems.Add("Generate Donation Key", OnGenerateKey).Enabled = patch;
             advanced.MenuItems.Add("Hosts Editor", OnOpenHostsEditor);
-            advanced.MenuItems.Add("Export Sessions", OnExportSessions).Enabled = Verbose;
+            advanced.MenuItems.Add("Export Sessions", OnExportSessions);
             trayMenu.MenuItems.Add("Exit", OnExit);
             trayMenu.MenuItems.Add("Check for Updates", OnUpdateCheck);
             trayMenu.MenuItems.Add("Report Issue", OnDebugMessage);
             trayMenu.MenuItems.Add(dlEmulator);
             trayMenu.MenuItems.Add(advanced);
+            trayIcon = new NotifyIcon();
             trayIcon.Text = "Wii U USB Helper Launcher";
             trayIcon.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             trayIcon.ContextMenu = trayMenu;
@@ -473,7 +476,7 @@ namespace USBHelperLauncher
                 };
                 FiddlerApplication.DoExport("HTTPArchive v1.2", sessions, options, null);
 
-                MessageBox.Show("Session Export successful.", "Session Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Session export successful.", "Session export", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
