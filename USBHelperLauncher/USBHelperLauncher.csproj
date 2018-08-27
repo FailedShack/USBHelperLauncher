@@ -49,14 +49,17 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BasicFormatsForCore">
+      <HintPath>..\..\..\..\Documents\FiddlerCoreAPI\BasicFormatsForCore.dll</HintPath>
+    </Reference>
     <Reference Include="BCMakeCert">
       <HintPath>..\..\..\..\Documents\FiddlerCoreAPI\BCMakeCert.dll</HintPath>
     </Reference>
     <Reference Include="CertMaker">
       <HintPath>..\..\..\..\Documents\FiddlerCoreAPI\CertMaker.dll</HintPath>
     </Reference>
-    <Reference Include="FiddlerCore45">
-      <HintPath>..\..\..\..\Documents\FiddlerCoreAPI\FiddlerCore45.dll</HintPath>
+    <Reference Include="FiddlerCore4">
+      <HintPath>..\..\..\..\Documents\FiddlerCoreAPI\FiddlerCore4.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">

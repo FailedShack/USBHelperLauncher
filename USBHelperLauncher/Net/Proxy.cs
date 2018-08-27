@@ -1,6 +1,7 @@
 ﻿using Fiddler;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -22,6 +23,7 @@ namespace USBHelperLauncher.Net
     class Proxy : IDisposable
     {
 
+        private static readonly List<Session> sessions = new List<Session>();
         private static readonly Logger logger = Program.GetLogger();
         private static readonly Endpoint[] endpoints = new Endpoint[]
         {
@@ -62,6 +64,11 @@ namespace USBHelperLauncher.Net
 
         private void FiddlerApplication_BeforeRequest(Session oS)
         {
+            if (Program.Verbose)
+            {
+                sessions.Add(oS);
+            }
+
             if (oS.HTTPMethodIs("CONNECT"))
             {
                 if (oS.hostname.EndsWith("wiiuusbhelper.com"))
@@ -220,6 +227,11 @@ namespace USBHelperLauncher.Net
         public static string GetCertificateBase64()
         {
             return Convert.ToBase64String(CertMaker.GetRootCertificate().GetRawCertData());
+        }
+
+        public Session[] GetSessions()
+        {
+            return sessions.ToArray();
         }
 
         public string GetLog()
