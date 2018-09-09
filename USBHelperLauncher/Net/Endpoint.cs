@@ -74,7 +74,10 @@ namespace USBHelperLauncher.Net
         {
             oS.utilCreateResponseAndBypassServer();
             oS.oResponse["Content-Length"] = bytes.Length.ToString();
-            oS.responseBodyBytes = bytes;
+            if (!oS.HTTPMethodIs("HEAD"))
+            {
+                oS.responseBodyBytes = bytes;
+            }
         }
     }
 }
