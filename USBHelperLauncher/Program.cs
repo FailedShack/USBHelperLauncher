@@ -1,5 +1,4 @@
 ﻿using Fiddler;
-using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
@@ -18,13 +17,13 @@ using System.Xml.Linq;
 using USBHelperLauncher.Emulator;
 using USBHelperLauncher.Utils;
 using System.Text.RegularExpressions;
-using USBHelperLauncher.Net;
 using USBHelperInjector.Pipes;
 using USBHelperInjector.Pipes.Packets;
 using System.Linq;
 using USBHelperLauncher.Configuration;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace USBHelperLauncher
 {
@@ -175,6 +174,26 @@ namespace USBHelperLauncher
                     }
                 }
             }
+
+            // Ensure that the cached title key JSON files are valid
+            string[] toCheck = { "3FFFD23A80F800ABFCC436A5EC8F7F0B94C728A4", "9C6DD14B8E3530B701BC4F1B77345DADB0C32020" };
+            foreach (string file in toCheck)
+            {
+                string path = Path.Combine(GetInstallPath(), file);
+                if (File.Exists(path))
+                {
+                    try
+                    {
+                        JObject.Parse(File.ReadAllText(path));
+                    }
+                    catch (JsonReaderException)
+                    {
+                        File.Delete(path);
+                        logger.WriteLine(string.Format("Removed bad cache file: {0}", file));
+                    }
+                }
+            }
+
             if (!CertMaker.rootCertExists() && !CertMaker.createRootCert())
             {
                 MessageBox.Show("Creation of the interception certificate failed.", "Unable to generate certificate.", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -416,7 +435,7 @@ namespace USBHelperLauncher
 
                             foreach (FileInfo file in files)
                             {
-                                dialog.SetHeader("Removing: " + file.Name);
+                                dialog.BeginInvoke(new Action(() => dialog.SetHeader("Removing: " + file.Name)));
                                 file.Delete();
                                 dialog.BeginInvoke(new Action(() => progressBar.PerformStep()));
                             }
@@ -426,7 +445,7 @@ namespace USBHelperLauncher
 
                             foreach (DirectoryInfo subDir in subDirs)
                             {
-                                dialog.SetHeader("Removing: " + subDir.Name);
+                                dialog.BeginInvoke(new Action(() => dialog.SetHeader("Removing: " + subDir.Name)));
                                 subDir.Delete(true);
                                 dialog.BeginInvoke(new Action(() => progressBar.PerformStep()));
                             }
