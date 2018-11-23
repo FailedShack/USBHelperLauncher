@@ -30,7 +30,9 @@ namespace USBHelperLauncher.Net
             new ApplicationEndpoint(),
             new RegistrationEndpoint(),
             new SiteEndpoint(),
-            new WiiUShopEndpoint()
+            new WiiUShopEndpoint(),
+            new TitlekeysWiiUEndpoint(),
+            new Titlekeys3DSEndpoint()
         };
 
         private bool shownCloudWarning;
@@ -84,6 +86,13 @@ namespace USBHelperLauncher.Net
                 oS.bypassGateway = true;
                 oS.oFlags["x-overrideHost"] = ip;
                 LogRequest(oS, "Redirected request to " + ip);
+            }
+
+            // We really need better IPC
+            // Needed during first run, when the user has to input the title key sites
+            if (Settings.TitleKeys == null)
+            {
+                Settings.Load();
             }
 
             foreach (Endpoint endpoint in endpoints)

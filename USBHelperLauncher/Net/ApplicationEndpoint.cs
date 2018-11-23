@@ -22,7 +22,7 @@ namespace USBHelperLauncher.Net
             oS.utilCreateResponseAndBypassServer();
             oS.oResponse.headers.SetStatus(307, "Redirect");
             byte[] bytes = Convert.FromBase64String(data.Get("url"));
-            String url = Encoding.UTF8.GetString(bytes);
+            string url = Encoding.UTF8.GetString(bytes);
             oS.oResponse["Location"] = url;
             Proxy.LogRequest(oS, this, "Redirecting to " + url);
         }

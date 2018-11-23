@@ -16,7 +16,7 @@ namespace USBHelperLauncher.Configuration
         [Setting("Launcher", true)]
         public static bool ShowUpdateNag { get; set; }
 
-        [Setting("Launcher", true)]
+        [Setting("Launcher", false)]
         public static bool ShowHostsWarning { get; set; }
 
         [Setting("Launcher", true)]
@@ -27,6 +27,9 @@ namespace USBHelperLauncher.Configuration
 
         [Setting("Launcher", 64 * 1000)]
         public static int SessionSizeLimit { get; set; }
+
+        [Setting("Launcher", null)]
+        public static Dictionary<string, string> TitleKeys { get; set; }
 
         [Setting("Injector", false)]
         public static bool DisableOptionalPatches { get; set; }
@@ -52,7 +55,11 @@ namespace USBHelperLauncher.Configuration
                     conf[setting.Section] = new JObject();
                 }
                 var obj = conf[setting.Section];
-                obj[prop.Name] = new JValue(prop.GetValue(null));
+                var value = prop.GetValue(null);
+                if (value != null)
+                {
+                    obj[prop.Name] = JToken.FromObject(value);
+                }
             }
             File.WriteAllText(Path.Combine(Program.GetLauncherPath(), file), conf.ToString());
         }
