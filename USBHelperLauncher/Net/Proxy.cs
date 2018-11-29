@@ -86,6 +86,7 @@ namespace USBHelperLauncher.Net
                 oS.bypassGateway = true;
                 oS.oFlags["x-overrideHost"] = ip;
                 LogRequest(oS, "Redirected request to " + ip);
+                return;
             }
 
             // We really need better IPC

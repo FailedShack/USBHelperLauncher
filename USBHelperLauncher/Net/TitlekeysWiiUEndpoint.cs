@@ -17,6 +17,10 @@ namespace USBHelperLauncher.Net
         [Request("/*")]
         public void Get(Session oS)
         {
+            if (Settings.TitleKeys == null || !Settings.TitleKeys.ContainsKey("wiiu"))
+            {
+                return;
+            }
             oS.utilCreateResponseAndBypassServer();
             oS.oResponse.headers.SetStatus(307, "Redirect");
             var path = Regex.Replace(oS.PathAndQuery, @"^\/*", "");

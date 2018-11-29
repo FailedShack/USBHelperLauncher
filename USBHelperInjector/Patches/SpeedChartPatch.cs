@@ -21,7 +21,7 @@ namespace USBHelperInjector.Patches
         static void Postfix(object __instance)
         {
             FieldInfo speedChartField = (from field in __instance.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
-                                         where field.FieldType == Assembly.Load("LiveCharts.Winforms").GetType("LiveCharts.WinForms.CartesianChart")
+                                         where field.FieldType == Assembly.Load("LiveCharts.WinForms").GetType("LiveCharts.WinForms.CartesianChart")
                                          select field).FirstOrDefault();
 
             var speedChart = speedChartField.GetValue(__instance);

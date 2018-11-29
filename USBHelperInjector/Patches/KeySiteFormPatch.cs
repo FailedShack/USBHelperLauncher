@@ -64,7 +64,7 @@ namespace USBHelperInjector.Patches
                 {
                     var baseUri = new UriBuilder(text).Uri;
                     var uri = new Uri(baseUri, "json");
-                    var resp = client.SendAsync(new HttpRequestMessage(HttpMethod.Head, uri)).Result;
+                    var resp = client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead).Result;
                     resp.EnsureSuccessStatusCode();
                 }
                 catch
