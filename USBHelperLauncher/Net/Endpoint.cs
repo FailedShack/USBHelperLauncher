@@ -16,11 +16,11 @@ namespace USBHelperLauncher.Net
         protected static readonly Logger logger = Program.GetLogger();
         protected static readonly Database database = Program.GetDatabase();
 
-        private string hostName;
+        public string HostName { get; }
 
         public Endpoint(string hostName)
         {
-            this.hostName = hostName;
+            HostName = hostName;
         }
 
         public bool Handle(Session oS)
@@ -39,7 +39,7 @@ namespace USBHelperLauncher.Net
 
         public bool Matches(Session oS)
         {
-            return oS.HostnameIs(hostName);
+            return oS.HostnameIs(HostName);
         }
 
         public NameValueCollection GetRequestData(Session oS)

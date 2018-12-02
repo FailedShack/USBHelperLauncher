@@ -17,13 +17,13 @@ using System.Xml.Linq;
 using USBHelperLauncher.Emulator;
 using USBHelperLauncher.Utils;
 using System.Text.RegularExpressions;
-using USBHelperInjector.Pipes;
-using USBHelperInjector.Pipes.Packets;
 using System.Linq;
 using USBHelperLauncher.Configuration;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.ServiceModel;
+using USBHelperInjector.Contracts;
 
 namespace USBHelperLauncher
 {
@@ -38,11 +38,12 @@ namespace USBHelperLauncher
         private static string helperVersion;
         private static Thread backgroundThread;
         private static bool showConsole = false;
-        private static bool patch = true;
         private static NotifyIcon trayIcon;
         private static Net.Proxy proxy;
+        private static RSAParameters rsaParams;
 
         public static Hosts Hosts { get; set; }
+        public static bool PatchPublicKey { get; private set; } = true;
 
         [STAThread]
         static void Main(string[] args)
@@ -61,7 +62,7 @@ namespace USBHelperLauncher
                     switch (group.Value)
                     {
                         case "nopatch":
-                            patch = false;
+                            PatchPublicKey = false;
                             break;
                         case "showconsole":
                             showConsole = true;
@@ -215,6 +216,9 @@ namespace USBHelperLauncher
             }
 
             proxy.Start();
+            ServiceHost host = new ServiceHost(typeof(LauncherService), new Uri("net.pipe://localhost/LauncherService"));
+            host.AddServiceEndpoint(typeof(ILauncherService), new NetNamedPipeBinding(), "");
+            host.Open();
 
             // Patching
             ProgressDialog dialog = new ProgressDialog();
@@ -228,13 +232,16 @@ namespace USBHelperLauncher
             executable = Path.Combine(GetLauncherPath(), "Patched.exe");
             injector.Inject(executable);
             logger.WriteLine("Injected module initializer.");
-            if (patch)
+            if (PatchPublicKey)
             {
                 dialog.Invoke(new Action(() => dialog.SetHeader("Patching...")));
                 RSAPatcher patcher = new RSAPatcher(executable);
-                RSACryptoServiceProvider rsa = GetRSA();
-                string xml = rsa.ToXmlString(false);
-                rsa.Dispose();
+                string xml;
+                using (var rsa = new RSACryptoServiceProvider(2048))
+                {
+                    rsaParams = rsa.ExportParameters(true);
+                    xml = rsa.ToXmlString(false);
+                }
                 var builder = new StringBuilder();
                 var element = XElement.Parse(xml);
                 var settings = new XmlWriterSettings
@@ -264,48 +271,6 @@ namespace USBHelperLauncher
                 logger.WriteLine("Optional patches have been disabled.");
             }
 
-            new Thread(() =>
-            {
-                logger.WriteLine("Sending information to injector...");
-                var client = new PipeClient();
-                var packets = new List<ActionPacket>();
-                if (patch)
-                {
-                    packets.Add(new DonationKeyPacket()
-                    {
-                        DonationKey = GenerateDonationKey()
-                    });
-                }
-                packets.AddRange(new List<ActionPacket>()
-                {
-                    new CertificateAuthorityPacket()
-                    {
-                        CaCert = CertMaker.GetRootCertificate()
-                    },
-                    new ProxyPacket()
-                    {
-                        Proxy = proxy.GetWebProxy()
-                    },
-                    new DownloaderSettingsPacket()
-                    {
-                        MaxRetries = Settings.MaxRetries,
-                        DelayBetweenRetries = Settings.DelayBetweenRetries
-                    },
-                    new OptionalPatchesPacket()
-                    {
-                        DisableOptionalPatches = Settings.DisableOptionalPatches
-                    },
-                    new TerminationPacket()
-                });
-                foreach (ActionPacket packet in packets)
-                {
-                    if (!client.SendPacket(packet))
-                    {
-                        logger.WriteLine(string.Format("Could not send IPC packet of type {0}", packet.GetType().Name));
-                    }
-                }
-            }).Start();
-
             ContextMenu trayMenu = new ContextMenu();
             MenuItem dlEmulator = new MenuItem("Download Emulator");
             foreach (EmulatorConfiguration.Emulator emulator in Enum.GetValues(typeof(EmulatorConfiguration.Emulator)))
@@ -316,7 +281,7 @@ namespace USBHelperLauncher
             MenuItem advanced = new MenuItem("Advanced");
             advanced.MenuItems.Add("Toggle Console", OnVisibilityChange);
             advanced.MenuItems.Add("Clear Install", OnClearInstall);
-            advanced.MenuItems.Add("Generate Donation Key", OnGenerateKey).Enabled = patch;
+            advanced.MenuItems.Add("Generate Donation Key", OnGenerateKey).Enabled = PatchPublicKey;
             advanced.MenuItems.Add("Hosts Editor", OnOpenHostsEditor);
             advanced.MenuItems.Add("Export Sessions", OnExportSessions);
             trayMenu.MenuItems.Add("Exit", OnExit);
@@ -345,13 +310,6 @@ namespace USBHelperLauncher
             });
             backgroundThread.Start();
             Application.Run();
-        }
-
-        private static RSACryptoServiceProvider GetRSA()
-        {
-            CspParameters cp = new CspParameters();
-            cp.KeyContainerName = "USBHelper";
-            return new RSACryptoServiceProvider(2048, cp);
         }
 
         static Process StartProcess(string path, string arguments)
@@ -579,9 +537,12 @@ namespace USBHelperLauncher
             byte[] buffer = new byte[16];
             Random random = new Random();
             random.NextBytes(buffer);
-            RSACryptoServiceProvider rsa = GetRSA();
-            byte[] signature = rsa.SignData(buffer, CryptoConfig.MapNameToOID("SHA1"));
-            rsa.Dispose();
+            byte[] signature;
+            using (var rsa = new RSACryptoServiceProvider(2048))
+            {
+                rsa.ImportParameters(rsaParams);
+                signature = rsa.SignData(buffer, CryptoConfig.MapNameToOID("SHA1"));
+            }
             Buffer.BlockCopy(buffer, 0, key, 0, 16);
             Buffer.BlockCopy(signature, 0, key, 16, 256);
             return Convert.ToBase64String(key);

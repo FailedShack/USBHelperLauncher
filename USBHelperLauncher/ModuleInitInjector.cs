@@ -41,7 +41,7 @@ namespace USBHelperLauncher
                 // add call to our dll
                 var usbHelperInjector = ModuleDefMD.Load("USBHelperInjector.dll");
                 var testMethodDef = usbHelperInjector
-                    .Types.First(t => t.FullName == "USBHelperInjector.Injector")
+                    .Types.First(t => t.FullName == "USBHelperInjector.InjectorService")
                     .Methods.First(m => m.Name == "Init");
                 var testMethodRef = module.Import(testMethodDef);
 

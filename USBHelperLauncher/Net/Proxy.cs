@@ -89,13 +89,6 @@ namespace USBHelperLauncher.Net
                 return;
             }
 
-            // We really need better IPC
-            // Needed during first run, when the user has to input the title key sites
-            if (Settings.TitleKeys == null)
-            {
-                Settings.Load();
-            }
-
             foreach (Endpoint endpoint in endpoints)
             {
                 if (endpoint.Matches(oS))

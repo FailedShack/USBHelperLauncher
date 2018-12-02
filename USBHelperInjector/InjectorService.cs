@@ -1,30 +1,38 @@
 ﻿using Harmony;
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using System.ServiceModel;
+using System.Threading.Tasks;
+using USBHelperInjector.Contracts;
 using USBHelperInjector.Patches;
-using USBHelperInjector.Pipes;
 using USBHelperInjector.Properties;
 
 namespace USBHelperInjector
 {
-    public class Injector
+    public class InjectorService : IInjectorService
     {
-        private static X509Certificate2 CaCert { get; set; }
-
-        private static PipeServerListener server;
+        public static ILauncherService LauncherService { get; private set; }
+        public static X509Certificate2 CaCert { get; private set; }
 
         public static void Init()
         {
             MessageBoxPatch.Replace("tp9+kFO7LOSD0AZ5zUBHrA==", Resources.Disclaimer);
 
-            server = new PipeServerListener();
-            server.Listen();
+            var factory = new ChannelFactory<ILauncherService>(new NetNamedPipeBinding(), "net.pipe://localhost/LauncherService");
+            LauncherService = factory.CreateChannel();
+
+            ServiceHost host = new ServiceHost(typeof(InjectorService), new Uri("net.pipe://localhost/InjectorService"));
+            host.AddServiceEndpoint(typeof(IInjectorService), new NetNamedPipeBinding(), "");
+            host.Open();
+
+            Task.Run(async () => await LauncherService.SendInjectorSettings());
         }
 
-        public static void ApplyPatches(bool disableOptional)
+        public void ApplyPatches(bool disableOptional)
         {
             var harmony = HarmonyInstance.Create("me.failedshack.usbhelperinjector");
             var assembly = Assembly.GetExecutingAssembly();
@@ -43,15 +51,10 @@ namespace USBHelperInjector
             });
         }
 
-        public static void TerminateServer()
-        {
-            server.Shutdown();
-        }
-
         // Should make the given CA certificate be trusted (currently only disables HTTPs validation)
-        public static void TrustCertificateAuthority(X509Certificate2 cert)
+        public void TrustCertificateAuthority(byte[] rawCertData)
         {
-            CaCert = cert;
+            CaCert = new X509Certificate2(rawCertData);
             ServicePointManager.ServerCertificateValidationCallback += ValidateServerCertificate;
         }
 
@@ -59,6 +62,26 @@ namespace USBHelperInjector
         {
             // Disable HTTPs validation
             return true;
+        }
+
+        public void SetDonationKey(string donationKey)
+        {
+            Overrides.DonationKey = donationKey;
+        }
+
+        public void SetDownloaderMaxRetries(int maxRetries)
+        {
+            Overrides.MaxRetries = maxRetries;
+        }
+
+        public void SetDownloaderRetryDelay(int delay)
+        {
+            Overrides.DelayBetweenRetries = delay;
+        }
+
+        public void SetProxy(string address)
+        {
+            Overrides.Proxy = new WebProxy(address);
         }
     }
 }

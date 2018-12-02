@@ -21,10 +21,15 @@ namespace USBHelperLauncher.Net
             {
                 return;
             }
+            var baseUri = new UriBuilder(Settings.TitleKeys["wiiu"]).Uri;
+            if (baseUri.Host == HostName)
+            {
+                // Avoid redirection loop
+                return;
+            }
             oS.utilCreateResponseAndBypassServer();
             oS.oResponse.headers.SetStatus(307, "Redirect");
             var path = Regex.Replace(oS.PathAndQuery, @"^\/*", "");
-            var baseUri = new UriBuilder(Settings.TitleKeys["wiiu"]).Uri;
             var url = new Uri(baseUri, path).ToString();
             oS.oResponse["Location"] = url;
             Proxy.LogRequest(oS, this, "Redirecting to " + url);

@@ -8,8 +8,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
+using USBHelperInjector.Contracts;
 
 namespace USBHelperInjector.Patches
 {
@@ -51,9 +53,6 @@ namespace USBHelperInjector.Patches
 
         static bool Prefix(object __instance)
         {
-            var config = File.ReadAllText("conf.json");
-            var json = JObject.Parse(config);
-            var urls = new JObject();
             var textProperty = textBoxes[0].FieldType.GetProperty("Text");
             var client = new HttpClient();
             for (int i = 0; i < textBoxes.Count; i++)
@@ -75,12 +74,8 @@ namespace USBHelperInjector.Patches
                 }
                 // Take the title key site as valid.
                 textProperty.SetValue(textBox, string.Format("{0}.titlekeys", sites[i]));
-                urls.Add(new JProperty(sites[i], text));
+                InjectorService.LauncherService.SetKeySite(sites[i], text);
             }
-
-            // Save to config
-            json["Launcher"]["TitleKeys"] = urls;
-            File.WriteAllText("conf.json", json.ToString());
             return true;
         }
     }
