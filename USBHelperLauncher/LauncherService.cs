@@ -29,6 +29,10 @@ namespace USBHelperLauncher
             {
                 channel.SetDonationKey(Program.GenerateDonationKey());
             }
+            if (Settings.TitleKeys == null)
+            {
+                channel.ForceKeySiteForm();
+            }
             channel.TrustCertificateAuthority(CertMaker.GetRootCertificate().GetRawCertData());
             channel.SetProxy(Program.GetProxy().GetWebProxy().Address.ToString());
             channel.SetDownloaderMaxRetries(Settings.MaxRetries);

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -76,7 +77,7 @@ namespace USBHelperLauncher.Emulator
         public async Task<Package> GetGraphicPacksPackageAsync()
         {
             JObject release = await GithubUtil.GetRelease("slashiee", "cemu_graphic_packs", "latest");
-            string version = "v2-" + ((string)release["tag_name"]).Replace("appveyor", "");
+            string version = "v" + new string(((string)release["tag_name"]).Where(c => char.IsDigit(c)).ToArray());
             string dlUrl = (string)release["assets"][0]["browser_download_url"];
             return new ZipPackage(new Uri(dlUrl), "Graphic Packs", version, "graphicPacks");
         }

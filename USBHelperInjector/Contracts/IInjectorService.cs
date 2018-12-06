@@ -9,6 +9,9 @@ namespace USBHelperInjector.Contracts
         void TrustCertificateAuthority(byte[] rawCertData);
 
         [OperationContract]
+        void ForceKeySiteForm();
+
+        [OperationContract]
         void SetDonationKey(string donationKey);
 
         [OperationContract]

@@ -66,7 +66,18 @@ namespace USBHelperLauncher.Net
             string fileName = Path.GetFileName(oS.PathAndQuery);
             string localPath = Path.Combine(Program.GetLauncherPath(), folder, fileName);
             oS.utilCreateResponseAndBypassServer();
+
+            // Treat request as GET to keep response body
+            string temp = oS.RequestMethod;
+            oS.RequestMethod = "GET";
             oS.LoadResponseFromFile(localPath);
+            oS.RequestMethod = temp;
+            oS.oResponse["ETag"] = oS.GetResponseBodyHashAsBase64("md5");
+            if (oS.HTTPMethodIs("HEAD"))
+            {
+                oS.responseBodyBytes = Utilities.emptyByteArray;
+            }
+
             Proxy.LogRequest(oS, this, "Sending local copy of " + fileName);
         }
 
@@ -74,6 +85,7 @@ namespace USBHelperLauncher.Net
         {
             oS.utilCreateResponseAndBypassServer();
             oS.oResponse["Content-Length"] = bytes.Length.ToString();
+            oS.oResponse["ETag"] = Utilities.GetHashAsBase64("md5", bytes);
             if (!oS.HTTPMethodIs("HEAD"))
             {
                 oS.responseBodyBytes = bytes;

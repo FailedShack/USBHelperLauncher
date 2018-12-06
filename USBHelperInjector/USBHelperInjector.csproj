@@ -56,6 +56,7 @@
     <Compile Include="Patches\DlcTMDPatch.cs" />
     <Compile Include="Patches\DownloaderPatch.cs" />
     <Compile Include="Patches\DownloaderQueuePatch.cs" />
+    <Compile Include="Patches\ForceKeySiteFormPatch.cs" />
     <Compile Include="Patches\KeySiteFormPatch.cs" />
     <Compile Include="Patches\MessageBoxPatch.cs" />
     <Compile Include="Patches\SearchPatch.cs" />

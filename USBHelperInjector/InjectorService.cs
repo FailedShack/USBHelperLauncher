@@ -51,6 +51,11 @@ namespace USBHelperInjector
             });
         }
 
+        public void ForceKeySiteForm()
+        {
+            Overrides.ForceKeySiteForm = true;
+        }
+
         // Should make the given CA certificate be trusted (currently only disables HTTPs validation)
         public void TrustCertificateAuthority(byte[] rawCertData)
         {

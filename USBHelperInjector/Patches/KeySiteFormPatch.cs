@@ -76,6 +76,7 @@ namespace USBHelperInjector.Patches
                 textProperty.SetValue(textBox, string.Format("{0}.titlekeys", sites[i]));
                 InjectorService.LauncherService.SetKeySite(sites[i], text);
             }
+            Overrides.ForceKeySiteForm = false;
             return true;
         }
     }
