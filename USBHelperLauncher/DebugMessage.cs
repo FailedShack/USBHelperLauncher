@@ -53,7 +53,7 @@ namespace USBHelperLauncher
                     sb.AppendFormat("{0} -> {1}", host, Program.Hosts.Get(host)).AppendLine();
                 }
             }
-            if (keySites.Count > 0)
+            if (keySites != null && keySites.Count > 0)
             {
                 sb.AppendLine("Key Sites:");
                 foreach (KeyValuePair<string, string> site in keySites)
