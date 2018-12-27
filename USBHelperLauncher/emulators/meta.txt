@@ -1,0 +1,2 @@
+Steam Link (XINPUT)|steamlinkxinput
+Keyboard|keyboard
