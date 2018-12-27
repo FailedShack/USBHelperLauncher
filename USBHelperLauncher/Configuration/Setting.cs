@@ -17,5 +17,7 @@ namespace USBHelperLauncher.Configuration
             Section = section;
             Default = def;
         }
+
+        public Setting(string section) : this(section, null) { }
     }
 }

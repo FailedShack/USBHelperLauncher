@@ -21,13 +21,7 @@ namespace USBHelperLauncher.Emulator
         public event PostUnpackHandler PostUnpack;
         public delegate void PostUnpackHandler(DirectoryInfo dir);
 
-        public Package(Uri uri, string name, string version)
-        {
-            this.uri = uri;
-            this.name = name;
-            this.version = version;
-            this.installPath = "";
-        }
+        public Package(Uri uri, string name, string version) : this(uri, name, version, "") { }
 
         public Package(Uri uri, string name, string version, string installPath)
         {

@@ -95,7 +95,18 @@ namespace USBHelperLauncher.Net
                 {
                     if (!endpoint.Handle(oS))
                     {
-                        LogRequest(oS, endpoint, "Unhandled request: " + oS.PathAndQuery);
+                        var endpointName = endpoint.GetType().Name;
+                        if (Settings.EndpointFallbacks.ContainsKey(endpointName))
+                        {
+                            RedirectRequest(oS, endpoint, Settings.EndpointFallbacks[endpointName]);
+                        }
+                        else
+                        {
+                            LogRequest(oS, endpoint, "Unhandled request: " + oS.PathAndQuery);
+                            // Prevent someone else from getting our request
+                            oS.utilCreateResponseAndBypassServer();
+                            oS.oResponse.headers.SetStatus(410, "Gone");
+                        }
                     }
                     break;
                 }
@@ -188,14 +199,31 @@ namespace USBHelperLauncher.Net
             }
         }
 
+        public static bool RedirectRequest(Session oS, Endpoint endpoint, string baseUrl)
+        {
+            var baseUri = new UriBuilder(baseUrl).Uri;
+            if (oS.HostnameIs(baseUri.Host))
+            {
+                // Avoid redirection loop
+                return false;
+            }
+            oS.utilCreateResponseAndBypassServer();
+            oS.oResponse.headers.SetStatus(307, "Redirect");
+            var path = Regex.Replace(oS.PathAndQuery, @"^\/*", "");
+            var url = new Uri(baseUri, path).ToString();
+            oS.oResponse["Location"] = url;
+            LogRequest(oS, endpoint, "Redirecting to " + url);
+            return true;
+        }
+
         public static void LogRequest(Session oS, Endpoint endpoint, string message)
         {
-            logger.WriteLine(String.Format("[{0}] {1}: {2}", oS.RequestMethod, endpoint.GetType().Name, message));
+            logger.WriteLine(string.Format("[{0}] {1}: {2}", oS.RequestMethod, endpoint.GetType().Name, message));
         }
 
         public static void LogRequest(Session oS, string message)
         {
-            logger.WriteLine(String.Format("[{0}] {1}: {2}", oS.RequestMethod, oS.hostname, message));
+            logger.WriteLine(string.Format("[{0}] {1}: {2}", oS.RequestMethod, oS.hostname, message));
         }
 
         public WebProxy GetWebProxy()

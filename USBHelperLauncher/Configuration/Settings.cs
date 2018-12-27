@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using USBHelperLauncher.Net;
 
 namespace USBHelperLauncher.Configuration
 {
@@ -28,8 +29,14 @@ namespace USBHelperLauncher.Configuration
         [Setting("Launcher", 64 * 1000)]
         public static int SessionSizeLimit { get; set; }
 
-        [Setting("Launcher", null)]
-        public static Dictionary<string, string> TitleKeys { get; set; }
+        [Setting("Launcher")]
+        public static Dictionary<string, string> EndpointFallbacks { get; set; } = new Dictionary<string, string>()
+        {
+            { typeof(ContentEndpoint).Name, "https://cdn.0x100.xyz/wiiuusbhelper/cdn/" }
+        };
+
+        [Setting("Launcher")]
+        public static Dictionary<string, string> TitleKeys { get; set; } = new Dictionary<string, string>();
 
         [Setting("Injector", false)]
         public static bool DisableOptionalPatches { get; set; }
@@ -85,7 +92,10 @@ namespace USBHelperLauncher.Configuration
                 }
                 var token = conf.SelectToken(string.Join(".", setting.Section, prop.Name));
                 var value = token == null ? setting.Default : token.ToObject(prop.PropertyType);
-                prop.SetValue(null, value);
+                if (value != null)
+                {
+                    prop.SetValue(null, value);
+                }
             }
         }
     }

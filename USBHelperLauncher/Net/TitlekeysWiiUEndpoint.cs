@@ -17,22 +17,10 @@ namespace USBHelperLauncher.Net
         [Request("/*")]
         public void Get(Session oS)
         {
-            if (Settings.TitleKeys == null || !Settings.TitleKeys.ContainsKey("wiiu"))
+            if (Settings.TitleKeys.ContainsKey("wiiu"))
             {
-                return;
+                Proxy.RedirectRequest(oS, this, Settings.TitleKeys["wiiu"]);
             }
-            var baseUri = new UriBuilder(Settings.TitleKeys["wiiu"]).Uri;
-            if (baseUri.Host == HostName)
-            {
-                // Avoid redirection loop
-                return;
-            }
-            oS.utilCreateResponseAndBypassServer();
-            oS.oResponse.headers.SetStatus(307, "Redirect");
-            var path = Regex.Replace(oS.PathAndQuery, @"^\/*", "");
-            var url = new Uri(baseUri, path).ToString();
-            oS.oResponse["Location"] = url;
-            Proxy.LogRequest(oS, this, "Redirecting to " + url);
         }
     }
 }

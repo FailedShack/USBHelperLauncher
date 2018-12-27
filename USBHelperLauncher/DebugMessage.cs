@@ -30,8 +30,7 @@ namespace USBHelperLauncher
             StringBuilder sb = new StringBuilder();
             Exception exception = await TryReachProxy();
             DateTime now = DateTime.UtcNow;
-            var hosts = Program.Hosts.GetHosts();
-            var keySites = Settings.TitleKeys;
+            var hosts = Program.Hosts;
             sb.Append('-', 10).Append(" Wii U USB Helper Loader Debug Information ").Append('-', 10).AppendLine();
             sb.AppendLine("Debug Time: " + now + " (UTC)");
             sb.AppendLine("Session Length: " + (now - Program.GetSessionStart()).ToString(@"hh\:mm\:ss"));
@@ -45,27 +44,25 @@ namespace USBHelperLauncher
             sb.AppendLine("System Language: " + info.InstalledUICulture);
             sb.AppendLine("Total Memory: " + info.TotalPhysicalMemory);
             sb.AppendLine("Available Memory: " + info.AvailablePhysicalMemory);
-            if (hosts.Count() > 0)
-            {
-                sb.AppendLine("Hosts:");
-                foreach (string host in hosts)
-                {
-                    sb.AppendFormat("{0} -> {1}", host, Program.Hosts.Get(host)).AppendLine();
-                }
-            }
-            if (keySites != null && keySites.Count > 0)
-            {
-                sb.AppendLine("Key Sites:");
-                foreach (KeyValuePair<string, string> site in keySites)
-                {
-                    sb.AppendFormat("{0} -> {1}", site.Key, site.Value).AppendLine();
-                }
-            }
+            AppendDictionary(sb, "Hosts", hosts.GetHosts().ToDictionary(x => x, x => hosts.Get(x).ToString()));
+            AppendDictionary(sb, "Endpoint Fallbacks", Settings.EndpointFallbacks);
+            AppendDictionary(sb, "Key Sites", Settings.TitleKeys);
             sb.Append('-', 26).Append(" Log Start ").Append('-', 26).AppendLine();
             sb.Append(log);
             sb.Append('-', 22).Append(" Fiddler Log Start ").Append('-', 22).AppendLine();
             sb.Append(fiddlerLog);
             return sb.ToString();
+        }
+
+        private StringBuilder AppendDictionary(StringBuilder sb, string header, Dictionary<string, string> dict)
+        {
+            if (dict.Count() > 0)
+            {
+                sb.Append(header).AppendLine(":");
+                dict.ToList().ForEach(x => sb.AppendFormat("{0} -> {1}", x.Key, x.Value));
+                sb.AppendLine();
+            }
+            return sb;
         }
 
         public async Task<string> PublishAsync()

@@ -12,10 +12,6 @@ namespace USBHelperLauncher
     {
         public void SetKeySite(string site, string url)
         {
-            if (Settings.TitleKeys == null)
-            {
-                Settings.TitleKeys = new Dictionary<string, string>();
-            }
             Settings.TitleKeys[site] = url;
             Settings.Save();
         }
@@ -29,7 +25,7 @@ namespace USBHelperLauncher
             {
                 channel.SetDonationKey(Program.GenerateDonationKey());
             }
-            if (Settings.TitleKeys == null)
+            if (Settings.TitleKeys.Count == 0)
             {
                 channel.ForceKeySiteForm();
             }
