@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace USBHelperLauncher.Net
 {
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     class Request : Attribute
     {
         private string mask;
