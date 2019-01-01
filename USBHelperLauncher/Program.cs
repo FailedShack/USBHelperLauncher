@@ -185,7 +185,7 @@ namespace USBHelperLauncher
                 {
                     try
                     {
-                        JObject.Parse(File.ReadAllText(path));
+                        JToken.Parse(File.ReadAllText(path));
                     }
                     catch (JsonReaderException)
                     {
