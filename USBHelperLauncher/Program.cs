@@ -428,17 +428,32 @@ namespace USBHelperLauncher
         private async static void OnDebugMessage(object sender, EventArgs e)
         {
             DebugMessage debug = new DebugMessage(logger.GetLog(), proxy.GetLog());
+            if (Control.ModifierKeys == Keys.Shift)
+            {
+                var dialog = new SaveFileDialog()
+                {
+                    Filter = "Log Files (*.log)|*.log",
+                    FileName = string.Format("usbhelperlauncher_{0:yyyy-MM-dd_HH-mm-ss}.log", DateTime.Now)
+                };
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    File.WriteAllText(dialog.FileName, await debug.Build());
+                }
+                return;
+            }
             Clipboard.SetText(await debug.PublishAsync());
             MessageBox.Show("Debug message created and published, the link has been stored in your clipboard.\nProvide this link when reporting an issue.", "Debug message", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private static void OnExportSessions(object sender, EventArgs e)
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "HTTPArchive (*.har)|*.har";
-            saveFileDialog.DefaultExt = "har";
-            saveFileDialog.AddExtension = true;
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            SaveFileDialog dialog = new SaveFileDialog
+            {
+                Filter = "HTTPArchive (*.har)|*.har",
+                DefaultExt = "har",
+                AddExtension = true
+            };
+            if (dialog.ShowDialog() == DialogResult.OK)
             {
                 logger.WriteLine("Exporting Sessions...");
 
@@ -447,7 +462,7 @@ namespace USBHelperLauncher
 
                 var options = new Dictionary<string, object>
                 {
-                    { "Filename", saveFileDialog.FileName },
+                    { "Filename", dialog.FileName },
                     { "MaxTextBodyLength", 10*1024*1024 },
                     { "MaxBinaryBodyLength", 10*1024*1024 }
                 };
