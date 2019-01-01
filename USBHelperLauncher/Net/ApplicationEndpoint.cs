@@ -55,5 +55,22 @@ namespace USBHelperLauncher.Net
             oS.responseBodyBytes = dataBytes;
             Proxy.LogRequest(oS, this, "Created zip from " + url);
         }
+
+        [Request("/requestZipHash.php")]
+        [Request("/hash_zip/*")]
+        public void GetZipHash(Session oS)
+        {
+            string data = Path.GetFileName(oS.PathAndQuery);
+            if (data == "requestZipHash.php")
+            {
+                data = GetRequestData(oS).Get("url");
+            }
+
+            byte[] bytes = Convert.FromBase64String(data);
+            string url = Encoding.UTF8.GetString(bytes);
+
+            oS.utilCreateResponseAndBypassServer();
+            Proxy.LogRequest(oS, this, "Sent empty zip hash for " + url);
+        }
     }
 }

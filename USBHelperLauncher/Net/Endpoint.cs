@@ -25,10 +25,9 @@ namespace USBHelperLauncher.Net
 
         public bool Handle(Session oS)
         {
-            Request request = null;
             foreach (var method in GetType().GetMethods())
             {
-                if ((request = method.GetCustomAttributes().OfType<Request>().FirstOrDefault()) != null && request.Matches(oS))
+                if (method.GetCustomAttributes().OfType<Request>().Any(request => request.Matches(oS)))
                 {
                     method.Invoke(this, new object[] { oS });
                     return true;
