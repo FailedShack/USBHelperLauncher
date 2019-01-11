@@ -122,6 +122,7 @@
     <Compile Include="LauncherService.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ModuleInitInjector.cs" />
+    <Compile Include="Net\CloudEndpoint.cs" />
     <Compile Include="Net\Titlekeys3DSEndpoint.cs" />
     <Compile Include="Net\WiiUShopEndpoint.cs" />
     <Compile Include="Net\SiteEndpoint.cs" />
