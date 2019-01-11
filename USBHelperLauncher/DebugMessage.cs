@@ -59,8 +59,7 @@ namespace USBHelperLauncher
             if (dict.Count() > 0)
             {
                 sb.Append(header).AppendLine(":");
-                dict.ToList().ForEach(x => sb.AppendFormat("{0} -> {1}", x.Key, x.Value));
-                sb.AppendLine();
+                dict.ToList().ForEach(x => sb.AppendFormat("{0} -> {1}", x.Key, x.Value).AppendLine());
             }
             return sb;
         }
