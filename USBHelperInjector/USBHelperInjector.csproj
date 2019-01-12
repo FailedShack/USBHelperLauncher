@@ -39,6 +39,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
@@ -53,11 +54,13 @@
     <Compile Include="InjectorService.cs" />
     <Compile Include="Optional.cs" />
     <Compile Include="Overrides.cs" />
+    <Compile Include="Patches\Disable3DSDownload.cs" />
     <Compile Include="Patches\DlcTMDPatch.cs" />
     <Compile Include="Patches\DownloaderPatch.cs" />
     <Compile Include="Patches\DownloaderQueuePatch.cs" />
     <Compile Include="Patches\ForceKeySiteFormPatch.cs" />
-    <Compile Include="Patches\KeySiteFormPatch.cs" />
+    <Compile Include="Patches\KeySiteFormHideObsoletePatch.cs" />
+    <Compile Include="Patches\KeySiteFormValidationPatch.cs" />
     <Compile Include="Patches\MessageBoxPatch.cs" />
     <Compile Include="Patches\SearchPatch.cs" />
     <Compile Include="Patches\ServicePointPatch.cs" />
