@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.ServiceModel;
 using USBHelperInjector.Contracts;
+using System.Security.Principal;
 
 namespace USBHelperLauncher
 {
@@ -193,6 +194,37 @@ namespace USBHelperLauncher
                         logger.WriteLine(string.Format("Removed bad cache file: {0}", file));
                     }
                 }
+            }
+
+            // Make sure that FiddlerCore's key container can be accessed
+            string keyContainerName = FiddlerApplication.Prefs.GetStringPref("fiddler.certmaker.bc.KeyContainerName", "FiddlerBCKey");
+            try
+            {
+                CspParameters cspParams = new CspParameters();
+                cspParams.KeyContainerName = keyContainerName;
+                var _ = new CspKeyContainerInfo(cspParams).UniqueKeyContainerName; // this will throw an exception if the container cannot be accessed
+            }
+            catch (CryptographicException)
+            {
+                using (MD5 md5 = MD5.Create())
+                {
+                    byte[] hash = md5.ComputeHash(Encoding.ASCII.GetBytes(keyContainerName.ToLower() + "\0"));
+                    var reader = new BinaryReader(new MemoryStream(hash));
+                    var sb = new StringBuilder();
+                    for (int i = 0; i < 4; i++)
+                    {
+                        sb.AppendFormat("{0:x8}", reader.ReadInt32());
+                    }
+                    string hashString = sb.ToString();
+
+                    string userSID = WindowsIdentity.GetCurrent().User.ToString();
+                    string rsaPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Microsoft", "Crypto", "RSA", userSID);
+                    string keyContainer = Directory.GetFiles(rsaPath).Where(n => Path.GetFileName(n).ToLower().StartsWith(hashString)).FirstOrDefault();
+
+                    File.Delete(keyContainer);
+                    logger.WriteLine("Removed broken key container.");
+                }
+                
             }
 
             if (!CertMaker.rootCertExists() && !CertMaker.createRootCert())
