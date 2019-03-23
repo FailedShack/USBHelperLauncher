@@ -221,7 +221,7 @@ namespace USBHelperLauncher
                     string rsaPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Microsoft", "Crypto", "RSA", userSID);
                     string keyContainer = Directory.GetFiles(rsaPath).Where(n => Path.GetFileName(n).ToLower().StartsWith(hashString)).FirstOrDefault();
 
-                    if (keyContainer != default(string))
+                    if (keyContainer != null)
                     {
                         File.Delete(keyContainer);
                         logger.WriteLine(string.Format("Removed broken key container (Name: \"{0}\", Hash: {1}).", keyContainerName, hashString));
