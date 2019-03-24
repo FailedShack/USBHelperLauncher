@@ -1,30 +1,30 @@
 ﻿using Fiddler;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Security.Principal;
+using System.ServiceModel;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
+using USBHelperInjector.Contracts;
+using USBHelperLauncher.Configuration;
 using USBHelperLauncher.Emulator;
 using USBHelperLauncher.Utils;
-using System.Text.RegularExpressions;
-using System.Linq;
-using USBHelperLauncher.Configuration;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using System.ServiceModel;
-using USBHelperInjector.Contracts;
-using System.Security.Principal;
 
 namespace USBHelperLauncher
 {
@@ -148,7 +148,7 @@ namespace USBHelperLauncher
                 Environment.Exit(0);
             }
             helperVersion = File.ReadAllLines("ver")[0];
-            int revision = Int32.Parse(helperVersion.Substring(helperVersion.LastIndexOf('.') + 1));
+            int revision = int.Parse(helperVersion.Substring(helperVersion.LastIndexOf('.') + 1));
             if (helperVersion.StartsWith("0.6.1"))
             {
                 // Workaround to allow it to launch
@@ -323,11 +323,13 @@ namespace USBHelperLauncher
             trayMenu.MenuItems.Add("Report Issue", OnDebugMessage);
             trayMenu.MenuItems.Add(dlEmulator);
             trayMenu.MenuItems.Add(advanced);
-            trayIcon = new NotifyIcon();
-            trayIcon.Text = "Wii U USB Helper Launcher";
-            trayIcon.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
-            trayIcon.ContextMenu = trayMenu;
-            trayIcon.Visible = true;
+            trayIcon = new NotifyIcon
+            {
+                Text = "Wii U USB Helper Launcher",
+                Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath),
+                ContextMenu = trayMenu,
+                Visible = true
+            };
             backgroundThread = new Thread(() =>
             {
                 Thread.CurrentThread.IsBackground = true;

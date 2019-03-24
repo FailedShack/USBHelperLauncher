@@ -1,18 +1,11 @@
 ﻿using Fiddler;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Web;
 using System.Windows.Forms;
 using USBHelperLauncher.Configuration;
 using USBHelperLauncher.Emulator;
@@ -37,9 +30,9 @@ namespace USBHelperLauncher.Net
         };
 
         private bool shownCloudWarning;
-        private ushort port;
-        private TextWriter log;
-        private Buffer<Session> sessions;
+        private readonly ushort port;
+        private readonly TextWriter log;
+        private readonly Buffer<Session> sessions;
 
         public Proxy(ushort port)
         {
@@ -127,8 +120,7 @@ namespace USBHelperLauncher.Net
                 if (path.StartsWith("/res/emulators/") && !File.Exists(Path.Combine("\\emulators", fileName)))
                 {
                     string noExt = Path.GetFileNameWithoutExtension(fileName);
-                    EmulatorConfiguration.Emulator emulator;
-                    if (Enum.TryParse(noExt, out emulator))
+                    if (Enum.TryParse(noExt, out EmulatorConfiguration.Emulator emulator))
                     {
                         new Thread(() =>
                         {
@@ -250,6 +242,7 @@ namespace USBHelperLauncher.Net
         public void Dispose()
         {
             FiddlerApplication.Shutdown();
+            log.Dispose();
         }
     }
 }

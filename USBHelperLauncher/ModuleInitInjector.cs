@@ -1,17 +1,13 @@
 ﻿using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.Writer;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace USBHelperLauncher
 {
     class ModuleInitInjector
     {
-        private string path;
+        private readonly string path;
 
         public ModuleInitInjector(string path)
         {

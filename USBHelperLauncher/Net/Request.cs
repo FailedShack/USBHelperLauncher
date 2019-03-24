@@ -1,17 +1,13 @@
 ﻿using Fiddler;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace USBHelperLauncher.Net
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     class Request : Attribute
     {
-        private string mask;
+        private readonly string mask;
 
         public Request(string mask)
         {

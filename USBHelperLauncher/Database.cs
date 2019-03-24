@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace USBHelperLauncher
 {
@@ -46,8 +41,8 @@ namespace USBHelperLauncher
 
         public class AesData
         {
-            private byte[] key;
-            private byte[] iv;
+            private readonly byte[] key;
+            private readonly byte[] iv;
 
             public AesData(byte[] key, byte[] iv)
             {
@@ -66,7 +61,7 @@ namespace USBHelperLauncher
             }
         }
 
-        private string[] files = { "customs.json", "dlcs.json", "dlcs3ds.json", "games.json", "games3ds.json", "gamesWii.json", "injections.json", "updates.json", "updates3ds.json" };
+        private readonly string[] files = { "customs.json", "dlcs.json", "dlcs3ds.json", "games.json", "games3ds.json", "gamesWii.json", "injections.json", "updates.json", "updates3ds.json" };
         private byte[] zip;
 
         public void LoadFromDir(string path)

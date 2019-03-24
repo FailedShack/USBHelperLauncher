@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -16,7 +15,7 @@ namespace USBHelperLauncher
 {
     class DebugMessage
     {
-        private string log, fiddlerLog;
+        private readonly string log, fiddlerLog;
 
         public DebugMessage(string log, string fiddlerLog)
         {
@@ -89,8 +88,7 @@ namespace USBHelperLauncher
                 {
                     return e;
                 }
-                Guid guid;
-                if (Guid.TryParse(respString, out guid))
+                if (Guid.TryParse(respString, out Guid guid))
                 {
                     if (Program.GetSessionGuid() == guid)
                     {

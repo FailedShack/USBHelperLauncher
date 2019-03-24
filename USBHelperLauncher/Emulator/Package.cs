@@ -14,7 +14,8 @@ namespace USBHelperLauncher.Emulator
         private const string Format = "{0} {1}";
 
         private Uri uri;
-        private string name, fileName, version, installPath;
+        private string fileName;
+        private readonly string name, version, installPath;
         private Dictionary<string, string> metadata = new Dictionary<string, string>();
         protected FileInfo packageFile;
 
@@ -51,8 +52,7 @@ namespace USBHelperLauncher.Emulator
             HttpClient client = new HttpClient();
             var req = new HttpRequestMessage(HttpMethod.Head, uri);
             var resp = await client.SendAsync(req);
-            IEnumerable<string> headerValues;
-            if (resp.Content.Headers.TryGetValues("Content-Disposition", out headerValues))
+            if (resp.Content.Headers.TryGetValues("Content-Disposition", out IEnumerable<string> headerValues))
             {
                 var headerValue = headerValues.FirstOrDefault();
                 if (headerValue != null)

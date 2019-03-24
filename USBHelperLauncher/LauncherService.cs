@@ -1,7 +1,5 @@
 ﻿using Fiddler;
-using System.Collections.Generic;
 using System.ServiceModel;
-using System.Threading;
 using System.Threading.Tasks;
 using USBHelperInjector.Contracts;
 using USBHelperLauncher.Configuration;

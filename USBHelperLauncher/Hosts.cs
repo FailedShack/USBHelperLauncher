@@ -3,10 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace USBHelperLauncher
 {
@@ -47,8 +44,7 @@ namespace USBHelperLauncher
         public static Hosts Load(string path)
         {
             var hosts = new Hosts();
-            using (var file = File.OpenText(path))
-            using (var reader = new JsonTextReader(file))
+            using (var reader = new JsonTextReader(File.OpenText(path)))
             {
                 var json = JToken.ReadFrom(reader);
                 foreach (var entry in json.Children<JProperty>())
@@ -59,8 +55,7 @@ namespace USBHelperLauncher
                         throw new ArgumentException("Host does contain a valid value: " + host);
                     }
                     string ipStr = (string) entry.Value;
-                    IPAddress ip;
-                    if (!IPAddress.TryParse(ipStr, out ip))
+                    if (!IPAddress.TryParse(ipStr, out IPAddress ip))
                     {
                         throw new ArgumentException("IP address could not be parsed: " + ipStr);
                     }

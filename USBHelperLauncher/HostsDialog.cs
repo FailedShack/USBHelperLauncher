@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace USBHelperLauncher
@@ -165,7 +162,7 @@ namespace USBHelperLauncher
 
         private static bool ValidateIPv4(string ipString)
         {
-            if (String.IsNullOrWhiteSpace(ipString))
+            if (string.IsNullOrWhiteSpace(ipString))
             {
                 return false;
             }
@@ -176,9 +173,7 @@ namespace USBHelperLauncher
                 return false;
             }
 
-            byte tempForParsing;
-
-            return splitValues.All(r => byte.TryParse(r, out tempForParsing));
+            return splitValues.All(r => byte.TryParse(r, out _));
         }
 
         private void HostsDialog_Load(object sender, EventArgs e)

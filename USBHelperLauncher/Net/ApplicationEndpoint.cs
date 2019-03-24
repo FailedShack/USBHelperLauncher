@@ -1,13 +1,9 @@
 ﻿using Fiddler;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 
 namespace USBHelperLauncher.Net
 {
@@ -43,8 +39,7 @@ namespace USBHelperLauncher.Net
             using (ZipArchive zip = new ZipArchive(stream, ZipArchiveMode.Create))
             {
                 var entry = zip.CreateEntry("content");
-                using (var entryStream = entry.Open())
-                using (var streamWriter = new StreamWriter(entryStream))
+                using (var streamWriter = new StreamWriter(entry.Open()))
                 {
                     streamWriter.Write(content);
                 }

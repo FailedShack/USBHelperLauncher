@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace USBHelperLauncher.Utils
 {
@@ -45,8 +42,7 @@ namespace USBHelperLauncher.Utils
                 int length = GetWindowTextLength(hWnd);
                 if (length == 0) return true;
 
-                uint windowPid;
-                GetWindowThreadProcessId(hWnd, out windowPid);
+                GetWindowThreadProcessId(hWnd, out uint windowPid);
                 if (windowPid != processId) return true;
 
                 count++;

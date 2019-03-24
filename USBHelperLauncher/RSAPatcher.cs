@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace USBHelperLauncher
 {
@@ -13,7 +11,7 @@ namespace USBHelperLauncher
         // We're looking for '<RSAKeyValue>'
         private static readonly byte[] pattern = new byte[] { 60, 82, 83, 65, 75, 101, 121, 86, 97, 108, 117, 101, 62 };
 
-        private string path;
+        private readonly string path;
         private long? position;
 
         public RSAPatcher(string path)

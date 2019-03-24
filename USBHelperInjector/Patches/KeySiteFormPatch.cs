@@ -1,17 +1,11 @@
 ﻿using Harmony;
 using Harmony.ILCopying;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.ServiceModel;
-using System.Text;
-using System.Threading.Tasks;
-using USBHelperInjector.Contracts;
 
 namespace USBHelperInjector.Patches
 {
