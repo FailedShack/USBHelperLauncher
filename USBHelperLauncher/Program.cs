@@ -200,34 +200,33 @@ namespace USBHelperLauncher
             string keyContainerName = FiddlerApplication.Prefs.GetStringPref("fiddler.certmaker.bc.KeyContainerName", "FiddlerBCKey");
             try
             {
-                CspParameters cspParams = new CspParameters();
-                cspParams.KeyContainerName = keyContainerName;
+                CspParameters cspParams = new CspParameters { KeyContainerName = keyContainerName };
                 var _ = new CspKeyContainerInfo(cspParams).UniqueKeyContainerName; // this will throw an exception if the container cannot be accessed
             }
             catch (CryptographicException)
             {
+                byte[] hash;
                 using (MD5 md5 = MD5.Create())
                 {
-                    byte[] hash = md5.ComputeHash(Encoding.ASCII.GetBytes(keyContainerName.ToLower() + "\0"));
-                    var reader = new BinaryReader(new MemoryStream(hash));
-                    var sb = new StringBuilder();
-                    for (int i = 0; i < 4; i++)
-                    {
-                        sb.AppendFormat("{0:x8}", reader.ReadInt32());
-                    }
-                    string hashString = sb.ToString();
-
-                    string userSID = WindowsIdentity.GetCurrent().User.ToString();
-                    string rsaPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Microsoft", "Crypto", "RSA", userSID);
-                    string keyContainer = Directory.GetFiles(rsaPath).Where(n => Path.GetFileName(n).ToLower().StartsWith(hashString)).FirstOrDefault();
-
-                    if (keyContainer != null)
-                    {
-                        File.Delete(keyContainer);
-                        logger.WriteLine(string.Format("Removed broken key container (Name: \"{0}\", Hash: {1}).", keyContainerName, hashString));
-                    }
+                    hash = md5.ComputeHash(Encoding.ASCII.GetBytes(keyContainerName.ToLower() + "\0"));
                 }
-                
+                var reader = new BinaryReader(new MemoryStream(hash));
+                var sb = new StringBuilder();
+                for (int i = 0; i < 4; i++)
+                {
+                    sb.AppendFormat("{0:x8}", reader.ReadInt32());
+                }
+
+                string hashString = sb.ToString();
+                string userSID = WindowsIdentity.GetCurrent().User.ToString();
+                string rsaPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Microsoft", "Crypto", "RSA", userSID);
+                string keyContainer = Directory.GetFiles(rsaPath).Where(n => Path.GetFileName(n).ToLower().StartsWith(hashString)).FirstOrDefault();
+
+                if (keyContainer != null)
+                {
+                    File.Delete(keyContainer);
+                    logger.WriteLine(string.Format("Removed broken key container (Name: \"{0}\", Hash: {1}).", keyContainerName, hashString));
+                }
             }
 
             if (!CertMaker.rootCertExists() && !CertMaker.createRootCert())
