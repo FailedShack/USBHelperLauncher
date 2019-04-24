@@ -61,6 +61,7 @@
     <Compile Include="Patches\ForceKeySiteFormPatch.cs" />
     <Compile Include="Patches\KeySiteFormHideObsoletePatch.cs" />
     <Compile Include="Patches\KeySiteFormValidationPatch.cs" />
+    <Compile Include="Patches\KeySite3DSSettingsPatch.cs" />
     <Compile Include="Patches\MessageBoxPatch.cs" />
     <Compile Include="Patches\SearchPatch.cs" />
     <Compile Include="Patches\ServicePointPatch.cs" />
