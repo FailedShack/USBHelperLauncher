@@ -31,7 +31,7 @@ namespace USBHelperLauncher
             channel.SetProxy(Program.GetProxy().GetWebProxy().Address.ToString());
             channel.SetDownloaderMaxRetries(Settings.MaxRetries);
             channel.SetDownloaderRetryDelay(Settings.DelayBetweenRetries);
-            channel.ApplyPatches(Settings.DisableOptionalPatches);
+            channel.SetDisableOptionalPatches(Settings.DisableOptionalPatches);
             return Task.FromResult(0);
         }
     }

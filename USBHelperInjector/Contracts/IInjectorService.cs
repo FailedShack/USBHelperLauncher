@@ -21,9 +21,9 @@ namespace USBHelperInjector.Contracts
         void SetDownloaderRetryDelay(int delay);
 
         [OperationContract]
-        void ApplyPatches(bool disableOptional);
+        void SetProxy(string address);
 
         [OperationContract]
-        void SetProxy(string address);
+        void SetDisableOptionalPatches(bool disableOptional);
     }
 }

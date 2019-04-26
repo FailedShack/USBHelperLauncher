@@ -29,11 +29,8 @@ namespace USBHelperInjector
             host.AddServiceEndpoint(typeof(IInjectorService), new NetNamedPipeBinding(), "");
             host.Open();
 
-            Task.Run(async () => await LauncherService.SendInjectorSettings());
-        }
+            LauncherService.SendInjectorSettings();
 
-        public void ApplyPatches(bool disableOptional)
-        {
             var harmony = HarmonyInstance.Create("me.failedshack.usbhelperinjector");
             var assembly = Assembly.GetExecutingAssembly();
             assembly.GetTypes().Do(type =>
@@ -43,7 +40,7 @@ namespace USBHelperInjector
                 {
                     var info = HarmonyMethod.Merge(parentMethodInfos);
                     var processor = new PatchProcessor(harmony, type, info);
-                    if (!(disableOptional && Optional.IsOptional(type)))
+                    if (!(Overrides.DisableOptionalPatches && Optional.IsOptional(type)))
                     {
                         processor.Patch();
                     }
@@ -87,6 +84,11 @@ namespace USBHelperInjector
         public void SetProxy(string address)
         {
             Overrides.Proxy = new WebProxy(address);
+        }
+
+        public void SetDisableOptionalPatches(bool disableOptional)
+        {
+            Overrides.DisableOptionalPatches = disableOptional;
         }
     }
 }

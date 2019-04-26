@@ -31,30 +31,42 @@ namespace USBHelperLauncher.Net
             byte[] bytes = Convert.FromBase64String(data.Get("url"));
             string url = Encoding.UTF8.GetString(bytes);
 
-            string content;
-            using (WebClient client = new WebClient())
+            try
             {
-                client.Proxy = Program.GetProxy().GetWebProxy();
-                byte[] responseBytes = client.DownloadData(url);
-                var contentType = new ContentType(client.ResponseHeaders["Content-Type"]);
-                content = Encoding.GetEncoding(contentType.CharSet ?? "UTF-8").GetString(responseBytes);
-            }
-
-            MemoryStream stream = new MemoryStream();
-            using (ZipArchive zip = new ZipArchive(stream, ZipArchiveMode.Create))
-            {
-                var entry = zip.CreateEntry("content");
-                using (var streamWriter = new StreamWriter(entry.Open()))
+                string content;
+                using (WebClient client = new WebClient())
                 {
-                    streamWriter.Write(content);
+                    client.Proxy = Program.GetProxy().GetWebProxy();
+                    byte[] responseBytes = client.DownloadData(url);
+                    var contentType = new ContentType(client.ResponseHeaders["Content-Type"]);
+                    content = Encoding.GetEncoding(contentType.CharSet ?? "UTF-8").GetString(responseBytes);
                 }
-            }
 
-            byte[] dataBytes = stream.ToArray();
-            oS.utilCreateResponseAndBypassServer();
-            oS.oResponse["Content-Length"] = dataBytes.Length.ToString();
-            oS.responseBodyBytes = dataBytes;
-            Proxy.LogRequest(oS, this, "Created zip from " + url);
+                MemoryStream stream = new MemoryStream();
+                using (ZipArchive zip = new ZipArchive(stream, ZipArchiveMode.Create))
+                {
+                    var entry = zip.CreateEntry("content");
+                    using (var streamWriter = new StreamWriter(entry.Open()))
+                    {
+                        streamWriter.Write(content);
+                    }
+                }
+
+                byte[] dataBytes = stream.ToArray();
+                oS.utilCreateResponseAndBypassServer();
+                oS.oResponse["Content-Length"] = dataBytes.Length.ToString();
+                oS.responseBodyBytes = dataBytes;
+                Proxy.LogRequest(oS, this, "Created zip from " + url);
+            }
+            catch (WebException webEx)
+            {
+                Proxy.LogRequest(oS, this, "Unable to create zip for " + url + ": " + webEx);
+
+                var response = (HttpWebResponse)webEx.Response;
+                oS.utilCreateResponseAndBypassServer();
+                oS.oResponse.headers.SetStatus((int)response.StatusCode, response.StatusDescription);
+                oS.utilSetResponseBody("");
+            }
         }
 
         [Request("/requestZipHash.php")]
