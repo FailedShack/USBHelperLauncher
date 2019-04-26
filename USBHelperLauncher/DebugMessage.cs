@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -41,6 +42,7 @@ namespace USBHelperLauncher
             sb.AppendLine("Operating System: " + info.OSFullName);
             sb.AppendLine("Platform: " + info.OSPlatform);
             sb.AppendLine("System Language: " + info.InstalledUICulture);
+            sb.AppendLine("Antivirus Programs: " + GetAVList());
             sb.AppendLine("Total Memory: " + info.TotalPhysicalMemory);
             sb.AppendLine("Available Memory: " + info.AvailablePhysicalMemory);
             AppendDictionary(sb, "Hosts", hosts.GetHosts().ToDictionary(x => x, x => hosts.Get(x).ToString()));
@@ -135,6 +137,32 @@ namespace USBHelperLauncher
                 {
                     return "Version 4.5 or later is not detected.";
                 }
+            }
+        }
+
+        private static string GetAVList()
+        {
+            try
+            {
+                ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"root\SecurityCenter2", "SELECT * FROM AntiVirusProduct");
+                ManagementObjectCollection collection = searcher.Get();
+                var names = new List<string>();
+                foreach (ManagementObject obj in collection)
+                {
+                    var name = obj["displayName"].ToString();
+                    var stateInt = (uint) obj["productState"];
+                    if ((stateInt & 0x1000) == 0)
+                    {
+                        name += " [disabled]";
+                    }
+
+                    names.Add(name);
+                }
+                return string.Join(", ", names);
+            }
+            catch
+            {
+                return "<error>";
             }
         }
     }
