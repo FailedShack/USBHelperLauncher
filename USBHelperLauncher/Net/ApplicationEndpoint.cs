@@ -62,10 +62,17 @@ namespace USBHelperLauncher.Net
             {
                 Proxy.LogRequest(oS, this, "Unable to create zip for " + url + ": " + webEx);
 
-                var response = (HttpWebResponse)webEx.Response;
                 oS.utilCreateResponseAndBypassServer();
-                oS.oResponse.headers.SetStatus((int)response.StatusCode, response.StatusDescription);
                 oS.utilSetResponseBody("");
+                if (webEx.Response is HttpWebResponse)
+                {
+                    var response = (HttpWebResponse)webEx.Response;
+                    oS.oResponse.headers.SetStatus((int)response.StatusCode, response.StatusDescription);
+                }
+                else
+                {
+                    oS.oResponse.headers.SetStatus(500, "Internal Server Error");
+                }
             }
         }
 
