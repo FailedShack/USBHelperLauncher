@@ -32,6 +32,8 @@ namespace USBHelperLauncher
             channel.SetDownloaderMaxRetries(Settings.MaxRetries);
             channel.SetDownloaderRetryDelay(Settings.DelayBetweenRetries);
             channel.SetDisableOptionalPatches(Settings.DisableOptionalPatches);
+            channel.SetHelperVersion(Program.GetHelperVersion());
+            channel.SetPortable(Settings.Portable);
             return Task.FromResult(0);
         }
     }

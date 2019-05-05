@@ -25,5 +25,11 @@ namespace USBHelperInjector.Contracts
 
         [OperationContract]
         void SetDisableOptionalPatches(bool disableOptional);
+
+        [OperationContract]
+        void SetHelperVersion(string helperVersion);
+
+        [OperationContract]
+        void SetPortable(bool portable);
     }
 }

@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using USBHelperInjector.Patches.Attributes;
 
 namespace USBHelperInjector.Patches
 {
