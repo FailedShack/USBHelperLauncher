@@ -1,6 +1,7 @@
 ﻿using Harmony;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Reflection.Emit;

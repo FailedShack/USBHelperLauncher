@@ -3,6 +3,7 @@ using Harmony.ILCopying;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -74,7 +75,9 @@ namespace USBHelperInjector.Patches
                     new CodeInstruction(OpCodes.Ldloc_S, localException)
                     {
                         labels = new List<Label> { labelContinueArgs }
-                    }
+                    },
+                    new CodeInstruction(OpCodes.Dup),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(KeySiteErrorMessagePatch), "FixWebExceptionMessage"))
                 });
 
                 // Exit if no backup is available
@@ -102,6 +105,20 @@ namespace USBHelperInjector.Patches
             codes.InsertRange(catchBlockStart + 1, catchBlockInstructions);
 
             return codes;
+        }
+
+        static void FixWebExceptionMessage(Exception exception)
+        {
+            if (exception is WebException webEx)
+            {
+                if (webEx.Status == WebExceptionStatus.ProtocolError)
+                {
+                    // Use the description from the response instead of the localized description
+                    var response = (HttpWebResponse)webEx.Response;
+                    var newMessage = string.Format("({0}) {1}", (int)response.StatusCode, response.StatusDescription);
+                    AccessTools.Field(typeof(Exception), "_message").SetValue(webEx, newMessage);
+                }
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Fiddler;
 using System.ServiceModel;
-using System.Threading.Tasks;
 using USBHelperInjector.Contracts;
 using USBHelperLauncher.Configuration;
 
@@ -14,7 +13,7 @@ namespace USBHelperLauncher
             Settings.Save();
         }
 
-        public Task SendInjectorSettings()
+        public void SendInjectorSettings()
         {
             Program.GetLogger().WriteLine("Sending information to injector...");
             var factory = new ChannelFactory<IInjectorService>(new NetNamedPipeBinding(), "net.pipe://localhost/InjectorService");
@@ -32,7 +31,6 @@ namespace USBHelperLauncher
             channel.SetDownloaderMaxRetries(Settings.MaxRetries);
             channel.SetDownloaderRetryDelay(Settings.DelayBetweenRetries);
             channel.SetDisableOptionalPatches(Settings.DisableOptionalPatches);
-            return Task.FromResult(0);
         }
     }
 }

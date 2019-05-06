@@ -6,7 +6,6 @@ using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
-using System.Threading.Tasks;
 using USBHelperInjector.Contracts;
 using USBHelperInjector.Patches;
 using USBHelperInjector.Properties;

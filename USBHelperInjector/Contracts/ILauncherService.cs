@@ -10,6 +10,6 @@ namespace USBHelperInjector.Contracts
         void SetKeySite(string site, string url);
 
         [OperationContract]
-        Task SendInjectorSettings();
+        void SendInjectorSettings();
     }
 }

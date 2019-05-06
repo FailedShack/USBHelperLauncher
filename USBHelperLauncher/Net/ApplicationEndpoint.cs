@@ -31,49 +31,50 @@ namespace USBHelperLauncher.Net
             byte[] bytes = Convert.FromBase64String(data.Get("url"));
             string url = Encoding.UTF8.GetString(bytes);
 
-            try
+            string content;
+            using (WebClient client = new WebClient())
             {
-                string content;
-                using (WebClient client = new WebClient())
+                client.Proxy = Program.GetProxy().GetWebProxy();
+                byte[] responseBytes;
+                try
                 {
-                    client.Proxy = Program.GetProxy().GetWebProxy();
-                    byte[] responseBytes = client.DownloadData(url);
-                    var contentType = new ContentType(client.ResponseHeaders["Content-Type"]);
-                    content = Encoding.GetEncoding(contentType.CharSet ?? "UTF-8").GetString(responseBytes);
+                    responseBytes = client.DownloadData(url);
                 }
-
-                MemoryStream stream = new MemoryStream();
-                using (ZipArchive zip = new ZipArchive(stream, ZipArchiveMode.Create))
+                catch (WebException webEx)
                 {
-                    var entry = zip.CreateEntry("content");
-                    using (var streamWriter = new StreamWriter(entry.Open()))
+                    Proxy.LogRequest(oS, this, "Unable to download data from " + url + ": " + webEx);
+                    oS.utilCreateResponseAndBypassServer();
+                    if (webEx.Status == WebExceptionStatus.ProtocolError)
                     {
-                        streamWriter.Write(content);
+                        var response = (HttpWebResponse)webEx.Response;
+                        oS.oResponse.headers.SetStatus((int)response.StatusCode, response.StatusDescription);
                     }
+                    else
+                    {
+                        oS.oResponse.headers.SetStatus(500, "Internal Server Error: " + webEx.Status);
+                    }
+                    return;
                 }
 
-                byte[] dataBytes = stream.ToArray();
-                oS.utilCreateResponseAndBypassServer();
-                oS.oResponse["Content-Length"] = dataBytes.Length.ToString();
-                oS.responseBodyBytes = dataBytes;
-                Proxy.LogRequest(oS, this, "Created zip from " + url);
+                var contentType = new ContentType(client.ResponseHeaders["Content-Type"]);
+                content = Encoding.GetEncoding(contentType.CharSet ?? "UTF-8").GetString(responseBytes);
             }
-            catch (WebException webEx)
+
+            MemoryStream stream = new MemoryStream();
+            using (ZipArchive zip = new ZipArchive(stream, ZipArchiveMode.Create))
             {
-                Proxy.LogRequest(oS, this, "Unable to create zip for " + url + ": " + webEx);
-
-                oS.utilCreateResponseAndBypassServer();
-                oS.utilSetResponseBody("");
-                if (webEx.Response is HttpWebResponse)
+                var entry = zip.CreateEntry("content");
+                using (var streamWriter = new StreamWriter(entry.Open()))
                 {
-                    var response = (HttpWebResponse)webEx.Response;
-                    oS.oResponse.headers.SetStatus((int)response.StatusCode, response.StatusDescription);
-                }
-                else
-                {
-                    oS.oResponse.headers.SetStatus(500, "Internal Server Error");
+                    streamWriter.Write(content);
                 }
             }
+
+            byte[] dataBytes = stream.ToArray();
+            oS.utilCreateResponseAndBypassServer();
+            oS.oResponse["Content-Length"] = dataBytes.Length.ToString();
+            oS.responseBodyBytes = dataBytes;
+            Proxy.LogRequest(oS, this, "Created zip from " + url);
         }
 
         [Request("/requestZipHash.php")]
