@@ -51,33 +51,16 @@ namespace USBHelperInjector.Patches
                 var labelLoadWiiU = generator.DefineLabel();
                 var labelContinueArgs = generator.DefineLabel();
 
-                codes[index].operand = AccessTools.Method(typeof(string), "Format", new[] { typeof(string), typeof(object), typeof(object) });
+                codes.RemoveAt(index);
                 codes.InsertRange(index, new List<CodeInstruction>
                 {
-                    // Override format string
+                    // Override error message
                     new CodeInstruction(OpCodes.Pop),
                     new CodeInstruction(OpCodes.Pop),
-                    new CodeInstruction(OpCodes.Ldstr, "An error occurred while trying to retrieve the title keys for {0}:\n\n{1}\n\n" + message),
-
-                    // Use "WiiU" or "3DS" as the first format argument
+                    new CodeInstruction(OpCodes.Ldloc_S, localException),
                     new CodeInstruction(OpCodes.Ldarg_1),
-                    new CodeInstruction(OpCodes.Ldstr, "wiiu"),
-                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(string), "Contains")),
-                    new CodeInstruction(OpCodes.Brtrue_S, labelLoadWiiU),
-                    new CodeInstruction(OpCodes.Ldstr, "3DS"),
-                    new CodeInstruction(OpCodes.Br_S, labelContinueArgs),
-                    new CodeInstruction(OpCodes.Ldstr, "WiiU")
-                    {
-                        labels = new List<Label> { labelLoadWiiU }
-                    },
-
-                    // Use the exception as the second format argument
-                    new CodeInstruction(OpCodes.Ldloc_S, localException)
-                    {
-                        labels = new List<Label> { labelContinueArgs }
-                    },
-                    new CodeInstruction(OpCodes.Dup),
-                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(KeySiteErrorMessagePatch), "FixWebExceptionMessage"))
+                    new CodeInstruction(OpCodes.Ldstr, message),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(KeySiteErrorMessagePatch), "FormatExceptionMessage"))
                 });
 
                 // Exit if no backup is available
@@ -107,18 +90,21 @@ namespace USBHelperInjector.Patches
             return codes;
         }
 
-        static void FixWebExceptionMessage(Exception exception)
+        static string FormatExceptionMessage(Exception exception, string url, string postfix)
         {
-            if (exception is WebException webEx)
+            string exceptionMessage;
+            if (exception is WebException webEx && webEx.Status == WebExceptionStatus.ProtocolError)
             {
-                if (webEx.Status == WebExceptionStatus.ProtocolError)
-                {
-                    // Use the description from the response instead of the localized description
-                    var response = (HttpWebResponse)webEx.Response;
-                    var newMessage = string.Format("({0}) {1}", (int)response.StatusCode, response.StatusDescription);
-                    AccessTools.Field(typeof(Exception), "_message").SetValue(webEx, newMessage);
-                }
+                var response = (HttpWebResponse)webEx.Response;
+                exceptionMessage = KeySiteFormValidationPatch.GetCustomHttpErrorMessage((int)response.StatusCode, response.StatusDescription);
             }
+            else
+            {
+                exceptionMessage = exception.ToString();
+            }
+
+            var urlType = url.Contains("wiiu") ? "WiiU" : "3DS";
+            return string.Format("An error occurred while trying to retrieve the title keys for {0}:\n\n{1}\n\n{2}", urlType, exceptionMessage, postfix);
         }
     }
 }

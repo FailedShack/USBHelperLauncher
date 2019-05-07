@@ -33,24 +33,35 @@ namespace USBHelperInjector.Patches
                 var baseUri = new UriBuilder(textBoxWiiU.Text).Uri;
                 var uri = new Uri(baseUri, "json");
                 var resp = client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead).Result;
-                resp.EnsureSuccessStatusCode();
+                if (resp.IsSuccessStatusCode)
+                {
+                    // Take the title key site as valid if no exception occurred.
+                    InjectorService.LauncherService.SetKeySite(sites[0], textBoxWiiU.Text);
+                    textBoxWiiU.Text = string.Format("{0}.titlekeys", sites[0]);
 
-                // Take the title key site as valid if no exception occurred.
-                InjectorService.LauncherService.SetKeySite(sites[0], textBoxWiiU.Text);
-                textBoxWiiU.Text = string.Format("{0}.titlekeys", sites[0]);
+                    // Always give Wii U USB Helper a valid 3DS titlekey url if the WiiU url is valid
+                    var textBox3DS = (Control)textBoxes[1].GetValue(__instance);
+                    textBox3DS.Text = string.Format("{0}.titlekeys", sites[1]);
 
-                // Always give Wii U USB Helper a valid 3DS titlekey url if the WiiU url is valid
-                var textBox3DS = (Control)textBoxes[1].GetValue(__instance);
-                textBox3DS.Text = string.Format("{0}.titlekeys", sites[1]);
-
-                errorMessage = null;
+                    errorMessage = null;
+                }
+                else
+                {
+                    // Tell the user the title key site is invalid.
+                    textBoxWiiU.Text = string.Empty;
+                    errorMessage = GetCustomHttpErrorMessage((int)resp.StatusCode, resp.ReasonPhrase);
+                }
             }
             catch (Exception e)
             {
                 // Tell the user the title key site is invalid.
                 textBoxWiiU.Text = string.Empty;
+                errorMessage = e.ToString();
+            }
 
-                errorMessage = string.Format("An error occurred while trying to reach {0}:\n\n{1}", wiiUUrl, e.ToString());
+            if (errorMessage != null)
+            {
+                errorMessage = string.Format("An error occurred while trying to reach {0}:\n\n{1}", wiiUUrl, errorMessage);
             }
 
             Overrides.ForceKeySiteForm = false;
@@ -76,6 +87,11 @@ namespace USBHelperInjector.Patches
             codes.InsertRange(showIndex, toInsert);
 
             return codes;
+        }
+
+        internal static string GetCustomHttpErrorMessage(int statusCode, string statusDescription)
+        {
+            return string.Format("Remote server replied with status: ({0}) {1}", statusCode, statusDescription);
         }
     }
 }
