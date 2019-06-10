@@ -34,6 +34,9 @@ namespace USBHelperLauncher.Net
         private readonly TextWriter log;
         private readonly Buffer<Session> sessions;
 
+        public string CustomProxyAddress;
+        public string CustomProxyAuthorization;
+
         public Proxy(ushort port)
         {
             this.port = port;
@@ -61,6 +64,17 @@ namespace USBHelperLauncher.Net
 
         private void FiddlerApplication_BeforeRequest(Session oS)
         {
+            if (oS.RequestHeaders.Exists("X-FiddlerCustomProxy"))
+            {
+                oS["x-overrideGateway"] = oS.RequestHeaders["X-FiddlerCustomProxy"];
+                oS.RequestHeaders.Remove("X-FiddlerCustomProxy");
+            }
+            else
+            {
+                oS["x-overrideGateway"] = CustomProxyAddress;
+                oS.RequestHeaders["Proxy-Authorization"] = CustomProxyAuthorization;
+            }
+
             if (oS.HTTPMethodIs("CONNECT"))
             {
                 if (oS.hostname.EndsWith("wiiuusbhelper.com"))

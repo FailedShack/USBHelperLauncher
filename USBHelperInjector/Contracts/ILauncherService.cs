@@ -10,6 +10,9 @@ namespace USBHelperInjector.Contracts
         void SetKeySite(string site, string url);
 
         [OperationContract]
+        string SetCustomProxy(string address, string username, string password);
+
+        [OperationContract]
         void SendInjectorSettings();
     }
 }
