@@ -18,22 +18,21 @@ namespace USBHelperInjector.Patches
 
         static void Postfix(object __instance)
         {
-            Control wiiUTextBox = (Control) ReflectionHelper.FrmAskTicket.TextBoxes[0].GetValue(__instance);
-            Type radButtonType = wiiUTextBox.GetType().Assembly.GetType("Telerik.WinControls.UI.RadButton");
-            Type radLabelType = wiiUTextBox.GetType().Assembly.GetType("Telerik.WinControls.UI.RadLabel");
+            var textBoxWiiU = (Control)ReflectionHelper.FrmAskTicket.TextBoxes[0].GetValue(__instance);
+            var siblings = textBoxWiiU.Parent.Controls.Cast<Control>();
+            var assembly = textBoxWiiU.GetType().Assembly;
+            var radButtonType = assembly.GetType("Telerik.WinControls.UI.RadButton");
+            var radLabelType = assembly.GetType("Telerik.WinControls.UI.RadLabel");
 
-            Control groupBox = wiiUTextBox.Parent;
-            foreach (Control c in groupBox.Controls)
+            foreach (var c in siblings)
             {
-                if (c.Location.Y > wiiUTextBox.Location.Y && c.GetType() != radButtonType)
+                if (c.Location.Y > textBoxWiiU.Location.Y && c.GetType() != radButtonType)
                 {
                     c.Visible = false;
                 }
             }
 
-            Control largestLabel = groupBox.Controls.OfType<Control>()
-                .Where(c => c.GetType() == radLabelType)
-                .OrderBy(c => c.Text.Length).Last();
+            var largestLabel = siblings.Where(c => c.GetType() == radLabelType).OrderBy(c => c.Text.Length).Last();
             if (largestLabel.Text.Length > 30) // make sure to modify the correct label, it may not exist on older versions
             {
                 largestLabel.Visible = false;

@@ -90,6 +90,7 @@ namespace USBHelperInjector.Patches
             return codes;
         }
 
+        // Called from the transpiler using reflection
         static string FormatExceptionMessage(Exception exception, string url, string postfix)
         {
             string exceptionMessage;
