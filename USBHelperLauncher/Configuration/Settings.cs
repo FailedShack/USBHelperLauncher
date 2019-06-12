@@ -29,7 +29,7 @@ namespace USBHelperLauncher.Configuration
         [Setting("Launcher")]
         public static Dictionary<string, string> EndpointFallbacks { get; set; } = new Dictionary<string, string>()
         {
-            { typeof(ContentEndpoint).Name, "https://cdn.0x100.xyz/wiiuusbhelper/cdn/" }
+            { typeof(ContentEndpoint).Name, "https://cdn.shiftinv.cc/wiiuusbhelper/cdn/" }
         };
 
         [Setting("Launcher")]

@@ -24,6 +24,7 @@ using System.Xml.Linq;
 using USBHelperInjector.Contracts;
 using USBHelperLauncher.Configuration;
 using USBHelperLauncher.Emulator;
+using USBHelperLauncher.Net;
 using USBHelperLauncher.Utils;
 
 namespace USBHelperLauncher
@@ -50,6 +51,7 @@ namespace USBHelperLauncher
         static void Main(string[] args)
         {
             Settings.Load();
+            MigrateSettings();
             Settings.Save();
             proxy = new Net.Proxy(8877);
             _handler += new EventHandler(Handler);
@@ -581,6 +583,17 @@ namespace USBHelperLauncher
             trayIcon.Dispose();
             logger.Dispose();
         }
+
+        private static void MigrateSettings()
+        {
+            // > 0.14d
+            if (Settings.EndpointFallbacks.TryGetValue(typeof(ContentEndpoint).Name, out var contentEndpointUrl)
+                && contentEndpointUrl == "https://cdn.0x100.xyz/wiiuusbhelper/cdn/")
+            {
+                Settings.EndpointFallbacks[typeof(ContentEndpoint).Name] = "https://cdn.shiftinv.cc/wiiuusbhelper/cdn/";
+            }
+        }
+
 
         public static string GenerateDonationKey()
         {
