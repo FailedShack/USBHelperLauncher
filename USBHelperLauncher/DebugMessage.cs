@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -30,6 +31,7 @@ namespace USBHelperLauncher
             Exception exception = await TryReachProxy();
             DateTime now = DateTime.UtcNow;
             var hosts = Program.Hosts;
+            var av = new Dictionary<string, bool>();
             sb.Append('-', 10).Append(" Wii U USB Helper Loader Debug Information ").Append('-', 10).AppendLine();
             sb.AppendLine("Debug Time: " + now + " (UTC)");
             sb.AppendLine("Session Length: " + (now - Program.GetSessionStart()).ToString(@"hh\:mm\:ss"));
@@ -43,6 +45,8 @@ namespace USBHelperLauncher
             sb.AppendLine("System Language: " + info.InstalledUICulture);
             sb.AppendLine("Total Memory: " + info.TotalPhysicalMemory);
             sb.AppendLine("Available Memory: " + info.AvailablePhysicalMemory);
+            TryCatch(() => GetAntiVirus(ref av), e => sb.AppendLine("Antivirus Software: Error (" + e.Message + ")"));
+            AppendDictionary(sb, "Antivirus Software", av.ToDictionary(x => x.Key, x => x.Value ? "Enabled" : "Disabled"));
             AppendDictionary(sb, "Hosts", hosts.GetHosts().ToDictionary(x => x, x => hosts.Get(x).ToString()));
             AppendDictionary(sb, "Endpoint Fallbacks", Settings.EndpointFallbacks);
             AppendDictionary(sb, "Key Sites", Settings.TitleKeys);
@@ -135,6 +139,30 @@ namespace USBHelperLauncher
                 {
                     return "Version 4.5 or later is not detected.";
                 }
+            }
+        }
+
+        private static void GetAntiVirus(ref Dictionary<string, bool> antivirus)
+        {
+            var searcher = new ManagementObjectSearcher(@"root\SecurityCenter2", "SELECT * FROM AntiVirusProduct");
+            var collection = searcher.Get();
+            foreach (ManagementObject obj in collection)
+            {
+                var name = obj["displayName"].ToString();
+                var state = (uint)obj["productState"];
+                antivirus.Add(name, (state & 0x1000) != 0);
+            }
+        }
+
+        private static void TryCatch(Action tryAction, Action<Exception> catchAction)
+        {
+            try
+            {
+                tryAction();
+            }
+            catch (Exception e)
+            {
+                catchAction(e);
             }
         }
     }
