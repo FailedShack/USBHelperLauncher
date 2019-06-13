@@ -31,6 +31,7 @@ namespace USBHelperLauncher
             Exception exception = await TryReachProxy();
             DateTime now = DateTime.UtcNow;
             var hosts = Program.Hosts;
+            var av = new Dictionary<string, bool>();
             sb.Append('-', 10).Append(" Wii U USB Helper Loader Debug Information ").Append('-', 10).AppendLine();
             sb.AppendLine("Debug Time: " + now + " (UTC)");
             sb.AppendLine("Session Length: " + (now - Program.GetSessionStart()).ToString(@"hh\:mm\:ss"));
@@ -42,9 +43,10 @@ namespace USBHelperLauncher
             sb.AppendLine("Operating System: " + info.OSFullName);
             sb.AppendLine("Platform: " + info.OSPlatform);
             sb.AppendLine("System Language: " + info.InstalledUICulture);
-            sb.AppendLine("Antivirus Programs: " + GetAVList());
             sb.AppendLine("Total Memory: " + info.TotalPhysicalMemory);
             sb.AppendLine("Available Memory: " + info.AvailablePhysicalMemory);
+            TryCatch(() => GetAntiVirus(ref av), e => sb.AppendLine("Antivirus Software: Error (" + e.Message + ")"));
+            AppendDictionary(sb, "Antivirus Software", av.ToDictionary(x => x.Key, x => x.Value ? "Enabled" : "Disabled"));
             AppendDictionary(sb, "Hosts", hosts.GetHosts().ToDictionary(x => x, x => hosts.Get(x).ToString()));
             AppendDictionary(sb, "Endpoint Fallbacks", Settings.EndpointFallbacks);
             AppendDictionary(sb, "Key Sites", Settings.TitleKeys);
@@ -140,29 +142,27 @@ namespace USBHelperLauncher
             }
         }
 
-        private static string GetAVList()
+        private static void GetAntiVirus(ref Dictionary<string, bool> antivirus)
+        {
+            var searcher = new ManagementObjectSearcher(@"root\SecurityCenter2", "SELECT * FROM AntiVirusProduct");
+            var collection = searcher.Get();
+            foreach (ManagementObject obj in collection)
+            {
+                var name = obj["displayName"].ToString();
+                var state = (uint)obj["productState"];
+                antivirus.Add(name, (state & 0x1000) != 0);
+            }
+        }
+
+        private static void TryCatch(Action tryAction, Action<Exception> catchAction)
         {
             try
             {
-                ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"root\SecurityCenter2", "SELECT * FROM AntiVirusProduct");
-                ManagementObjectCollection collection = searcher.Get();
-                var names = new List<string>();
-                foreach (ManagementObject obj in collection)
-                {
-                    var name = obj["displayName"].ToString();
-                    var stateInt = (uint) obj["productState"];
-                    if ((stateInt & 0x1000) == 0)
-                    {
-                        name += " [disabled]";
-                    }
-
-                    names.Add(name);
-                }
-                return string.Join(", ", names);
+                tryAction();
             }
-            catch
+            catch (Exception e)
             {
-                return "<error>";
+                catchAction(e);
             }
         }
     }
