@@ -22,6 +22,8 @@ namespace USBHelperInjector
 
         public static int DelayBetweenRetries { get; set; }
 
+        public static bool DisableOptionalPatches { get; set; }
+
         internal static void RaiseProxyChangeEvent(WebProxy proxy)
         {
             OnSetProxy?.Invoke(proxy);

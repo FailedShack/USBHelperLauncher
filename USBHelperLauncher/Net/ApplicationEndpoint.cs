@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Net.Mime;
 using System.Text;
 
 namespace USBHelperLauncher.Net
@@ -29,12 +30,36 @@ namespace USBHelperLauncher.Net
             var data = GetRequestData(oS);
             byte[] bytes = Convert.FromBase64String(data.Get("url"));
             string url = Encoding.UTF8.GetString(bytes);
+
             string content;
             using (WebClient client = new WebClient())
             {
                 client.Proxy = Program.GetProxy().GetWebProxy();
-                content = client.DownloadString(url);
+                byte[] responseBytes;
+                try
+                {
+                    responseBytes = client.DownloadData(url);
+                }
+                catch (WebException webEx)
+                {
+                    Proxy.LogRequest(oS, this, "Unable to download data from " + url + ": " + webEx);
+                    oS.utilCreateResponseAndBypassServer();
+                    if (webEx.Status == WebExceptionStatus.ProtocolError)
+                    {
+                        var response = (HttpWebResponse)webEx.Response;
+                        oS.oResponse.headers.SetStatus((int)response.StatusCode, response.StatusDescription);
+                    }
+                    else
+                    {
+                        oS.oResponse.headers.SetStatus(500, "Internal Server Error: " + webEx.Status);
+                    }
+                    return;
+                }
+
+                var contentType = new ContentType(client.ResponseHeaders["Content-Type"]);
+                content = Encoding.GetEncoding(contentType.CharSet ?? "UTF-8").GetString(responseBytes);
             }
+
             MemoryStream stream = new MemoryStream();
             using (ZipArchive zip = new ZipArchive(stream, ZipArchiveMode.Create))
             {
@@ -44,6 +69,7 @@ namespace USBHelperLauncher.Net
                     streamWriter.Write(content);
                 }
             }
+
             byte[] dataBytes = stream.ToArray();
             oS.utilCreateResponseAndBypassServer();
             oS.oResponse["Content-Length"] = dataBytes.Length.ToString();
