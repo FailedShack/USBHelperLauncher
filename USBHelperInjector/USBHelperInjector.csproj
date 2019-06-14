@@ -63,6 +63,7 @@
     <Compile Include="Patches\KeySiteFormValidationPatch.cs" />
     <Compile Include="Patches\KeySite3DSSettingsPatch.cs" />
     <Compile Include="Patches\KeySiteErrorMessagePatch.cs" />
+    <Compile Include="Patches\LanguagePatch.cs" />
     <Compile Include="Patches\MessageBoxPatch.cs" />
     <Compile Include="Patches\SearchPatch.cs" />
     <Compile Include="Patches\ServicePointPatch.cs" />
