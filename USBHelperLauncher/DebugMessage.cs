@@ -37,6 +37,8 @@ namespace USBHelperLauncher
             sb.AppendLine("Session Length: " + (now - Program.GetSessionStart()).ToString(@"hh\:mm\:ss"));
             sb.AppendLine("Session GUID: " + Program.GetSessionGuid().ToString());
             sb.AppendLine("Proxy Available: " + (exception == null ? "Yes" : "No (" + exception.Message + ")"));
+            sb.Append("Custom Proxy: " + (Program.GetProxy().CustomProxyAddress != null ? Program.GetProxy().CustomProxyAddress : "<none>"));
+            sb.AppendLine(Program.GetProxy().CustomProxyAuthorization != null ? " (with authorization)" : "");
             sb.AppendLine("Version: " + Program.GetVersion());
             sb.AppendLine("Helper Version: " + Program.GetHelperVersion());
             sb.AppendLine(".NET Framework Version: " + Get45or451FromRegistry());

@@ -55,6 +55,7 @@
     <Compile Include="Optional.cs" />
     <Compile Include="Overrides.cs" />
     <Compile Include="Patches\Disable3DSDownload.cs" />
+    <Compile Include="Patches\CustomProxyPatch.cs" />
     <Compile Include="Patches\DlcTMDPatch.cs" />
     <Compile Include="Patches\DownloaderPatch.cs" />
     <Compile Include="Patches\DownloaderQueuePatch.cs" />

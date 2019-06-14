@@ -45,6 +45,26 @@ namespace USBHelperInjector
                     }
                 }
             });
+
+            Overrides.OnSetProxy += OnSetProxy;
+        }
+
+        private static void OnSetProxy(WebProxy proxy)
+        {
+            string address = null, username = null, password = null;
+            if (proxy != null)
+            {
+                var credentials = (NetworkCredential)proxy.Credentials;
+                address = proxy.Address.OriginalString;
+                username = credentials.UserName;
+                password = credentials.Password;
+            }
+
+            string error = LauncherService.SetCustomProxy(address, username, password);
+            if (error != null)
+            {
+                throw new Exception(error);
+            }
         }
 
         public void ForceKeySiteForm()

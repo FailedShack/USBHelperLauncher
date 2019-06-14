@@ -7,7 +7,7 @@ namespace USBHelperInjector.Patches
     [HarmonyPatch]
     internal class SettingsProxyGet
     {
-        static MethodBase TargetMethod()
+        internal static MethodBase TargetMethod()
         {
             return AccessTools.DeclaredProperty(ReflectionHelper.NusGrabberForm, "Proxy").GetGetMethod(true);
         }
@@ -26,7 +26,7 @@ namespace USBHelperInjector.Patches
     [HarmonyPatch]
     internal class SettingsProxySet
     {
-        static MethodBase TargetMethod()
+        internal static MethodBase TargetMethod()
         {
             return AccessTools.DeclaredProperty(ReflectionHelper.NusGrabberForm, "Proxy").GetSetMethod(true);
         }
