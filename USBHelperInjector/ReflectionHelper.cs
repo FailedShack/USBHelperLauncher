@@ -16,6 +16,8 @@ namespace USBHelperInjector
 
         public static Module MainModule { get; } = assembly.GetModule("WiiU_USB_Helper.exe");
 
+        public static MethodInfo EntryPoint { get; } = assembly.EntryPoint;
+
         public static Type Settings
         {
             get

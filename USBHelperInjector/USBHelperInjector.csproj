@@ -52,12 +52,15 @@
   <ItemGroup>
     <Compile Include="Contracts\ILauncherService.cs" />
     <Compile Include="InjectorService.cs" />
-    <Compile Include="Optional.cs" />
+    <Compile Include="Patches\Attributes\Optional.cs" />
     <Compile Include="Overrides.cs" />
     <Compile Include="Patches\Disable3DSDownload.cs" />
+    <Compile Include="Patches\Attributes\VersionSpecific.cs" />
+    <Compile Include="Patches\DiscontinuedBypassPatches.cs" />
     <Compile Include="Patches\DlcTMDPatch.cs" />
     <Compile Include="Patches\DownloaderPatch.cs" />
     <Compile Include="Patches\DownloaderQueuePatch.cs" />
+    <Compile Include="Patches\PortablePatches.cs" />
     <Compile Include="Patches\ForceKeySiteFormPatch.cs" />
     <Compile Include="Patches\KeySiteFormHideObsoletePatch.cs" />
     <Compile Include="Patches\KeySiteFormValidationPatch.cs" />

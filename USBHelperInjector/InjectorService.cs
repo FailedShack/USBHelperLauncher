@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using USBHelperInjector.Contracts;
 using USBHelperInjector.Patches;
+using USBHelperInjector.Patches.Attributes;
 using USBHelperInjector.Properties;
 
 namespace USBHelperInjector
@@ -16,6 +17,8 @@ namespace USBHelperInjector
     {
         public static ILauncherService LauncherService { get; private set; }
         public static X509Certificate2 CaCert { get; private set; }
+        public static string HelperVersion { get; private set; }
+        public static bool Portable { get; private set; }
 
         public static void Init()
         {
@@ -32,19 +35,18 @@ namespace USBHelperInjector
 
             var harmony = HarmonyInstance.Create("me.failedshack.usbhelperinjector");
             var assembly = Assembly.GetExecutingAssembly();
-            assembly.GetTypes().Do(type =>
-            {
-                var parentMethodInfos = type.GetHarmonyMethods();
-                if (parentMethodInfos != null && parentMethodInfos.Count() > 0)
+            assembly.GetTypes()
+                .Where(type => VersionSpecific.Applies(type, HelperVersion) && !(Overrides.DisableOptionalPatches && Optional.IsOptional(type)))
+                .Do(type =>
                 {
-                    var info = HarmonyMethod.Merge(parentMethodInfos);
-                    var processor = new PatchProcessor(harmony, type, info);
-                    if (!(Overrides.DisableOptionalPatches && Optional.IsOptional(type)))
+                    var parentMethodInfos = type.GetHarmonyMethods();
+                    if (parentMethodInfos != null && parentMethodInfos.Count() > 0)
                     {
+                        var info = HarmonyMethod.Merge(parentMethodInfos);
+                        var processor = new PatchProcessor(harmony, type, info);
                         processor.Patch();
                     }
-                }
-            });
+                });
         }
 
         public void ForceKeySiteForm()
@@ -88,6 +90,16 @@ namespace USBHelperInjector
         public void SetDisableOptionalPatches(bool disableOptional)
         {
             Overrides.DisableOptionalPatches = disableOptional;
+        }
+
+        public void SetHelperVersion(string helperVersion)
+        {
+            HelperVersion = helperVersion;
+        }
+
+        public void SetPortable(bool portable)
+        {
+            Portable = portable;
         }
     }
 }

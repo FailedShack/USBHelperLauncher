@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using USBHelperInjector.Patches.Attributes;
 
 namespace USBHelperInjector.Patches
 {

@@ -148,34 +148,6 @@ namespace USBHelperLauncher
                 Environment.Exit(0);
             }
             helperVersion = File.ReadAllLines("ver")[0];
-            int revision = int.Parse(helperVersion.Substring(helperVersion.LastIndexOf('.') + 1));
-            if (helperVersion.StartsWith("0.6.1"))
-            {
-                // Workaround to allow it to launch
-                if (revision >= 653)
-                {
-                    string installPath = GetInstallPath();
-                    string lastTitles = Path.Combine(installPath, "lasttitles");
-                    if (revision > 653)
-                    {
-                        string installConfPath = GetInstallConfPath();
-                        Directory.CreateDirectory(installConfPath);
-                        File.Create(Path.Combine(installConfPath, "user.config")).Close();
-                    }
-                    if (!File.Exists(lastTitles))
-                    {
-                        Directory.CreateDirectory(installPath);
-                        StringBuilder sb = new StringBuilder();
-                        // Rev. 653 minimums: 3 lines, single character each
-                        // Revs. 654 & 655 minimums: 25 lines, 16 chars each
-                        for (int lines = 0; lines != 25; lines++)
-                        {
-                            sb.Append('0', 16).AppendLine();
-                        }
-                        File.WriteAllText(lastTitles, sb.ToString());
-                    }
-                }
-            }
 
             // Ensure that the cached title key JSON files are valid
             string[] toCheck = { "3FFFD23A80F800ABFCC436A5EC8F7F0B94C728A4", "9C6DD14B8E3530B701BC4F1B77345DADB0C32020" };
@@ -418,7 +390,7 @@ namespace USBHelperLauncher
                 BackgroundWorker worker = dialog.GetWorker();
                 worker.DoWork += delegate (object obj, DoWorkEventArgs args)
                 {
-                    string[] toRemove = new string[] { GetInstallPath(), GetInstallConfPath() };
+                    string[] toRemove = Settings.Portable ? new string[] { Path.Combine(GetLauncherPath(), "userdata") } : new string[] { GetInstallPath(), GetInstallConfPath() };
                     foreach (string dir in toRemove)
                     {
                         if (Directory.Exists(dir))

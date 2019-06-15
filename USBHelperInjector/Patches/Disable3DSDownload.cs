@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Windows.Forms;
+using USBHelperInjector.Patches.Attributes;
 
 namespace USBHelperInjector.Patches
 {

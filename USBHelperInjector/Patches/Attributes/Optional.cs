@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace USBHelperInjector
+namespace USBHelperInjector.Patches.Attributes
 {
     [AttributeUsage(AttributeTargets.Class)]
     class Optional : Attribute

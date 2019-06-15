@@ -44,6 +44,9 @@ namespace USBHelperLauncher.Configuration
         [Setting("Injector", 0)]
         public static int DelayBetweenRetries { get; set; }
 
+        [Setting("Injector", false)]
+        public static bool Portable { get; set; }
+
         public static void Save()
         {
             JObject conf = new JObject();
