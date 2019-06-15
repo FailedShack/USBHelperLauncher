@@ -10,6 +10,24 @@ namespace USBHelperLauncher.Configuration
     public class Settings
     {
         private const string file = "conf.json";
+        private static List<KeyValuePair<PropertyInfo, Setting>> _properties;
+
+        private static List<KeyValuePair<PropertyInfo, Setting>> Properties
+        {
+            get
+            {
+                if (_properties == null)
+                    _properties = typeof(Settings)
+                        .GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                        .Select(x => new KeyValuePair<PropertyInfo, Setting>(x, Setting.From(x)))
+                        .Where(x => x.Value != null)
+                        .ToList();
+                return _properties;
+            }
+        }
+
+        [Setting("Launcher")]
+        private static string DoNotModify { get; set; }
 
         [Setting("Launcher", true)]
         public static bool ShowUpdateNag { get; set; }
@@ -49,23 +67,20 @@ namespace USBHelperLauncher.Configuration
 
         public static void Save()
         {
+            DoNotModify = Program.GetVersion();
             JObject conf = new JObject();
-            foreach (var prop in typeof(Settings).GetProperties())
+            foreach (var prop in Properties)
             {
-                Setting setting = prop.GetCustomAttributes().OfType<Setting>().FirstOrDefault();
-                if (setting == null)
+                var section = prop.Value.Section;
+                if (conf[section] == null)
                 {
-                    continue;
+                    conf[section] = new JObject();
                 }
-                if (conf[setting.Section] == null)
-                {
-                    conf[setting.Section] = new JObject();
-                }
-                var obj = conf[setting.Section];
-                var value = prop.GetValue(null);
+                var obj = conf[section];
+                var value = prop.Key.GetValue(null);
                 if (value != null)
                 {
-                    obj[prop.Name] = JToken.FromObject(value);
+                    obj[prop.Key.Name] = JToken.FromObject(value);
                 }
             }
             File.WriteAllText(Path.Combine(Program.GetLauncherPath(), file), conf.ToString());
@@ -83,18 +98,14 @@ namespace USBHelperLauncher.Configuration
             {
                 conf = new JObject();
             }
-            foreach (var prop in typeof(Settings).GetProperties())
+            foreach (var setting in Properties.OrderByDescending(x => x.Key.Name == "DoNotModify"))
             {
-                Setting setting = prop.GetCustomAttributes().OfType<Setting>().FirstOrDefault();
-                if (setting == null)
-                {
-                    continue;
-                }
-                var token = conf.SelectToken(string.Join(".", setting.Section, prop.Name));
-                var value = token == null ? setting.Default : token.ToObject(prop.PropertyType);
+                var forget = setting.Value.Forgetful && DoNotModify != Program.GetVersion();
+                var token = conf.SelectToken(string.Join(".", setting.Value.Section, setting.Key.Name));
+                var value = token == null || forget ? setting.Value.Default : token.ToObject(setting.Key.PropertyType);
                 if (value != null)
                 {
-                    prop.SetValue(null, value);
+                    setting.Key.SetValue(null, value);
                 }
             }
         }
