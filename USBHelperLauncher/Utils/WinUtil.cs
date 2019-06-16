@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -82,6 +83,30 @@ namespace USBHelperLauncher.Utils
             return QueryFullProcessImageName(process.Handle, 0, fileNameBuilder, ref bufferLength) != 0 ?
                 fileNameBuilder.ToString() :
                 null;
+        }
+
+        public class CSP
+        {
+            [DllImport("advapi32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            private static extern bool CryptAcquireContext(out IntPtr phProv, string pszContainer, string pszProvider, uint dwProvType, uint dwFlags);
+
+            const uint PROV_RSA_FULL = 1;
+            const uint CRYPT_DELETEKEYSET = 16;
+
+            public const uint NTE_BAD_KEY_STATE = 0x8009000B;
+
+            public static uint TryAcquire(string keyContainer)
+            {
+                CryptAcquireContext(out _, keyContainer, null, PROV_RSA_FULL, 0);
+                return (uint)Marshal.GetLastWin32Error();
+            }
+
+            public static void Delete(string keyContainer)
+            {
+                if (!CryptAcquireContext(out _, keyContainer, null, PROV_RSA_FULL, CRYPT_DELETEKEYSET))
+                    throw new Win32Exception(Marshal.GetLastWin32Error());
+            }
         }
     }
 }
