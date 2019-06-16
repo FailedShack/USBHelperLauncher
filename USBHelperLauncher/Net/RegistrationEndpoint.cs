@@ -14,7 +14,7 @@ namespace USBHelperLauncher.Net
         public void GetContributors(Session oS)
         {
             oS.utilCreateResponseAndBypassServer();
-            oS.utilSetResponseBody("Wii U USB Helper Launcher made by\n!FailedShack\n© 2018");
+            oS.utilSetResponseBody("USBHelperLauncher made by\n!FailedShack\n© 2018");
             Proxy.LogRequest(oS, this, "Sent credits.");
         }
 

@@ -32,7 +32,7 @@ namespace USBHelperLauncher
             DateTime now = DateTime.UtcNow;
             var hosts = Program.Hosts;
             var av = new Dictionary<string, bool>();
-            sb.Append('-', 10).Append(" Wii U USB Helper Loader Debug Information ").Append('-', 10).AppendLine();
+            sb.Append('-', 10).Append(" USBHelperLauncher Debug Information ").Append('-', 10).AppendLine();
             sb.AppendLine("Debug Time: " + now + " (UTC)");
             sb.AppendLine("Session Length: " + (now - Program.GetSessionStart()).ToString(@"hh\:mm\:ss"));
             sb.AppendLine("Session GUID: " + Program.GetSessionGuid().ToString());
