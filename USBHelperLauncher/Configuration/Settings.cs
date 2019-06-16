@@ -29,6 +29,9 @@ namespace USBHelperLauncher.Configuration
         [Setting("Launcher")]
         private static string DoNotModify { get; set; }
 
+        [Setting("Launcher", false)]
+        public static bool HostsExpert { get; set; }
+
         [Setting("Launcher", true)]
         public static bool ShowUpdateNag { get; set; }
 

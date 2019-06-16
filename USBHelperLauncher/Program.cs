@@ -12,7 +12,6 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Security.Principal;
 using System.ServiceModel;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -115,6 +114,23 @@ namespace USBHelperLauncher
                 catch (Exception e)
                 {
                     MessageBox.Show("Could not load hosts file: " + e.Message, "Malformed hosts file", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Hosts = new Hosts();
+                }
+
+                var conflicting = proxy.GetConflictingHosts();
+                if (!Settings.HostsExpert && conflicting.Count > 0)
+                {
+                    var hostsConflictWarning = new CheckboxDialog(
+                        "The following hostnames specified in the hosts file are normally handled by USBHelperLauncher:\n\n" + string.Join("\n", conflicting) +
+                        "\n\nIf you override them the program may not function properly." +
+                        "\nDo you want to exclude them?", "Do not show this again.", "Conflicting hosts", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    DialogResult result = hostsConflictWarning.ShowDialog();
+                    if (result == DialogResult.Yes)
+                    {
+                        Hosts.hosts = Hosts.hosts.Where(x => !conflicting.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
+                    }
+                    Settings.HostsExpert = hostsConflictWarning.Checked;
+                    Settings.Save();
                 }
             }
             else

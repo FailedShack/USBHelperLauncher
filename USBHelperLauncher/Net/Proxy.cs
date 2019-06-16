@@ -1,5 +1,6 @@
 ﻿using Fiddler;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -207,6 +208,15 @@ namespace USBHelperLauncher.Net
             oS.oResponse["Location"] = url;
             LogRequest(oS, endpoint, "Redirecting to " + url);
             return true;
+        }
+
+        public List<string> GetConflictingHosts()
+        {
+            var hostnames = endpoints.Select(x => new UriBuilder(x.HostName).Uri).ToList();
+            return Program.Hosts.GetHosts().Where(x =>
+            {
+                return hostnames.Any(y => Uri.Compare(new UriBuilder(x).Uri, y, UriComponents.Host, UriFormat.SafeUnescaped, StringComparison.OrdinalIgnoreCase) == 0);
+            }).ToList();
         }
 
         public static void LogRequest(Session oS, Endpoint endpoint, string message)

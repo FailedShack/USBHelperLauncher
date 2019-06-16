@@ -9,7 +9,7 @@ namespace USBHelperLauncher
 {
     class Hosts
     {
-        private Dictionary<string, IPAddress> hosts;
+        internal Dictionary<string, IPAddress> hosts;
 
         public Hosts()
         {
