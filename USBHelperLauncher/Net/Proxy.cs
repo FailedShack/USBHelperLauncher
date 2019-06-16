@@ -174,7 +174,14 @@ namespace USBHelperLauncher.Net
 
         private void Log_OnLogString(object sender, LogEventArgs e)
         {
-            log.WriteLine(e.LogString);
+            try
+            {
+                log.WriteLine(e.LogString);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Program is exiting, nothing to do here.
+            }
         }
 
         private void FiddlerApplication_ResponseHeadersAvailable(Session oS)
