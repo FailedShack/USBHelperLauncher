@@ -154,7 +154,6 @@
     <Compile Include="Net\Endpoint.cs" />
     <Compile Include="Net\RegistrationEndpoint.cs" />
     <Compile Include="Net\Request.cs" />
-    <Compile Include="RSAPatcher.cs" />
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="Utils\Buffer.cs" />
     <Compile Include="Utils\CitraRepoUtil.cs" />

@@ -15,6 +15,9 @@ namespace USBHelperInjector.Contracts
         void SetDonationKey(string donationKey);
 
         [OperationContract]
+        void SetPublicKey(string publicKey);
+
+        [OperationContract]
         void SetDownloaderMaxRetries(int maxRetries);
 
         [OperationContract]

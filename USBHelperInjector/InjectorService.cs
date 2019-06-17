@@ -72,6 +72,11 @@ namespace USBHelperInjector
             Overrides.DonationKey = donationKey;
         }
 
+        public void SetPublicKey(string publicKey)
+        {
+            Overrides.PublicKey = publicKey;
+        }
+
         public void SetDownloaderMaxRetries(int maxRetries)
         {
             Overrides.MaxRetries = maxRetries;

@@ -68,6 +68,7 @@
     <Compile Include="Patches\KeySiteErrorMessagePatch.cs" />
     <Compile Include="Patches\LanguagePatch.cs" />
     <Compile Include="Patches\MessageBoxPatch.cs" />
+    <Compile Include="Patches\PublicKeyPatch.cs" />
     <Compile Include="Patches\SearchPatch.cs" />
     <Compile Include="Patches\ServicePointPatch.cs" />
     <Compile Include="Patches\SettingsDonationKeyPatches.cs" />

@@ -43,7 +43,8 @@ namespace USBHelperLauncher
         private static RSAParameters rsaParams;
 
         public static Hosts Hosts { get; set; }
-        public static bool PatchPublicKey { get; private set; } = true;
+        public static string PublicKey { get; private set; }
+        public static bool OverridePublicKey { get; private set; } = true;
 
         [STAThread]
         static void Main(string[] args)
@@ -61,8 +62,8 @@ namespace USBHelperLauncher
                 {
                     switch (group.Value)
                     {
-                        case "nopatch":
-                            PatchPublicKey = false;
+                        case "nokey":
+                            OverridePublicKey = false;
                             break;
                         case "showconsole":
                             showConsole = true;
@@ -229,35 +230,17 @@ namespace USBHelperLauncher
             executable = Path.Combine(GetLauncherPath(), "Patched.exe");
             injector.Inject(executable);
             logger.WriteLine("Injected module initializer.");
-            if (PatchPublicKey)
+            dialog.Invoke(new Action(() => dialog.Close()));
+
+            if (OverridePublicKey)
             {
-                dialog.Invoke(new Action(() => dialog.SetHeader("Patching...")));
-                RSAPatcher patcher = new RSAPatcher(executable);
-                string xml;
+                // Generate an RSA key pair for our donation keys
                 using (var rsa = new RSACryptoServiceProvider(2048))
                 {
                     rsaParams = rsa.ExportParameters(true);
-                    xml = rsa.ToXmlString(false);
+                    PublicKey = rsa.ToXmlString(false);
                 }
-                var builder = new StringBuilder();
-                var element = XElement.Parse(xml);
-                var settings = new XmlWriterSettings
-                {
-                    OmitXmlDeclaration = true,
-                    Indent = true
-                };
-                using (var xmlWriter = XmlWriter.Create(builder, settings))
-                {
-                    element.Save(xmlWriter);
-                }
-                patcher.SetPublicKey(builder.ToString());
-                logger.WriteLine("Patched public key.");
             }
-            else
-            {
-                logger.WriteLine("Patching has been disabled.");
-            }
-            dialog.Invoke(new Action(() => dialog.Close()));
 
             // Time to launch Wii U USB Helper
             sessionStart = DateTime.UtcNow;
@@ -278,7 +261,7 @@ namespace USBHelperLauncher
             MenuItem advanced = new MenuItem("Advanced");
             advanced.MenuItems.Add("Toggle Console", OnVisibilityChange);
             advanced.MenuItems.Add("Clear Install", OnClearInstall);
-            advanced.MenuItems.Add("Generate Donation Key", OnGenerateKey).Enabled = PatchPublicKey;
+            advanced.MenuItems.Add("Generate Donation Key", OnGenerateKey).Enabled = OverridePublicKey;
             advanced.MenuItems.Add("Hosts Editor", OnOpenHostsEditor);
             advanced.MenuItems.Add("Export Sessions", OnExportSessions);
             trayMenu.MenuItems.Add("Exit", OnExit);

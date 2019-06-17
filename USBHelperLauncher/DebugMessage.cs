@@ -32,11 +32,12 @@ namespace USBHelperLauncher
             DateTime now = DateTime.UtcNow;
             var hosts = Program.Hosts;
             var av = new Dictionary<string, bool>();
-            sb.Append('-', 10).Append(" USBHelperLauncher Debug Information ").Append('-', 10).AppendLine();
+            sb.Append('-', 13).Append(" USBHelperLauncher Debug Information ").Append('-', 13).AppendLine();
             sb.AppendLine("Debug Time: " + now + " (UTC)");
             sb.AppendLine("Session Length: " + (now - Program.GetSessionStart()).ToString(@"hh\:mm\:ss"));
             sb.AppendLine("Session GUID: " + Program.GetSessionGuid().ToString());
             sb.AppendLine("Proxy Available: " + (exception == null ? "Yes" : "No (" + exception.Message + ")"));
+            sb.AppendLine("Public Key Override: " + (Program.OverridePublicKey ? "Yes" : "No"));
             sb.AppendLine("Version: " + Program.GetVersion());
             sb.AppendLine("Helper Version: " + Program.GetHelperVersion());
             sb.AppendLine(".NET Framework Version: " + Get45or451FromRegistry());

@@ -14,6 +14,8 @@ namespace USBHelperInjector
 
         public static string DonationKey { get; set; }
 
+        public static string PublicKey { get; set; }
+
         public static bool ForceKeySiteForm { get; set; }
 
         public static WebProxy Proxy { get; set; }
