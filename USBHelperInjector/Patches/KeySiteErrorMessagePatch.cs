@@ -49,9 +49,6 @@ namespace USBHelperInjector.Patches
                     ? "No backup was found. Unfortunately the app cannot work without it."
                     : "Wii U USB Helper will now try to use a backup version. Please note that some features might not work as expected.";
 
-                var labelLoadWiiU = generator.DefineLabel();
-                var labelContinueArgs = generator.DefineLabel();
-
                 codes.RemoveAt(index);
                 codes.InsertRange(index, new List<CodeInstruction>
                 {
