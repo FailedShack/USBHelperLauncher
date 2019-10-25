@@ -59,6 +59,9 @@ namespace USBHelperLauncher.Configuration
         [Setting("Injector", false)]
         public static bool DisableOptionalPatches { get; set; }
 
+        [Setting("Injector", true)]
+        public static bool DisableWebSearchTab { get; set; }
+
         [Setting("Injector", 3)]
         public static int MaxRetries { get; set; }
 

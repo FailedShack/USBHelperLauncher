@@ -56,6 +56,7 @@
     <Compile Include="Overrides.cs" />
     <Compile Include="Patches\Disable3DSDownload.cs" />
     <Compile Include="Patches\Attributes\VersionSpecific.cs" />
+    <Compile Include="Patches\DisableWebTabPatch.cs" />
     <Compile Include="Patches\DiscontinuedBypassPatches.cs" />
     <Compile Include="Patches\DlcTMDPatch.cs" />
     <Compile Include="Patches\DownloaderPatch.cs" />

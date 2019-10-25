@@ -34,5 +34,8 @@ namespace USBHelperInjector.Contracts
 
         [OperationContract]
         void SetPortable(bool portable);
+
+        [OperationContract]
+        void SetDisableWebSearchTab(bool disableWebSearchTab);
     }
 }
