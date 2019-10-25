@@ -88,6 +88,10 @@ namespace USBHelperLauncher.Net
             {
                 if (endpoint.Matches(oS))
                 {
+                    // Strip redundant forward slashes to match request patterns
+                    var parts = oS.PathAndQuery.Split(new char[] { '?' }, 2);
+                    parts[0] = Regex.Replace(parts[0], "/+", "/");
+                    oS.PathAndQuery = string.Join("?", parts);
                     if (!endpoint.Handle(oS))
                     {
                         var endpointName = endpoint.GetType().Name;
@@ -210,7 +214,7 @@ namespace USBHelperLauncher.Net
             }
             oS.utilCreateResponseAndBypassServer();
             oS.oResponse.headers.SetStatus(307, "Redirect");
-            var path = Regex.Replace(oS.PathAndQuery, @"^\/*", "");
+            var path = Regex.Replace(oS.PathAndQuery, "^/*", "");
             var url = new Uri(baseUri, path).ToString();
             oS.oResponse["Location"] = url;
             LogRequest(oS, endpoint, "Redirecting to " + url);
