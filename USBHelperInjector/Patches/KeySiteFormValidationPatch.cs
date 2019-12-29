@@ -1,4 +1,6 @@
 ﻿using Harmony;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,14 +35,30 @@ namespace USBHelperInjector.Patches
                 try
                 {
                     var resp = client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead).Result;
-                    if (!resp.IsSuccessStatusCode)
+                    if (resp.IsSuccessStatusCode)
+                    {
+                        // Ensure that we actually got a JSON response
+                        var content = resp.Content;
+                        if (content.Headers.ContentType.MediaType != "application/json")
+                        {
+                            try
+                            {
+                                JToken.Parse(content.ReadAsStringAsync().Result);
+                            }
+                            catch (JsonReaderException e)
+                            {
+                                lastError = string.Format("Remote server replied with invalid data:\n\n{0}", e.Message);
+                            }
+                        }
+                    }
+                    else
                     {
                         lastError = GetCustomHttpErrorMessage((int)resp.StatusCode, resp.ReasonPhrase);
                     }
                 }
                 catch (HttpRequestException e)
                 {
-                    lastError = e.Message;
+                    lastError = string.Format("An error occurred while trying to reach {0}:\n\n{1}", baseUri.ToString(), e.Message);
                 }
             }
 
@@ -57,7 +75,6 @@ namespace USBHelperInjector.Patches
             {
                 // Tell the user the title key site is invalid.
                 textBoxWiiU.Text = string.Empty;
-                lastError = string.Format("An error occurred while trying to reach {0}:\n\n{1}", baseUri.ToString(), lastError);
             }
 
             Overrides.ForceKeySiteForm = false;
