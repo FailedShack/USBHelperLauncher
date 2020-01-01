@@ -9,9 +9,6 @@ namespace USBHelperLauncher.Net
 {
     class Endpoint
     {
-        protected static readonly Logger logger = Program.GetLogger();
-        protected static readonly Database database = Program.GetDatabase();
-
         public string HostName { get; }
 
         public Endpoint(string hostName)

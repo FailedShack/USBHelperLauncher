@@ -15,7 +15,7 @@ namespace USBHelperLauncher
 
         public void SendInjectorSettings()
         {
-            Program.GetLogger().WriteLine("Sending information to injector...");
+            Program.Logger.WriteLine("Sending information to injector...");
             var factory = new ChannelFactory<IInjectorService>(new NetNamedPipeBinding(), "net.pipe://localhost/InjectorService");
             var channel = factory.CreateChannel();
             if (Program.OverridePublicKey)
@@ -28,12 +28,12 @@ namespace USBHelperLauncher
                 channel.ForceKeySiteForm();
             }
             channel.TrustCertificateAuthority(CertMaker.GetRootCertificate().GetRawCertData());
-            channel.SetProxy(Program.GetProxy().GetWebProxy().Address.ToString());
+            channel.SetProxy(Program.Proxy.GetWebProxy().Address.ToString());
             channel.SetDownloaderMaxRetries(Settings.MaxRetries);
             channel.SetDownloaderRetryDelay(Settings.DelayBetweenRetries);
             channel.SetDisableOptionalPatches(Settings.DisableOptionalPatches);
             channel.SetDisableWebSearchTab(Settings.DisableWebSearchTab);
-            channel.SetHelperVersion(Program.GetHelperVersion());
+            channel.SetHelperVersion(Program.HelperVersion);
             channel.SetPortable(Settings.Portable);
         }
     }

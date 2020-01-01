@@ -62,12 +62,12 @@ namespace USBHelperLauncher.Net
             byte[] bytes;
             if (version.HasValue)
             {
-                bytes = database.Encrypt(version.Value).ToArray();
+                bytes = Program.Database.Encrypt(version.Value).ToArray();
                 message = string.Format(message, "with " + version.Value.ToString());
             }
             else
             {
-                bytes = database.ToArray();
+                bytes = Program.Database.ToArray();
                 message = string.Format(message, "without");
             }
             LoadResponseFromByteArray(oS, bytes);

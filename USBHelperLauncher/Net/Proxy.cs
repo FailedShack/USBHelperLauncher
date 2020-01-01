@@ -16,8 +16,6 @@ namespace USBHelperLauncher.Net
 {
     class Proxy : IDisposable
     {
-
-        private static readonly Logger logger = Program.GetLogger();
         private static readonly Endpoint[] endpoints = new Endpoint[]
         {
             new ContentEndpoint(),
@@ -130,7 +128,7 @@ namespace USBHelperLauncher.Net
                         new Thread(() =>
                         {
                             // Get rid of the exception caused by not finding the file
-                            int pid = Program.GetHelperProcess().Id;
+                            int pid = Program.HelperProcess.Id;
                             int lastCount = -1;
                             while (true)
                             {
@@ -232,12 +230,12 @@ namespace USBHelperLauncher.Net
 
         public static void LogRequest(Session oS, Endpoint endpoint, string message)
         {
-            logger.WriteLine(string.Format("[{0}] {1}: {2}", oS.RequestMethod, endpoint.GetType().Name, message));
+            Program.Logger.WriteLine(string.Format("[{0}] {1}: {2}", oS.RequestMethod, endpoint.GetType().Name, message));
         }
 
         public static void LogRequest(Session oS, string message)
         {
-            logger.WriteLine(string.Format("[{0}] {1}: {2}", oS.RequestMethod, oS.hostname, message));
+            Program.Logger.WriteLine(string.Format("[{0}] {1}: {2}", oS.RequestMethod, oS.hostname, message));
         }
 
         public WebProxy GetWebProxy()

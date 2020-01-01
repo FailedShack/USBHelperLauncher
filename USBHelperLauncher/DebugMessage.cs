@@ -34,12 +34,12 @@ namespace USBHelperLauncher
             var av = new Dictionary<string, bool>();
             sb.Append('-', 13).Append(" USBHelperLauncher Debug Information ").Append('-', 13).AppendLine();
             sb.AppendLine("Debug Time: " + now + " (UTC)");
-            sb.AppendLine("Session Length: " + (now - Program.GetSessionStart()).ToString(@"hh\:mm\:ss"));
-            sb.AppendLine("Session GUID: " + Program.GetSessionGuid().ToString());
+            sb.AppendLine("Session Length: " + (now - Program.SessionStart).ToString(@"hh\:mm\:ss"));
+            sb.AppendLine("Session GUID: " + Program.Session.ToString());
             sb.AppendLine("Proxy Available: " + (exception == null ? "Yes" : "No (" + exception.Message + ")"));
             sb.AppendLine("Public Key Override: " + (Program.OverridePublicKey ? "Yes" : "No"));
             sb.AppendLine("Version: " + Program.GetVersion());
-            sb.AppendLine("Helper Version: " + Program.GetHelperVersion());
+            sb.AppendLine("Helper Version: " + Program.HelperVersion);
             sb.AppendLine(".NET Framework Version: " + Get45or451FromRegistry());
             sb.AppendLine("Operating System: " + info.OSFullName);
             sb.AppendLine("Platform: " + info.OSPlatform);
@@ -83,7 +83,7 @@ namespace USBHelperLauncher
         {
             using (var client = new WebClient())
             {
-                client.Proxy = Program.GetProxy().GetWebProxy();
+                client.Proxy = Program.Proxy.GetWebProxy();
                 string respString;
                 try
                 {
@@ -93,12 +93,9 @@ namespace USBHelperLauncher
                 {
                     return e;
                 }
-                if (Guid.TryParse(respString, out Guid guid))
+                if (Guid.TryParse(respString, out Guid session) && Program.Session == session)
                 {
-                    if (Program.GetSessionGuid() == guid)
-                    {
-                        return null;
-                    }
+                    return null;
                 }
                 return new InvalidOperationException("Invalid response: " + Regex.Replace(string.Concat(respString.Take(40)), @"\s+", " ") + "...");
 

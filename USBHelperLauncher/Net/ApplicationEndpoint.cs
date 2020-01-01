@@ -34,7 +34,7 @@ namespace USBHelperLauncher.Net
             string content;
             using (WebClient client = new WebClient())
             {
-                client.Proxy = Program.GetProxy().GetWebProxy();
+                client.Proxy = Program.Proxy.GetWebProxy();
                 byte[] responseBytes;
                 try
                 {

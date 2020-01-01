@@ -45,7 +45,7 @@ namespace USBHelperLauncher.Net
         public void GetSession(Session oS)
         {
             oS.utilCreateResponseAndBypassServer();
-            oS.utilSetResponseBody(Program.GetSessionGuid().ToString());
+            oS.utilSetResponseBody(Program.Session.ToString());
             Proxy.LogRequest(oS, this, "Sent session guid.");
         }
     }

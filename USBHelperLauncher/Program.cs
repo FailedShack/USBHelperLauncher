@@ -29,20 +29,19 @@ namespace USBHelperLauncher
 {
     class Program
     {
-        private static readonly Guid sessionGuid = Guid.NewGuid();
-        private static readonly Logger logger = new Logger();
-        private static readonly Database database = new Database();
-        private static readonly Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
-
-        private static DateTime sessionStart;
-        private static Process process;
-        private static string helperVersion;
         private static bool showConsole = false;
         private static NotifyIcon trayIcon;
-        private static Net.Proxy proxy;
         private static RSAParameters rsaParams;
 
+        public static Guid Session { get; } = Guid.NewGuid();
+        public static Logger Logger { get; } = new Logger();
+        public static Dispatcher Dispatcher { get; } = Dispatcher.CurrentDispatcher;
+        public static Database Database { get; } = new Database();
+        public static Net.Proxy Proxy { get; } = new Net.Proxy(8877);
         public static Hosts Hosts { get; set; }
+        public static Process HelperProcess { get; private set; }
+        public static string HelperVersion { get; private set; }
+        public static DateTime SessionStart { get; private set; }
         public static string PublicKey { get; private set; }
         public static bool OverridePublicKey { get; private set; } = true;
 
@@ -51,7 +50,6 @@ namespace USBHelperLauncher
         {
             Settings.Load();
             Settings.Save();
-            proxy = new Net.Proxy(8877);
             _handler += new EventHandler(Handler);
             SetConsoleCtrlHandler(_handler, true);
 
@@ -72,7 +70,7 @@ namespace USBHelperLauncher
                 }
             }
 
-            logger.WriteLine("Made by FailedShack");
+            Logger.WriteLine("Made by FailedShack");
             SetConsoleVisibility(showConsole);
             Application.EnableVisualStyles();
 
@@ -118,7 +116,7 @@ namespace USBHelperLauncher
                     Hosts = new Hosts();
                 }
 
-                var conflicting = proxy.GetConflictingHosts();
+                var conflicting = Proxy.GetConflictingHosts();
                 if (!Settings.HostsExpert && conflicting.Count > 0)
                 {
                     var hostsConflictWarning = new CheckboxDialog(
@@ -151,7 +149,7 @@ namespace USBHelperLauncher
 
             try
             {
-                database.LoadFromDir(Path.Combine(GetLauncherPath(), "data"));
+                Database.LoadFromDir(Path.Combine(GetLauncherPath(), "data"));
             }
             catch (FileNotFoundException e)
             {
@@ -164,7 +162,7 @@ namespace USBHelperLauncher
                 MessageBox.Show("Could not find Wii U USB Helper, please make sure this executable is in the correct folder.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(0);
             }
-            helperVersion = File.ReadAllLines("ver")[0];
+            HelperVersion = File.ReadAllLines("ver")[0];
 
             // Ensure that the cached title key JSON files are valid
             string[] toCheck = { "3FFFD23A80F800ABFCC436A5EC8F7F0B94C728A4", "9C6DD14B8E3530B701BC4F1B77345DADB0C32020" };
@@ -180,7 +178,7 @@ namespace USBHelperLauncher
                     catch (JsonReaderException)
                     {
                         File.Delete(path);
-                        logger.WriteLine(string.Format("Removed bad cache file: {0}", file));
+                        Logger.WriteLine(string.Format("Removed bad cache file: {0}", file));
                     }
                 }
             }
@@ -190,7 +188,7 @@ namespace USBHelperLauncher
             if (WinUtil.CSP.TryAcquire(keyContainer) == WinUtil.CSP.NTE_BAD_KEY_STATE)
             {
                 WinUtil.CSP.Delete(keyContainer);
-                logger.WriteLine("Removed broken key container: {0}", keyContainer);
+                Logger.WriteLine("Removed broken key container: {0}", keyContainer);
             }
 
             if (!CertMaker.rootCertExists() && !CertMaker.createRootCert())
@@ -213,7 +211,7 @@ namespace USBHelperLauncher
                 running.Kill();
             }
 
-            proxy.Start();
+            Proxy.Start();
             ServiceHost host = new ServiceHost(typeof(LauncherService), new Uri("net.pipe://localhost/LauncherService"));
             host.AddServiceEndpoint(typeof(ILauncherService), new NetNamedPipeBinding(), "");
             host.Open();
@@ -229,7 +227,7 @@ namespace USBHelperLauncher
             var injector = new ModuleInitInjector(executable);
             executable = Path.Combine(GetLauncherPath(), "Patched.exe");
             injector.Inject(executable);
-            logger.WriteLine("Injected module initializer.");
+            Logger.WriteLine("Injected module initializer.");
             dialog.Invoke(new Action(() => dialog.Close()));
 
             if (OverridePublicKey)
@@ -243,22 +241,22 @@ namespace USBHelperLauncher
             }
 
             // Time to launch Wii U USB Helper
-            sessionStart = DateTime.UtcNow;
+            SessionStart = DateTime.UtcNow;
             var startInfo = new ProcessStartInfo()
             {
                 FileName = executable,
-                Arguments = helperVersion,
+                Arguments = HelperVersion,
                 UseShellExecute = false,
                 RedirectStandardError = true,
                 StandardErrorEncoding = Encoding.Default
             };
-            process = new Process() { StartInfo = startInfo };
+            var process = new Process() { StartInfo = startInfo };
             process.EnableRaisingEvents = true;
             process.Exited += async (sender, e) =>
             {
                 if (process.ExitCode != 0)
                 {
-                    logger.WriteLine("Wii U USB Helper returned non-zero exit code 0x{0:x}:\n{1}", process.ExitCode, process.StandardError.ReadToEnd().Trim()); ;
+                    Logger.WriteLine("Wii U USB Helper returned non-zero exit code 0x{0:x}:\n{1}", process.ExitCode, process.StandardError.ReadToEnd().Trim()); ;
                     var result = MessageBox.Show(string.Format("Uh-oh. Wii U USB Helper has crashed unexpectedly.\nDo you want to generate a debug log?\n\nError code: 0x{0:x}", process.ExitCode), "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
                     if (result == DialogResult.Yes)
                     {
@@ -269,10 +267,11 @@ namespace USBHelperLauncher
                 Application.Exit();
             };
             process.Start();
+            HelperProcess = process;
 
             if (Settings.DisableOptionalPatches)
             {
-                logger.WriteLine("Optional patches have been disabled.");
+                Logger.WriteLine("Optional patches have been disabled.");
             }
 
             ContextMenu trayMenu = new ContextMenu();
@@ -301,16 +300,6 @@ namespace USBHelperLauncher
                 Visible = true
             };
             Application.Run();
-        }
-
-        public static Process GetHelperProcess()
-        {
-            return process;
-        }
-
-        public static string GetHelperVersion()
-        {
-            return helperVersion;
         }
 
         private static void OnExit(object sender, EventArgs e)
@@ -416,9 +405,9 @@ namespace USBHelperLauncher
             };
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                logger.WriteLine("Exporting Sessions...");
+                Logger.WriteLine("Exporting Sessions...");
 
-                Session[] sessions = proxy.GetSessions();
+                Session[] sessions = Proxy.GetSessions();
                 FiddlerApplication.oTranscoders.ImportTranscoders(Assembly.Load("BasicFormatsForCore"));
 
                 var options = new Dictionary<string, object>
@@ -494,17 +483,17 @@ namespace USBHelperLauncher
 
         private static void Cleanup()
         {
-            if (!process.HasExited)
+            if (!HelperProcess.HasExited)
             {
-                process.Kill();
+                HelperProcess.Kill();
             }
-            if (proxy != null)
+            if (Proxy != null)
             {
-                proxy.Dispose();
+                Proxy.Dispose();
             }
             trayIcon.Visible = false;
             trayIcon.Dispose();
-            logger.Dispose();
+            Logger.Dispose();
         }
 
         public static string GenerateDonationKey()
@@ -526,7 +515,7 @@ namespace USBHelperLauncher
 
         public static async Task GenerateDebugLog()
         {
-            DebugMessage debug = new DebugMessage(logger.GetLog(), proxy.GetLog());
+            DebugMessage debug = new DebugMessage(Logger.GetLog(), Proxy.GetLog());
             async Task toFile()
             {
                 var dialog = new SaveFileDialog()
@@ -547,12 +536,12 @@ namespace USBHelperLauncher
             try
             {
                 var url = await debug.PublishAsync();
-                dispatcher.Invoke(new Action(() => Clipboard.SetText(url)));
+                Dispatcher.Invoke(new Action(() => Clipboard.SetText(url)));
                 MessageBox.Show("Debug message created and published, the link has been stored in your clipboard.\nProvide this link when reporting an issue.", "Debug message", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex) when (ex is HttpRequestException || ex is JsonReaderException)
             {
-                logger.WriteLine("Could not submit log to Hastebin: {0}", ex);
+                Logger.WriteLine("Could not submit log to Hastebin: {0}", ex);
                 await toFile();
             }
         }
@@ -572,34 +561,8 @@ namespace USBHelperLauncher
         // Displays a form as a child of Wii U USB Helper
         public static void ShowChildDialog(Form dialog)
         {
-            var process = GetHelperProcess();
-            WinUtil.SetWindowLong(dialog.Handle, -8 /*GWL_HWNDPARENT*/, process.MainWindowHandle);
+            WinUtil.SetWindowLong(dialog.Handle, -8 /*GWL_HWNDPARENT*/, HelperProcess.MainWindowHandle);
             dialog.ShowDialog();
-        }
-
-        public static Logger GetLogger()
-        {
-            return logger;
-        }
-
-        public static Database GetDatabase()
-        {
-            return database;
-        }
-
-        public static Net.Proxy GetProxy()
-        {
-            return proxy;
-        }
-
-        public static DateTime GetSessionStart()
-        {
-            return sessionStart;
-        }
-
-        public static Guid GetSessionGuid()
-        {
-            return sessionGuid;
         }
 
         [DllImport("Kernel32")]
