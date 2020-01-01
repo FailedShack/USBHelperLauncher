@@ -9,6 +9,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -18,8 +19,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Linq;
+using System.Windows.Threading;
 using USBHelperInjector.Contracts;
 using USBHelperLauncher.Configuration;
 using USBHelperLauncher.Emulator;
@@ -32,11 +32,11 @@ namespace USBHelperLauncher
         private static readonly Guid sessionGuid = Guid.NewGuid();
         private static readonly Logger logger = new Logger();
         private static readonly Database database = new Database();
+        private static readonly Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
 
         private static DateTime sessionStart;
         private static Process process;
         private static string helperVersion;
-        private static Thread backgroundThread;
         private static bool showConsole = false;
         private static NotifyIcon trayIcon;
         private static Net.Proxy proxy;
@@ -244,7 +244,31 @@ namespace USBHelperLauncher
 
             // Time to launch Wii U USB Helper
             sessionStart = DateTime.UtcNow;
-            process = StartProcess(executable, helperVersion);
+            var startInfo = new ProcessStartInfo()
+            {
+                FileName = executable,
+                Arguments = helperVersion,
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                StandardErrorEncoding = Encoding.Default
+            };
+            process = new Process() { StartInfo = startInfo };
+            process.EnableRaisingEvents = true;
+            process.Exited += async (sender, e) =>
+            {
+                if (process.ExitCode != 0)
+                {
+                    logger.WriteLine("Wii U USB Helper returned non-zero exit code 0x{0:x}:\n{1}", process.ExitCode, process.StandardError.ReadToEnd().Trim()); ;
+                    var result = MessageBox.Show(string.Format("Uh-oh. Wii U USB Helper has crashed unexpectedly.\nDo you want to generate a debug log?\n\nError code: 0x{0:x}", process.ExitCode), "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                    if (result == DialogResult.Yes)
+                    {
+                        await GenerateDebugLog();
+                    }
+                }
+                Cleanup();
+                Application.Exit();
+            };
+            process.Start();
 
             if (Settings.DisableOptionalPatches)
             {
@@ -266,7 +290,7 @@ namespace USBHelperLauncher
             advanced.MenuItems.Add("Export Sessions", OnExportSessions);
             trayMenu.MenuItems.Add("Exit", OnExit);
             trayMenu.MenuItems.Add("Check for Updates", OnUpdateCheck);
-            trayMenu.MenuItems.Add("Report Issue", OnDebugMessage);
+            trayMenu.MenuItems.Add("Report Issue", async (sender, e) => await GenerateDebugLog());
             trayMenu.MenuItems.Add(dlEmulator);
             trayMenu.MenuItems.Add(advanced);
             trayIcon = new NotifyIcon
@@ -276,31 +300,7 @@ namespace USBHelperLauncher
                 ContextMenu = trayMenu,
                 Visible = true
             };
-            backgroundThread = new Thread(() =>
-            {
-                Thread.CurrentThread.IsBackground = true;
-                while (!process.HasExited)
-                {
-                    try
-                    {
-                        Thread.Sleep(30);
-                    }
-                    catch (ThreadInterruptedException) { }
-                }
-                Cleanup();
-                Application.Exit();
-            });
-            backgroundThread.Start();
             Application.Run();
-        }
-
-        static Process StartProcess(string path, string arguments)
-        {
-            Process process = new Process();
-            process.StartInfo.FileName = path;
-            process.StartInfo.Arguments = arguments;
-            process.Start();
-            return process;
         }
 
         public static Process GetHelperProcess()
@@ -357,7 +357,6 @@ namespace USBHelperLauncher
             DialogResult result = MessageBox.Show("Are you sure you want to clear your current Wii U USB Helper install data?\nThis action cannot be undone.", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.Yes)
             {
-                backgroundThread.Interrupt();
                 Cleanup();
                 ProgressDialog dialog = new ProgressDialog();
                 ProgressBar progressBar = dialog.GetProgressBar();
@@ -405,26 +404,6 @@ namespace USBHelperLauncher
                 }).Start();
                 worker.RunWorkerAsync();
             }
-        }
-
-        private async static void OnDebugMessage(object sender, EventArgs e)
-        {
-            DebugMessage debug = new DebugMessage(logger.GetLog(), proxy.GetLog());
-            if (Control.ModifierKeys == Keys.Shift)
-            {
-                var dialog = new SaveFileDialog()
-                {
-                    Filter = "Log Files (*.log)|*.log",
-                    FileName = string.Format("usbhelperlauncher_{0:yyyy-MM-dd_HH-mm-ss}.log", DateTime.Now)
-                };
-                if (dialog.ShowDialog() == DialogResult.OK)
-                {
-                    File.WriteAllText(dialog.FileName, await debug.Build());
-                }
-                return;
-            }
-            Clipboard.SetText(await debug.PublishAsync());
-            MessageBox.Show("Debug message created and published, the link has been stored in your clipboard.\nProvide this link when reporting an issue.", "Debug message", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private static void OnExportSessions(object sender, EventArgs e)
@@ -543,6 +522,39 @@ namespace USBHelperLauncher
             Buffer.BlockCopy(buffer, 0, key, 0, 16);
             Buffer.BlockCopy(signature, 0, key, 16, 256);
             return Convert.ToBase64String(key);
+        }
+
+        public static async Task GenerateDebugLog()
+        {
+            DebugMessage debug = new DebugMessage(logger.GetLog(), proxy.GetLog());
+            async Task toFile()
+            {
+                var dialog = new SaveFileDialog()
+                {
+                    Filter = "Log Files (*.log)|*.log",
+                    FileName = string.Format("usbhelperlauncher_{0:yyyy-MM-dd_HH-mm-ss}.log", DateTime.Now)
+                };
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    File.WriteAllText(dialog.FileName, await debug.Build());
+                }
+            }
+            if (Control.ModifierKeys == Keys.Shift)
+            {
+                await toFile();
+            }
+
+            try
+            {
+                var url = await debug.PublishAsync();
+                dispatcher.Invoke(new Action(() => Clipboard.SetText(url)));
+                MessageBox.Show("Debug message created and published, the link has been stored in your clipboard.\nProvide this link when reporting an issue.", "Debug message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex) when (ex is HttpRequestException || ex is JsonReaderException)
+            {
+                logger.WriteLine("Could not submit log to Hastebin: {0}", ex);
+                await toFile();
+            }
         }
 
         public static string GetVersion()
