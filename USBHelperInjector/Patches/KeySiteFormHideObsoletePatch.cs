@@ -9,7 +9,7 @@ namespace USBHelperInjector.Patches
     [HarmonyPatch]
     class KeySiteFormHideObsoletePatch
     {
-        static MethodBase TargetMethod()
+        internal static MethodBase TargetMethod()
         {
             return (from method in ReflectionHelper.FrmAskTicket.Type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)
                     where method.GetParameters().Count() == 0
