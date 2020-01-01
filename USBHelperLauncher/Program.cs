@@ -37,6 +37,7 @@ namespace USBHelperLauncher
         public static Logger Logger { get; } = new Logger();
         public static Dispatcher Dispatcher { get; } = Dispatcher.CurrentDispatcher;
         public static Database Database { get; } = new Database();
+        public static LocaleProvider Locale { get; } = new LocaleProvider();
         public static Net.Proxy Proxy { get; } = new Net.Proxy(8877);
         public static Hosts Hosts { get; set; }
         public static Process HelperProcess { get; private set; }
@@ -101,6 +102,21 @@ namespace USBHelperLauncher
                         Settings.Save();
                     }
                 });
+            }
+
+            if (Settings.ShowTranslateNag && Locale.ChosenLocale != LocaleProvider.DefaultLocale)
+            {
+                var localeInfo = Locale.KnownLocales[Locale.ChosenLocale];
+                var translateNag = MessageBox.Show(
+                    string.Format("We are currently looking for volunteers to translate Wii U USB Helper to other languages. " +
+                    "You may be able to contribute by submitting translations for {0} on Crowdin.\nWould you like to open the site?", localeInfo.Name),
+                    "Appeal to Translate", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                if (translateNag == DialogResult.Yes)
+                {
+                    Process.Start("https://crowdin.com/project/wii-u-usb-helper");
+                }
+                Settings.ShowTranslateNag = false;
+                Settings.Save();
             }
 
             string hostsFile = GetHostsFile();
@@ -212,18 +228,42 @@ namespace USBHelperLauncher
             }
 
             Proxy.Start();
+
+            // Update translations
+            var dialog = new ProgressDialog();
+            var worker = dialog.GetWorker();
+            dialog.SetHeader("Updating translations...");
+            new Thread(() => dialog.ShowDialog()).Start();
+            Task.Run(async () =>
+            {
+                try
+                {
+                    if (await Locale.UpdateIfNeeded(dialog))
+                    {
+                        Logger.WriteLine("Updated translations: {0}", Settings.TranslationsBuild);
+                    }
+                    else
+                    {
+                        Logger.WriteLine("Translations were up to date.");
+                    }
+                }
+                catch (WebException e)
+                {
+                    Logger.WriteLine("Could not update translations: {0}", e.Message);
+                }
+            });
+
             ServiceHost host = new ServiceHost(typeof(LauncherService), new Uri("net.pipe://localhost/LauncherService"));
             host.AddServiceEndpoint(typeof(ILauncherService), new NetNamedPipeBinding(), "");
             host.Open();
 
             // Patching
-            ProgressDialog dialog = new ProgressDialog();
-            dialog.SetStyle(ProgressBarStyle.Marquee);
-            dialog.GetProgressBar().MarqueeAnimationSpeed = 30;
-            dialog.SetHeader("Injecting...");
-            new Thread(() => {
-                dialog.ShowDialog();
-            }).Start();
+            dialog.Invoke(new Action(() =>
+            {
+                dialog.SetStyle(ProgressBarStyle.Marquee);
+                dialog.GetProgressBar().MarqueeAnimationSpeed = 30;
+                dialog.SetHeader("Injecting...");
+            }));
             var injector = new ModuleInitInjector(executable);
             executable = Path.Combine(GetLauncherPath(), "Patched.exe");
             injector.Inject(executable);
@@ -281,6 +321,20 @@ namespace USBHelperLauncher
                 EmulatorConfiguration config = EmulatorConfiguration.GetConfiguration(emulator);
                 dlEmulator.MenuItems.Add(config.GetName(), (sender, e) => OnDownloadEmulator(config));
             }
+            MenuItem language = new MenuItem("Language") { RadioCheck = true };
+            foreach (var lang in Locale.AvailableLocales)
+            {
+                language.MenuItems.Add(lang.Value.Native, (sender, e) =>
+                {
+                    Settings.Locale = lang.Key;
+                    Settings.Save();
+                    MessageBox.Show("Your language choice has been saved.\nPlease restart USBHelperLauncher for changes to take effect.", "Restart required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }).Checked = lang.Key == Locale.ChosenLocale;
+            }
+            if (language.MenuItems.Count == 0)
+            {
+                language.MenuItems.Add("No translations found").Enabled = false;
+            }
             MenuItem advanced = new MenuItem("Advanced");
             advanced.MenuItems.Add("Toggle Console", OnVisibilityChange);
             advanced.MenuItems.Add("Clear Install", OnClearInstall);
@@ -291,6 +345,7 @@ namespace USBHelperLauncher
             trayMenu.MenuItems.Add("Check for Updates", OnUpdateCheck);
             trayMenu.MenuItems.Add("Report Issue", async (sender, e) => await GenerateDebugLog());
             trayMenu.MenuItems.Add(dlEmulator);
+            trayMenu.MenuItems.Add(language);
             trayMenu.MenuItems.Add(advanced);
             trayIcon = new NotifyIcon
             {

@@ -31,6 +31,7 @@ namespace USBHelperLauncher
             Exception exception = await TryReachProxy();
             DateTime now = DateTime.UtcNow;
             var hosts = Program.Hosts;
+            var locale = Program.Locale;
             var av = new Dictionary<string, bool>();
             sb.Append('-', 13).Append(" USBHelperLauncher Debug Information ").Append('-', 13).AppendLine();
             sb.AppendLine("Debug Time: " + now + " (UTC)");
@@ -43,6 +44,7 @@ namespace USBHelperLauncher
             sb.AppendLine(".NET Framework Version: " + Get45or451FromRegistry());
             sb.AppendLine("Operating System: " + info.OSFullName);
             sb.AppendLine("Platform: " + info.OSPlatform);
+            sb.AppendLine("Used Locale: " + locale.ChosenLocale);
             sb.AppendLine("System Language: " + info.InstalledUICulture);
             sb.AppendLine("Total Memory: " + info.TotalPhysicalMemory);
             sb.AppendLine("Available Memory: " + info.AvailablePhysicalMemory);

@@ -33,6 +33,7 @@ namespace USBHelperLauncher
             channel.SetDownloaderRetryDelay(Settings.DelayBetweenRetries);
             channel.SetDisableOptionalPatches(Settings.DisableOptionalPatches);
             channel.SetDisableWebSearchTab(Settings.DisableWebSearchTab);
+            channel.SetLocaleFile(Program.Locale.LocaleFile);
             channel.SetHelperVersion(Program.HelperVersion);
             channel.SetPortable(Settings.Portable);
         }

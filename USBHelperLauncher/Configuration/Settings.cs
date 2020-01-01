@@ -35,6 +35,9 @@ namespace USBHelperLauncher.Configuration
         [Setting("Launcher", true)]
         public static bool ShowUpdateNag { get; set; }
 
+        [Setting("Launcher", true)]
+        public static bool ShowTranslateNag { get; set; }
+
         [Setting("Launcher", false)]
         public static bool ShowHostsWarning { get; set; }
 
@@ -46,6 +49,12 @@ namespace USBHelperLauncher.Configuration
 
         [Setting("Launcher", 64 * 1000)]
         public static int SessionSizeLimit { get; set; }
+
+        [Setting("Launcher")]
+        public static string Locale { get; set; }
+
+        [Setting("Launcher")]
+        public static string TranslationsBuild { get; set; }
 
         [Setting("Launcher", forgetful: true)]
         public static Dictionary<string, string> EndpointFallbacks { get; set; } = new Dictionary<string, string>()

@@ -19,7 +19,7 @@ namespace USBHelperLauncher.Properties {
     // a través de una herramienta como ResGen o Visual Studio.
     // Para agregar o quitar un miembro, edite el archivo .ResX y, a continuación, vuelva a ejecutar ResGen
     // con la opción /str o recompile su proyecto de VS.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -67,6 +67,15 @@ namespace USBHelperLauncher.Properties {
             get {
                 object obj = ResourceManager.GetObject("Loading", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a {&quot;af-ZA&quot;: {&quot;name&quot;: &quot;Afrikaans&quot;, &quot;native&quot;: &quot;Afrikaans&quot;}, &quot;ar-SA&quot;: {&quot;name&quot;: &quot;Arabic&quot;, &quot;native&quot;: &quot;اللغة العربية&quot;}, &quot;ast-ES&quot;: {&quot;name&quot;: &quot;Asturian&quot;, &quot;native&quot;: &quot;Asturianu&quot;}, &quot;az-AZ&quot;: {&quot;name&quot;: &quot;Azerbaijani&quot;, &quot;native&quot;: &quot;Azərbaycanca&quot;}, &quot;ba-RU&quot;: {&quot;name&quot;: &quot;Bashkir&quot;, &quot;native&quot;: &quot;Башҡортса&quot;}, &quot;be-BY&quot;: {&quot;name&quot;: &quot;Belarusian&quot;, &quot;native&quot;: &quot;Беларуская&quot;}, &quot;bg-BG&quot;: {&quot;name&quot;: &quot;Bulgarian&quot;, &quot;native&quot;: &quot;Български&quot;}, &quot;br-FR&quot;: {&quot;name&quot;: &quot;Breton&quot;, &quot;native&quot;: &quot;Brezhoneg&quot;}, &quot;ca-ES&quot;: {&quot;name&quot;: &quot;Catalan&quot;, &quot;native&quot;: &quot;Català&quot;}, &quot;cs-CZ&quot;: {&quot;name&quot;:  [resto de la cadena truncado]&quot;;.
+        /// </summary>
+        internal static string Locales {
+            get {
+                return ResourceManager.GetString("Locales", resourceCulture);
             }
         }
     }

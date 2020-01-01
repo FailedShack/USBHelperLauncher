@@ -122,6 +122,7 @@
       <DependentUpon>HostsDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="LauncherService.cs" />
+    <Compile Include="LocaleProvider.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ModuleInitInjector.cs" />
     <Compile Include="Net\CloudEndpoint.cs" />
@@ -165,6 +166,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="localeIndex.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\locales.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="emulators\meta.txt">

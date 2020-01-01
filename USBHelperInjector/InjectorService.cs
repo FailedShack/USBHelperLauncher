@@ -20,6 +20,7 @@ namespace USBHelperInjector
         public static string HelperVersion { get; private set; }
         public static bool Portable { get; private set; }
         public static bool DisableWebSearchTab { get; private set; }
+        public static string LocaleFile { get; private set; }
 
         public static void Init()
         {
@@ -111,6 +112,11 @@ namespace USBHelperInjector
         public void SetDisableWebSearchTab(bool disableWebSearchTab)
         {
             DisableWebSearchTab = disableWebSearchTab;
+        }
+
+        public void SetLocaleFile(string localeFile)
+        {
+            LocaleFile = localeFile;
         }
     }
 }
