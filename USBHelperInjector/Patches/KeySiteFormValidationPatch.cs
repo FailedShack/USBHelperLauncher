@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace USBHelperInjector.Patches
@@ -26,6 +27,17 @@ namespace USBHelperInjector.Patches
         {
             var textBoxes = ReflectionHelper.FrmAskTicket.TextBoxes.Select(x => (Control)x.GetValue(__instance)).ToArray();
             var textBoxWiiU = textBoxes[0];
+
+            if (Regex.IsMatch(textBoxWiiU.Text.Trim(), "^[0-9a-fA-F]{32}$"))
+            {
+                DialogResult result = MessageBox.Show("The text you entered looks like a title key.\nMake sure that you enter the title key website's *address*, not a single title key.\n\nDo you want to continue anyway?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                if (result == DialogResult.No)
+                {
+                    textBoxWiiU.Text = string.Empty;
+                    return false;
+                }
+            }
+
             var baseUri = new UriBuilder(textBoxWiiU.Text).Uri;
             var uri = new Uri(baseUri, "json");
 
