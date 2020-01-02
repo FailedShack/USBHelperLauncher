@@ -71,10 +71,10 @@ namespace USBHelperLauncher.Configuration
         [Setting("Injector", true)]
         public static bool DisableWebSearchTab { get; set; }
 
-        [Setting("Injector", 3)]
+        [Setting("Injector", 5)]
         public static int MaxRetries { get; set; }
 
-        [Setting("Injector", 0)]
+        [Setting("Injector", 1000)]
         public static int DelayBetweenRetries { get; set; }
 
         [Setting("Injector", false)]
