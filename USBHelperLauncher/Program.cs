@@ -101,7 +101,7 @@ namespace USBHelperLauncher
                         Settings.ShowUpdateNag = !updateNag.Checked;
                         Settings.Save();
                     }
-                });
+                }).Wait();
             }
 
             if (Settings.ShowTranslateNag && Locale.ChosenLocale != LocaleProvider.DefaultLocale)
@@ -247,11 +247,11 @@ namespace USBHelperLauncher
                         Logger.WriteLine("Translations were up to date.");
                     }
                 }
-                catch (WebException e)
+                catch (Exception e)
                 {
                     Logger.WriteLine("Could not update translations: {0}", e.Message);
                 }
-            });
+            }).Wait();
 
             ServiceHost host = new ServiceHost(typeof(LauncherService), new Uri("net.pipe://localhost/LauncherService"));
             host.AddServiceEndpoint(typeof(ILauncherService), new NetNamedPipeBinding(), "");

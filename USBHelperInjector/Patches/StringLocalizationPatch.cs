@@ -57,6 +57,9 @@ namespace USBHelperInjector.Patches
 
         static void Postfix(ref string __result)
         {
+            if (index == null || locale == null)
+                return;
+
             string hash;
             using (var md5 = MD5.Create())
             {
