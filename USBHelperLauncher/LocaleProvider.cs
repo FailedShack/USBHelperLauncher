@@ -64,6 +64,7 @@ namespace USBHelperLauncher
                     _availableLocales = KnownLocales
                         .Where(x => locales.Contains(x.Key))
                         .ToDictionary(x => x.Key, x => x.Value);
+                    dirty = false;
                 }
                 return _availableLocales;
             }
