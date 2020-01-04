@@ -292,20 +292,7 @@ namespace USBHelperLauncher
             };
             var process = new Process() { StartInfo = startInfo };
             process.EnableRaisingEvents = true;
-            process.Exited += async (sender, e) =>
-            {
-                if (process.ExitCode != 0)
-                {
-                    Logger.WriteLine("Wii U USB Helper returned non-zero exit code 0x{0:x}:\n{1}", process.ExitCode, process.StandardError.ReadToEnd().Trim()); ;
-                    var result = MessageBox.Show(string.Format("Uh-oh. Wii U USB Helper has crashed unexpectedly.\nDo you want to generate a debug log?\n\nError code: 0x{0:x}", process.ExitCode), "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
-                    if (result == DialogResult.Yes)
-                    {
-                        await GenerateDebugLog();
-                    }
-                }
-                Cleanup();
-                Application.Exit();
-            };
+            process.Exited += OnHelperExit;
             process.Start();
             HelperProcess = process;
 
@@ -357,6 +344,24 @@ namespace USBHelperLauncher
             Application.Run();
         }
 
+        private async static void OnHelperExit(object sender, EventArgs e)
+        {
+            if (HelperProcess.ExitCode != 0)
+            {
+                Logger.WriteLine("Wii U USB Helper returned non-zero exit code 0x{0:x}:\n{1}", HelperProcess.ExitCode, HelperProcess.StandardError.ReadToEnd().Trim());
+                var result = MessageBox.Show(
+                    string.Format("Uh-oh. Wii U USB Helper has crashed unexpectedly." +
+                    "\nDo you want to generate a debug log?\n\nError code: 0x{0:x}", HelperProcess.ExitCode),
+                    "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                if (result == DialogResult.Yes)
+                {
+                    await GenerateDebugLog();
+                }
+            }
+            Cleanup();
+            Application.Exit();
+        }
+
         private static void OnExit(object sender, EventArgs e)
         {
             Cleanup();
@@ -401,6 +406,7 @@ namespace USBHelperLauncher
             DialogResult result = MessageBox.Show("Are you sure you want to clear your current Wii U USB Helper install data?\nThis action cannot be undone.", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.Yes)
             {
+                HelperProcess.Exited -= OnHelperExit;
                 Cleanup();
                 ProgressDialog dialog = new ProgressDialog();
                 ProgressBar progressBar = dialog.GetProgressBar();
