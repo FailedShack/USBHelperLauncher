@@ -29,16 +29,14 @@ namespace USBHelperLauncher.Net
         };
 
         private bool shownCloudWarning;
+        private Buffer<Session> sessions;
         private readonly ushort port;
         private readonly TextWriter log;
-        private readonly Buffer<Session> sessions;
 
         public Proxy(ushort port)
         {
             this.port = port;
             log = new StringWriter();
-            var maxBufferSize = Settings.SessionBufferSize;
-            sessions = maxBufferSize < 0 ? new Buffer<Session>() : new Buffer<Session>(maxBufferSize);
             FiddlerApplication.Log.OnLogString += Log_OnLogString;
             FiddlerApplication.BeforeRequest += FiddlerApplication_BeforeRequest;
             FiddlerApplication.AfterSessionComplete += FiddlerApplication_AfterSessionComplete;
@@ -47,6 +45,7 @@ namespace USBHelperLauncher.Net
 
         public void Start()
         {
+            sessions = new Buffer<Session>(Settings.SessionBufferSize);
             FiddlerApplication.Prefs.SetBoolPref("fiddler.certmaker.CleanupServerCertsOnExit", true);
             FiddlerApplication.CreateProxyEndpoint(7777, true, "localhost");
             FiddlerCoreStartupSettings startupSettings =
