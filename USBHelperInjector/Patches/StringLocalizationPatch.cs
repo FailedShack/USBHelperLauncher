@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using USBHelperInjector.Properties;
 
 namespace USBHelperInjector.Patches
 {
@@ -67,7 +68,16 @@ namespace USBHelperInjector.Patches
                 hash = string.Concat(bytes.Select(x => x.ToString("x2")));
             }
             if (index.TryGetValue(hash, out string key))
-                __result = locale[key];
+            {
+                if (key == "welcome.disclaimer.unused")
+                {
+                    __result = Resources.Disclaimer;
+                }
+                else
+                {
+                    __result = locale[key];
+                }
+            }
         }
 
         static T DeserializeOrDefault<T>(string filename)

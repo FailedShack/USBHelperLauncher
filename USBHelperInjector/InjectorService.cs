@@ -7,9 +7,7 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using USBHelperInjector.Contracts;
-using USBHelperInjector.Patches;
 using USBHelperInjector.Patches.Attributes;
-using USBHelperInjector.Properties;
 
 namespace USBHelperInjector
 {
@@ -24,8 +22,6 @@ namespace USBHelperInjector
 
         public static void Init()
         {
-            MessageBoxPatch.Replace("tp9+kFO7LOSD0AZ5zUBHrA==", Resources.Disclaimer);
-
             var factory = new ChannelFactory<ILauncherService>(new NetNamedPipeBinding(), "net.pipe://localhost/LauncherService");
             LauncherService = factory.CreateChannel();
 
