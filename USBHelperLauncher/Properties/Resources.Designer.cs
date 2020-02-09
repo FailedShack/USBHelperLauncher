@@ -61,6 +61,26 @@ namespace USBHelperLauncher.Properties {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a USBHelperLauncher brought to you by
+        ///!FailedShack
+        ///!shiftinv
+        ///Special thanks to
+        ///!agilly1989
+        ///!ElectroJo
+        ///!Jeret
+        ///!OldManOZ
+        ///!php interpreter
+        ///!RadicalR
+        ///!Renn
+        ///and all our translators!.
+        /// </summary>
+        internal static string Credits {
+            get {
+                return ResourceManager.GetString("Credits", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Loading {

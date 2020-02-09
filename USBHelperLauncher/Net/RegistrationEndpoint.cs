@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 using System.Security.Principal;
+using USBHelperLauncher.Properties;
 
 namespace USBHelperLauncher.Net
 {
@@ -14,7 +15,7 @@ namespace USBHelperLauncher.Net
         public void GetContributors(Session oS)
         {
             oS.utilCreateResponseAndBypassServer();
-            oS.utilSetResponseBody("USBHelperLauncher made by\n!FailedShack\n© 2018");
+            oS.utilSetResponseBody(Resources.Credits);
             Proxy.LogRequest(oS, this, "Sent credits.");
         }
 
