@@ -1,5 +1,4 @@
-﻿using Harmony;
-using Harmony.ILCopying;
+﻿using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -19,7 +18,7 @@ namespace USBHelperInjector.Patches
             return (from method in ReflectionHelper.NusGrabberForm.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
                     where method.GetParameters().Length == 1
                     && method.GetParameters()[0].ParameterType.IsAbstract
-                    let instructions = MethodBodyReader.GetInstructions(null, method)
+                    let instructions = PatchProcessor.GetOriginalInstructions(method, out _)
                     where instructions.Any(i => i.opcode == OpCodes.Callvirt && ((MethodInfo)i.operand) == shwGetter)
                     select method).FirstOrDefault();
         }

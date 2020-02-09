@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using System;
 using System.Linq;
 using System.Net;
@@ -31,20 +31,11 @@ namespace USBHelperInjector
 
             LauncherService.SendInjectorSettings();
 
-            var harmony = HarmonyInstance.Create("me.failedshack.usbhelperinjector");
+            var harmony = new Harmony("me.failedshack.usbhelperinjector");
             var assembly = Assembly.GetExecutingAssembly();
             assembly.GetTypes()
                 .Where(type => VersionSpecific.Applies(type, HelperVersion) && !(Overrides.DisableOptionalPatches && Optional.IsOptional(type)))
-                .Do(type =>
-                {
-                    var parentMethodInfos = type.GetHarmonyMethods();
-                    if (parentMethodInfos != null && parentMethodInfos.Count() > 0)
-                    {
-                        var info = HarmonyMethod.Merge(parentMethodInfos);
-                        var processor = new PatchProcessor(harmony, type, info);
-                        processor.Patch();
-                    }
-                });
+                .Do(type => harmony.ProcessorForAnnotatedClass(type).Patch());
         }
 
         public void ForceKeySiteForm()

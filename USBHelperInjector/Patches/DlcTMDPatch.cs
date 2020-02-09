@@ -1,5 +1,4 @@
-﻿using Harmony;
-using Harmony.ILCopying;
+﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;

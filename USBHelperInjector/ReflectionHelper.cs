@@ -1,4 +1,4 @@
-﻿using Harmony.ILCopying;
+﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,7 +59,7 @@ namespace USBHelperInjector
                     if (_okButtonHandler == null)
                     {
                         _okButtonHandler = (from method in Type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                                            let instructions = MethodBodyReader.GetInstructions(null, method)
+                                            let instructions = PatchProcessor.GetOriginalInstructions(method, out _)
                                             where instructions.Any(x => x.opcode == OpCodes.Call && ((MethodInfo)x.operand).Name == "set_FileLocation3DS")
                                             && instructions.Any(x => x.opcode == OpCodes.Ldfld && ((FieldInfo)x.operand).FieldType.Name == "RadTextBox")
                                             select method).FirstOrDefault();
@@ -75,7 +75,7 @@ namespace USBHelperInjector
                 {
                     if (_textBoxes == null)
                     {
-                        _textBoxes = (from instruction in MethodBodyReader.GetInstructions(null, OkButtonHandler)
+                        _textBoxes = (from instruction in PatchProcessor.GetOriginalInstructions(OkButtonHandler, out _)
                                       where instruction.opcode == OpCodes.Ldfld
                                       let field = (FieldInfo)instruction.operand
                                       where field.FieldType.Name == "RadTextBox"
