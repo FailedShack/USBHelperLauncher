@@ -49,17 +49,14 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BasicFormatsForCore">
-      <HintPath>..\..\..\..\Documents\FiddlerCoreAPI\BasicFormatsForCore.dll</HintPath>
+    <Reference Include="BCMakeCert, Version=2.0.9.0, Culture=neutral, PublicKeyToken=67cb91587178ac5a, processorArchitecture=MSIL">
+      <HintPath>..\packages\BCMakeCert.2.0.9\lib\net40\BCMakeCert.dll</HintPath>
     </Reference>
-    <Reference Include="BCMakeCert">
-      <HintPath>..\..\..\..\Documents\FiddlerCoreAPI\BCMakeCert.dll</HintPath>
+    <Reference Include="DotNetZip, Version=1.13.4.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetZip.1.13.4\lib\net40\DotNetZip.dll</HintPath>
     </Reference>
-    <Reference Include="CertMaker">
-      <HintPath>..\..\..\..\Documents\FiddlerCoreAPI\CertMaker.dll</HintPath>
-    </Reference>
-    <Reference Include="FiddlerCore4">
-      <HintPath>..\..\..\..\Documents\FiddlerCoreAPI\FiddlerCore4.dll</HintPath>
+    <Reference Include="FiddlerCore, Version=5.0.0.0, Culture=neutral, PublicKeyToken=67cb91587178ac5a, processorArchitecture=MSIL">
+      <HintPath>..\packages\FiddlerCore.Trial.5.0.0\lib\net45\FiddlerCore.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -69,6 +66,7 @@
       <HintPath>..\packages\SharpCompress.0.18.2\lib\net45\SharpCompress.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -84,6 +82,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="Telerik.NetworkConnections, Version=0.2.0.0, Culture=neutral, PublicKeyToken=67cb91587178ac5a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Telerik.NetworkConnections.0.2.0\lib\net40\Telerik.NetworkConnections.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
@@ -175,6 +176,9 @@
     <None Include="emulators\meta.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Content Include="BasicFormatsForCore.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Icon.ico" />
     <Content Include="innounp.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
