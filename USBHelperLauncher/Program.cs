@@ -265,7 +265,7 @@ namespace USBHelperLauncher
                 dialog.SetHeader("Injecting...");
             }));
             var injector = new ModuleInitInjector(executable);
-            executable = Path.Combine(GetLauncherPath(), "Patched.exe");
+            executable = Path.Combine(GetLauncherPath(), "WiiU_USB_Helper_.exe");
             injector.Inject(executable);
             Logger.WriteLine("Injected module initializer.");
             dialog.Invoke(new Action(() => dialog.Close()));
