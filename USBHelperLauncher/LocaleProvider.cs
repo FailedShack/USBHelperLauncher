@@ -29,7 +29,7 @@ namespace USBHelperLauncher
         {
             get
             {
-                var userLocale = Settings.Locale ?? CultureInfo.InstalledUICulture.Name;
+                var userLocale = Settings.Locale ?? CultureInfo.CurrentUICulture.Name;
                 return AvailableLocales.ContainsKey(userLocale) ? userLocale : DefaultLocale;
             }
         }

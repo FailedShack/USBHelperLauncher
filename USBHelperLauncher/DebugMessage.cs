@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Management;
 using System.Net;
@@ -45,7 +46,7 @@ namespace USBHelperLauncher
             sb.AppendLine("Operating System: " + info.OSFullName);
             sb.AppendLine("Platform: " + info.OSPlatform);
             sb.AppendLine("Used Locale: " + locale.ChosenLocale);
-            sb.AppendLine("System Language: " + info.InstalledUICulture);
+            sb.AppendLine("System Language: " + CultureInfo.CurrentUICulture.Name);
             sb.AppendLine("Total Memory: " + info.TotalPhysicalMemory);
             sb.AppendLine("Available Memory: " + info.AvailablePhysicalMemory);
             TryCatch(() => GetAntiVirus(ref av), e => sb.AppendLine("Antivirus Software: Error (" + e.Message + ")"));
