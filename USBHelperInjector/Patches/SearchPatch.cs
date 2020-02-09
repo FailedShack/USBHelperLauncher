@@ -14,7 +14,7 @@ namespace USBHelperInjector.Patches
         // we patch it in order to fix cases such as 'Pokemon' vs 'Pokémon'.
         static MethodBase TargetMethod()
         {
-            return (from type in ReflectionHelper.NusGrabberForm.GetNestedTypes(BindingFlags.NonPublic | BindingFlags.Instance)
+            return (from type in ReflectionHelper.NusGrabberForm.Type.GetNestedTypes(BindingFlags.NonPublic | BindingFlags.Instance)
                     where type.GetFields().Length == 1 && type.GetFields()[0].FieldType == typeof(string)
                     from method in type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
                     where method.ReturnType == typeof(bool)

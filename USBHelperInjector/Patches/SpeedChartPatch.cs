@@ -12,7 +12,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return (from method in ReflectionHelper.NusGrabberForm.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+            return (from method in ReflectionHelper.NusGrabberForm.Type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
                     where method.ReturnType == typeof(void) && method.GetParameters().Length == 0
                     && method.GetMethodBody().LocalVariables.Count == 1 && method.GetMethodBody().LocalVariables[0].LocalType == typeof(System.TimeSpan)
                     select method).FirstOrDefault();

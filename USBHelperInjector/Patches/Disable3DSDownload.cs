@@ -15,7 +15,7 @@ namespace USBHelperInjector.Patches
         internal static MethodBase TargetMethod()
         {
             var shwGetter = ReflectionHelper.Settings.GetProperty("ShowHaxchiWarning").GetGetMethod();
-            return (from method in ReflectionHelper.NusGrabberForm.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+            return (from method in ReflectionHelper.NusGrabberForm.Type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
                     where method.GetParameters().Length == 1
                     && method.GetParameters()[0].ParameterType.IsAbstract
                     let instructions = PatchProcessor.GetOriginalInstructions(method, out _)
@@ -52,7 +52,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return (from method in ReflectionHelper.NusGrabberForm.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+            return (from method in ReflectionHelper.NusGrabberForm.Type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
                     where method.GetParameters().Length == 1
                     && method.GetParameters()[0].ParameterType.GetProperty("Dlc") != null
                     && method.GetMethodBody().LocalVariables.Count == 0
@@ -73,7 +73,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return (from method in ReflectionHelper.NusGrabberForm.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+            return (from method in ReflectionHelper.NusGrabberForm.Type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
                     where method.GetParameters().Length == 1
                     && method.GetParameters()[0].ParameterType.GetProperty("Dlc") != null
                     && method.GetMethodBody().LocalVariables.Count == 2

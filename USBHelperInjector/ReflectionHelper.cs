@@ -26,28 +26,53 @@ namespace USBHelperInjector
             }
         }
 
-        public static Type NusGrabberForm
+        public static class NusGrabberForm
         {
-            get
-            {
-                return (from type in assembly.GetTypes()
-                        where typeof(Form).IsAssignableFrom(type)
-                        from prop in type.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)
-                        where prop.Name == "Proxy"
-                        select type).FirstOrDefault();
-            }
-        }
-
-
-        public static class FrmAskTicket
-        {
+            private static Type _type;
             public static Type Type
             {
                 get
                 {
-                    return (from type in ReflectionHelper.Types
-                            where type.GetProperty("FileLocationWiiU") != null
-                            select type).FirstOrDefault();
+                    if (_type == null)
+                    {
+                        _type = (from type in Types
+                                 where typeof(Form).IsAssignableFrom(type)
+                                 from prop in type.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)
+                                 where prop.Name == "Proxy"
+                                 select type).FirstOrDefault();
+                    }
+                    return _type;
+                }
+            }
+
+            private static ConstructorInfo _constructor;
+            public static ConstructorInfo Constructor
+            {
+                get
+                {
+                    if (_constructor == null)
+                    {
+                        _constructor = Type.GetConstructor(Type.EmptyTypes);
+                    }
+                    return _constructor;
+                }
+            }
+        }
+
+        public static class FrmAskTicket
+        {
+            private static Type _type;
+            public static Type Type
+            {
+                get
+                {
+                    if (_type == null)
+                    {
+                        _type = (from type in Types
+                                 where type.GetProperty("FileLocationWiiU") != null
+                                 select type).FirstOrDefault();
+                    }
+                    return _type;
                 }
             }
 

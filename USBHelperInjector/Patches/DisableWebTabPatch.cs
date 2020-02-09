@@ -11,13 +11,13 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return ReflectionHelper.NusGrabberForm.GetConstructor(Type.EmptyTypes);
+            return ReflectionHelper.NusGrabberForm.Constructor;
         }
 
         static void Postfix(object __instance)
         {
             if (!InjectorService.DisableWebSearchTab) return;
-            var fields = ReflectionHelper.NusGrabberForm.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+            var fields = ReflectionHelper.NusGrabberForm.Type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
             var toolWebField = (from field in fields
                                 where field.FieldType.Name == "ToolWindow"
                                 where ((Control)field.GetValue(__instance)).Name == "toolWeb"

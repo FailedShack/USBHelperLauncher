@@ -15,7 +15,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return (from method in ReflectionHelper.NusGrabberForm.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+            return (from method in ReflectionHelper.NusGrabberForm.Type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
                     where method.GetParameters().Select(p => p.ParameterType).SequenceEqual(new[] { typeof(string) })
                     && method.ReturnType == typeof(byte[])
                     select method).FirstOrDefault();

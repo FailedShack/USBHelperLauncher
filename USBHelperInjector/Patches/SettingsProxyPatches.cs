@@ -9,7 +9,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return AccessTools.DeclaredProperty(ReflectionHelper.NusGrabberForm, "Proxy").GetGetMethod(true);
+            return AccessTools.DeclaredProperty(ReflectionHelper.NusGrabberForm.Type, "Proxy").GetGetMethod(true);
         }
 
         static bool Prefix(ref WebProxy __result)
@@ -28,7 +28,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return AccessTools.DeclaredProperty(ReflectionHelper.NusGrabberForm, "Proxy").GetSetMethod(true);
+            return AccessTools.DeclaredProperty(ReflectionHelper.NusGrabberForm.Type, "Proxy").GetSetMethod(true);
         }
 
         static bool Prefix(ref WebProxy value)
