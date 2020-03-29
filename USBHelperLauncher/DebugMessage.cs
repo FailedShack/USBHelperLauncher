@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using USBHelperLauncher.Configuration;
 
@@ -71,13 +72,14 @@ namespace USBHelperLauncher
             return sb;
         }
 
-        public async Task<string> PublishAsync()
+        public async Task<string> PublishAsync(TimeSpan? timeout = null)
         {
             using (var client = new HttpClient())
             {
-                StringContent content = new StringContent(await Build(), Encoding.UTF8, "application/x-www-form-urlencoded");
-                var response = await client.PostAsync("https://hastebin.com/documents", content);
-                JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
+                var content = new StringContent(await Build(), Encoding.UTF8, "application/x-www-form-urlencoded");
+                var cancel = new CancellationTokenSource(timeout ?? TimeSpan.FromMilliseconds(-1));
+                var response = await client.PostAsync("https://hastebin.com/documents", content, cancel.Token);
+                var json = JObject.Parse(await response.Content.ReadAsStringAsync());
                 return "https://hastebin.com/" + (string)json["key"];
             }
         }
