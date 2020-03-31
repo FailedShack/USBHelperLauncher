@@ -564,8 +564,12 @@ namespace USBHelperLauncher
         {
             if (!HelperProcess.HasExited)
             {
-                killed = true;
-                HelperProcess.Kill();
+                HelperProcess.CloseMainWindow();
+                if (!HelperProcess.WaitForExit(500))
+                {
+                    killed = true;
+                    HelperProcess.Kill();
+                }
             }
             if (Proxy != null)
             {

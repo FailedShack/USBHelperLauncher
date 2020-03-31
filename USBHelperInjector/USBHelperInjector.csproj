@@ -40,6 +40,8 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
@@ -63,7 +65,8 @@
     <Compile Include="Patches\DownloaderPatch.cs" />
     <Compile Include="Patches\DownloaderQueuePatch.cs" />
     <Compile Include="Patches\EasterEggFontPatch.cs" />
-    <Compile Include="Patches\NusGrabberFormTaskbarPatch.cs" />
+    <Compile Include="Patches\MoviePlaybackPatch.cs" />
+    <Compile Include="Patches\NusGrabberFormPatch.cs" />
     <Compile Include="Patches\PortablePatches.cs" />
     <Compile Include="Patches\ForceKeySiteFormPatch.cs" />
     <Compile Include="Patches\KeySiteFormHideObsoletePatch.cs" />
