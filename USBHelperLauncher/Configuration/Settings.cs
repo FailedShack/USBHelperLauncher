@@ -80,6 +80,9 @@ namespace USBHelperLauncher.Configuration
         [Setting("Injector", false)]
         public static bool Portable { get; set; }
 
+        [Setting("Injector", false)]
+        public static bool ForceHttp { get; set; }
+
         public static void Save()
         {
             DoNotModify = Program.GetVersion();
@@ -113,7 +116,7 @@ namespace USBHelperLauncher.Configuration
             {
                 conf = new JObject();
             }
-            foreach (var setting in Properties.OrderByDescending(x => x.Key.Name == "DoNotModify"))
+            foreach (var setting in Properties.OrderByDescending(x => x.Key.Name == nameof(DoNotModify)))
             {
                 var forget = setting.Value.Forgetful && DoNotModify != Program.GetVersion();
                 var token = conf.SelectToken(string.Join(".", setting.Value.Section, setting.Key.Name));

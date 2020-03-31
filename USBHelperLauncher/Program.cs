@@ -120,6 +120,23 @@ namespace USBHelperLauncher
                 Settings.Save();
             }
 
+            var certs = new DirectoryInfo("certs");
+            if (certs.Exists)
+            {
+                foreach (var file in certs.EnumerateFiles().Where(x => x.Length > 0))
+                {
+                    try
+                    {
+                        Proxy.CertificateStore.Import(file.FullName);
+                    }
+                    catch (CryptographicException)
+                    {
+                        MessageBox.Show(string.Format("{0} is not a valid certificate file.", file.Name, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error));
+                        Environment.Exit(-1);
+                    }
+                }
+            }
+
             string hostsFile = GetHostsFile();
             if (File.Exists(hostsFile))
             {
@@ -171,13 +188,13 @@ namespace USBHelperLauncher
             catch (FileNotFoundException e)
             {
                 MessageBox.Show(e.Message + "\nMake sure this file is under the data directory.", "Initialization error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                Environment.Exit(-1);
             }
 
             if (!File.Exists("ver") || !File.Exists("WiiU_USB_Helper.exe"))
             {
                 MessageBox.Show("Could not find Wii U USB Helper, please make sure this executable is in the correct folder.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                Environment.Exit(-1);
             }
             HelperVersion = File.ReadAllLines("ver")[0];
 
@@ -208,10 +225,10 @@ namespace USBHelperLauncher
                 Logger.WriteLine("Removed broken key container: {0}", keyContainer);
             }
 
-            if (!CertMaker.rootCertExists() && !CertMaker.createRootCert())
+            if (!Settings.ForceHttp && !CertMaker.rootCertExists() && !CertMaker.createRootCert())
             {
                 MessageBox.Show("Creation of the interception certificate failed.", "Unable to generate certificate.", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                Environment.Exit(-1);
             }
 
             string executable = Path.Combine(GetLauncherPath(), "WiiU_USB_Helper.exe");
@@ -314,6 +331,11 @@ namespace USBHelperLauncher
             if (Settings.DisableOptionalPatches)
             {
                 Logger.WriteLine("Optional patches have been disabled.");
+            }
+
+            if (Settings.ForceHttp)
+            {
+                Logger.WriteLine("Requests will be proxied over plain HTTP.");
             }
 
             ContextMenu trayMenu = new ContextMenu();

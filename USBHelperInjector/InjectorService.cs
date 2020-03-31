@@ -17,6 +17,7 @@ namespace USBHelperInjector
         public static X509Certificate2 CaCert { get; private set; }
         public static string HelperVersion { get; private set; }
         public static bool Portable { get; private set; }
+        public static bool ForceHttp { get; private set; }
         public static bool DisableWebSearchTab { get; private set; }
         public static string LocaleFile { get; private set; }
 
@@ -94,6 +95,11 @@ namespace USBHelperInjector
         public void SetPortable(bool portable)
         {
             Portable = portable;
+        }
+
+        public void SetForceHttp(bool forceHttp)
+        {
+            ForceHttp = forceHttp;
         }
 
         public void SetDisableWebSearchTab(bool disableWebSearchTab)

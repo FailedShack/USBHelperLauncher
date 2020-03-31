@@ -5,6 +5,8 @@ using System.IO.Compression;
 using System.Net;
 using System.Net.Mime;
 using System.Text;
+using USBHelperLauncher.Configuration;
+using USBHelperLauncher.Utils;
 
 namespace USBHelperLauncher.Net
 {
@@ -29,35 +31,35 @@ namespace USBHelperLauncher.Net
         {
             var data = GetRequestData(oS);
             byte[] bytes = Convert.FromBase64String(data.Get("url"));
-            string url = Encoding.UTF8.GetString(bytes);
+            Uri uri = new Uri(Encoding.UTF8.GetString(bytes));
 
             string content;
-            using (WebClient client = new WebClient())
+            using (var resp = Program.Proxy.Get(uri).GetResponse())
             {
-                client.Proxy = Program.Proxy.GetWebProxy();
-                byte[] responseBytes;
+                var contentType = new ContentType(resp.Headers["Content-Type"]);
+                var encoding = Encoding.GetEncoding(contentType.CharSet ?? "UTF-8");
                 try
                 {
-                    responseBytes = client.DownloadData(url);
-                }
-                catch (WebException webEx)
-                {
-                    Proxy.LogRequest(oS, this, "Unable to download data from " + url + ": " + webEx);
-                    oS.utilCreateResponseAndBypassServer();
-                    if (webEx.Status == WebExceptionStatus.ProtocolError)
+                    using (var reader = new StreamReader(resp.GetResponseStream(), encoding))
                     {
-                        var response = (HttpWebResponse)webEx.Response;
+                        content = reader.ReadToEnd();
+                    }
+                }
+                catch (WebException e)
+                {
+                    Proxy.LogRequest(oS, this, "Unable to download data from " + uri.ToString() + ": " + e);
+                    oS.utilCreateResponseAndBypassServer();
+                    if (e.Status == WebExceptionStatus.ProtocolError)
+                    {
+                        var response = (HttpWebResponse)e.Response;
                         oS.oResponse.headers.SetStatus((int)response.StatusCode, response.StatusDescription);
                     }
                     else
                     {
-                        oS.oResponse.headers.SetStatus(500, "Internal Server Error: " + webEx.Status);
+                        oS.oResponse.headers.SetStatus(500, "Internal Server Error: " + e.Status);
                     }
                     return;
                 }
-
-                var contentType = new ContentType(client.ResponseHeaders["Content-Type"]);
-                content = Encoding.GetEncoding(contentType.CharSet ?? "UTF-8").GetString(responseBytes);
             }
 
             MemoryStream stream = new MemoryStream();
@@ -74,7 +76,7 @@ namespace USBHelperLauncher.Net
             oS.utilCreateResponseAndBypassServer();
             oS.oResponse["Content-Length"] = dataBytes.Length.ToString();
             oS.responseBodyBytes = dataBytes;
-            Proxy.LogRequest(oS, this, "Created zip from " + url);
+            Proxy.LogRequest(oS, this, "Created zip from " + uri.ToString());
         }
 
         [Request("/requestZipHash.php")]

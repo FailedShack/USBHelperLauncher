@@ -36,6 +36,7 @@ namespace USBHelperLauncher
             channel.SetLocaleFile(Program.Locale.LocaleFile);
             channel.SetHelperVersion(Program.HelperVersion);
             channel.SetPortable(Settings.Portable);
+            channel.SetForceHttp(Settings.ForceHttp);
         }
     }
 }

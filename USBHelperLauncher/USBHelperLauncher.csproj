@@ -162,11 +162,15 @@
     <Compile Include="Utils\CitraRepoUtil.cs" />
     <Compile Include="Utils\GithubUtil.cs" />
     <Compile Include="Utils\IOUtil.cs" />
+    <Compile Include="Utils\RedirectRequest.cs" />
     <Compile Include="Utils\SourceforgeUtil.cs" />
     <Compile Include="Utils\WinUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="certs\ADD SERVER CERTIFICATES HERE">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="localeIndex.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

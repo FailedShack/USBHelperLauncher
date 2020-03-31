@@ -8,6 +8,7 @@ using System.Linq;
 using System.Management;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -55,6 +56,8 @@ namespace USBHelperLauncher
             AppendDictionary(sb, "Hosts", hosts.GetHosts().ToDictionary(x => x, x => hosts.Get(x).ToString()));
             AppendDictionary(sb, "Endpoint Fallbacks", Settings.EndpointFallbacks);
             AppendDictionary(sb, "Key Sites", Settings.TitleKeys);
+            AppendDictionary(sb, "Server Certificates", Program.Proxy.CertificateStore.Cast<X509Certificate2>()
+                .ToDictionary(x => x.GetNameInfo(X509NameType.SimpleName, false), x => x.Thumbprint), format: "{0} ({1})");
             sb.Append('-', 26).Append(" Log Start ").Append('-', 26).AppendLine();
             sb.Append(log);
             sb.Append('-', 22).Append(" Fiddler Log Start ").Append('-', 22).AppendLine();
@@ -62,12 +65,12 @@ namespace USBHelperLauncher
             return sb.ToString();
         }
 
-        private StringBuilder AppendDictionary(StringBuilder sb, string header, Dictionary<string, string> dict)
+        private StringBuilder AppendDictionary(StringBuilder sb, string header, Dictionary<string, string> dict, string format = null)
         {
             if (dict.Count() > 0)
             {
                 sb.Append(header).AppendLine(":");
-                dict.ToList().ForEach(x => sb.AppendFormat("{0} -> {1}", x.Key, x.Value).AppendLine());
+                dict.ToList().ForEach(x => sb.AppendFormat(format ?? "{0} -> {1}", x.Key, x.Value).AppendLine());
             }
             return sb;
         }

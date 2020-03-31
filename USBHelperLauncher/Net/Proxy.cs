@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
@@ -33,10 +35,13 @@ namespace USBHelperLauncher.Net
         private readonly ushort port;
         private readonly TextWriter log;
 
+        public X509Certificate2Collection CertificateStore { get; }
+
         public Proxy(ushort port)
         {
             this.port = port;
             log = new StringWriter();
+            CertificateStore = new X509Certificate2Collection();
             FiddlerApplication.Log.OnLogString += Log_OnLogString;
             FiddlerApplication.BeforeRequest += FiddlerApplication_BeforeRequest;
             FiddlerApplication.AfterSessionComplete += FiddlerApplication_AfterSessionComplete;
@@ -46,6 +51,29 @@ namespace USBHelperLauncher.Net
         public void Start()
         {
             sessions = new Buffer<Session>(Settings.SessionBufferSize);
+            FiddlerApplication.OnValidateServerCertificate += (sender, args) =>
+            {
+                var errors = args.CertificatePolicyErrors;
+
+                // No need to re-verify
+                if (errors == SslPolicyErrors.None)
+                    return;
+
+                if ((errors & SslPolicyErrors.RemoteCertificateNotAvailable) > 0
+                || (errors & SslPolicyErrors.RemoteCertificateNameMismatch) > 0)
+                    return;
+
+                var remoteChain = args.ServerCertificateChain;
+                var chain = new X509Chain();
+                var policy = chain.ChainPolicy;
+                policy.RevocationMode = X509RevocationMode.NoCheck;
+                policy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
+                policy.ExtraStore.AddRange(CertificateStore);
+                if (chain.Build(remoteChain.ChainElements[0].Certificate))
+                {
+                    args.ValidityState = CertificateValidity.ForceValid;
+                }
+            };
             FiddlerApplication.Prefs.SetBoolPref("fiddler.certmaker.CleanupServerCertsOnExit", true);
             FiddlerApplication.CreateProxyEndpoint(7777, true, "localhost");
             FiddlerCoreStartupSettings startupSettings =
@@ -61,7 +89,12 @@ namespace USBHelperLauncher.Net
         {
             if (oS.HTTPMethodIs("CONNECT"))
             {
-                if (oS.hostname.EndsWith("wiiuusbhelper.com"))
+                if (Settings.ForceHttp)
+                {
+                    oS.utilCreateResponseAndBypassServer();
+                    oS.oResponse.headers.SetStatus(400, "Bad Request");
+                }
+                else if (oS.hostname.EndsWith("wiiuusbhelper.com"))
                 {
                     oS.oFlags["X-ReplyWithTunnel"] = "Fake for HTTPS Tunnel";
                 }
@@ -70,6 +103,13 @@ namespace USBHelperLauncher.Net
                     oS.oFlags["x-no-decrypt"] = "Passthrough for non-relevant hosts";
                 }
                 return;
+            }
+
+            var forwardedScheme = oS.RequestHeaders["X-Forwarded-Proto"];
+            if (!string.IsNullOrEmpty(forwardedScheme))
+            {
+                oS.RequestHeaders.UriScheme = forwardedScheme;
+                oS.RequestHeaders.Remove("X-Forwarded-Proto");
             }
 
             if (Program.Hosts.GetHosts().Contains(oS.hostname))
@@ -216,6 +256,27 @@ namespace USBHelperLauncher.Net
             oS.oResponse["Location"] = url;
             LogRequest(oS, endpoint, "Redirecting to " + url);
             return true;
+        }
+
+        public RedirectRequest Get(Uri uri)
+        {
+            var request = new RedirectRequest(uri) { Proxy = GetWebProxy() };
+            if (Settings.ForceHttp)
+            {
+                request.BeforeSubmit += (sender, args) =>
+                {
+                    if (request.Uri.Scheme == Uri.UriSchemeHttps)
+                    {
+                        request.Uri = new UriBuilder(request.Uri) { Scheme = Uri.UriSchemeHttp }.Uri;
+                        request.Headers["X-Forwarded-Proto"] = Uri.UriSchemeHttps;
+                    }
+                    else
+                    {
+                        request.Headers.Remove("X-Forwarded-Proto");
+                    }
+                };
+            }
+            return request;
         }
 
         public List<string> GetConflictingHosts()
