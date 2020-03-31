@@ -36,7 +36,7 @@ namespace USBHelperInjector
             var assembly = Assembly.GetExecutingAssembly();
             assembly.GetTypes()
                 .Where(type => VersionSpecific.Applies(type, HelperVersion) && !(Overrides.DisableOptionalPatches && Optional.IsOptional(type)))
-                .Do(type => harmony.ProcessorForAnnotatedClass(type).Patch());
+                .Do(type => harmony.CreateClassProcessor(type).Patch());
         }
 
         public void ForceKeySiteForm()
