@@ -45,7 +45,7 @@ namespace USBHelperLauncher
             sb.AppendLine("Version: " + Program.GetVersion());
             sb.AppendLine("Helper Version: " + Program.HelperVersion);
             sb.AppendLine(".NET Framework Version: " + Get45or451FromRegistry());
-            sb.AppendLine("Operating System: " + info.OSFullName);
+            sb.AppendFormat("Operating System: {0} ({1}-bit)", info.OSFullName, Environment.Is64BitOperatingSystem ? 64 : 32).AppendLine();
             sb.AppendLine("Platform: " + info.OSPlatform);
             sb.AppendLine("Used Locale: " + locale.ChosenLocale);
             sb.AppendLine("System Language: " + CultureInfo.CurrentUICulture.Name);
