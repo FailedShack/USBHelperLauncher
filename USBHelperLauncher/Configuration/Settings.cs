@@ -83,6 +83,9 @@ namespace USBHelperLauncher.Configuration
         [Setting("Injector", false)]
         public static bool ForceHttp { get; set; }
 
+        [Setting("Injector", false)]
+        public static bool NoFunAllowed { get; set; }
+
         public static void Save()
         {
             DoNotModify = Program.GetVersion();

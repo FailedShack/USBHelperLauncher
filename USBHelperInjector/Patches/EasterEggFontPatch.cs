@@ -12,7 +12,7 @@ namespace USBHelperInjector.Patches
     {
         private static string fontName;
 
-        static EasterEggFontPatch()
+        static bool Prepare()
         {
             if (DateTime.Now.Month == 4 && DateTime.Now.Day == 1)
             {
@@ -24,6 +24,7 @@ namespace USBHelperInjector.Patches
                     fontName = name;
                 }
             }
+            return InjectorService.FunAllowed;
         }
 
         static MethodBase TargetMethod()

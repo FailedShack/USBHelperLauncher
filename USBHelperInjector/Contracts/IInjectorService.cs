@@ -39,6 +39,9 @@ namespace USBHelperInjector.Contracts
         void SetForceHttp(bool forceHttp);
 
         [OperationContract]
+        void SetFunAllowed(bool funAllowed);
+
+        [OperationContract]
         void SetDisableWebSearchTab(bool disableWebSearchTab);
 
         [OperationContract]

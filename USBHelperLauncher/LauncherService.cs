@@ -37,6 +37,7 @@ namespace USBHelperLauncher
             channel.SetHelperVersion(Program.HelperVersion);
             channel.SetPortable(Settings.Portable);
             channel.SetForceHttp(Settings.ForceHttp);
+            channel.SetFunAllowed(!Settings.NoFunAllowed);
         }
     }
 }

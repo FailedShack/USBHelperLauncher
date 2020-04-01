@@ -18,6 +18,7 @@ namespace USBHelperInjector
         public static string HelperVersion { get; private set; }
         public static bool Portable { get; private set; }
         public static bool ForceHttp { get; private set; }
+        public static bool FunAllowed { get; private set; }
         public static bool DisableWebSearchTab { get; private set; }
         public static string LocaleFile { get; private set; }
 
@@ -100,6 +101,11 @@ namespace USBHelperInjector
         public void SetForceHttp(bool forceHttp)
         {
             ForceHttp = forceHttp;
+        }
+
+        public void SetFunAllowed(bool funAllowed)
+        {
+            FunAllowed = funAllowed;
         }
 
         public void SetDisableWebSearchTab(bool disableWebSearchTab)
