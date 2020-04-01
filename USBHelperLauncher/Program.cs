@@ -225,6 +225,7 @@ namespace USBHelperLauncher
                 Logger.WriteLine("Removed broken key container: {0}", keyContainer);
             }
 
+            CertMaker.oCertProvider = new BCCertMaker.BCCertMaker(); // Don't try to load CertMaker.dll
             if (!Settings.ForceHttp && !CertMaker.rootCertExists() && !CertMaker.createRootCert())
             {
                 MessageBox.Show("Creation of the interception certificate failed.", "Unable to generate certificate.", MessageBoxButtons.OK, MessageBoxIcon.Error);
