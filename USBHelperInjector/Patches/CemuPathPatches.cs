@@ -20,7 +20,8 @@ namespace USBHelperInjector.Patches
 
         static void Postfix(object __instance, ref string __result)
         {
-            if (GetCemuVersion(__instance) >= new Version(1, 15, 11))
+            var version = GetCemuVersion(__instance);
+            if (version == null || version >= new Version(1, 15, 11))
             {
                 __result = TryRewriteAndMoveDirectory(__result, "0005000e");
             }
@@ -59,6 +60,10 @@ namespace USBHelperInjector.Patches
         internal static Version GetCemuVersion(object instance)
         {
             var executable = (string)AccessTools.Method(TargetMethod().DeclaringType, "GetExecutable").Invoke(instance, null);
+            if (!File.Exists(executable))
+            {
+                return null;
+            }
             var versionInfo = FileVersionInfo.GetVersionInfo(executable);
             return new Version(versionInfo.ProductMajorPart, versionInfo.ProductMinorPart, versionInfo.ProductBuildPart, versionInfo.ProductPrivatePart);
         }
@@ -74,7 +79,8 @@ namespace USBHelperInjector.Patches
 
         static void Postfix(object __instance, ref string __result)
         {
-            if (CemuUpdatePathPatch.GetCemuVersion(__instance) >= new Version(1, 15, 11))
+            var version = CemuUpdatePathPatch.GetCemuVersion(__instance);
+            if (version == null || version >= new Version(1, 15, 11))
             {
                 __result = CemuUpdatePathPatch.TryRewriteAndMoveDirectory(__result, "0005000c");
             }
