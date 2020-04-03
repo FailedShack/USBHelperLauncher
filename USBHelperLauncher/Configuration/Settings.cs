@@ -77,7 +77,7 @@ namespace USBHelperLauncher.Configuration
         [Setting("Injector", 1000)]
         public static int DelayBetweenRetries { get; set; }
 
-        [Setting("Injector", false)]
+        [Setting("Injector", true)]
         public static bool Portable { get; set; }
 
         [Setting("Injector", false)]
