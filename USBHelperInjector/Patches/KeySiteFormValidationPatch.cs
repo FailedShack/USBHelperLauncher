@@ -9,9 +9,11 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using USBHelperInjector.Patches.Attributes;
 
 namespace USBHelperInjector.Patches
 {
+    [VersionSpecific("")] // hack: Exclude from automatic patching
     [HarmonyPatch]
     class KeySiteFormValidationPatch
     {

@@ -28,6 +28,7 @@ namespace USBHelperInjector.Patches
                             where handler?.Method == ReflectionHelper.FrmAskTicket.OkButtonHandler
                             select button).FirstOrDefault();
             __instance.AcceptButton = okButton;
+            InjectorService.Harmony.CreateClassProcessor(typeof(KeySiteFormValidationPatch)).Patch();
         }
     }
 }

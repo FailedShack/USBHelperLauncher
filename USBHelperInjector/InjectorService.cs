@@ -13,6 +13,7 @@ namespace USBHelperInjector
 {
     public class InjectorService : IInjectorService
     {
+        public static Harmony Harmony { get; private set; }
         public static ILauncherService LauncherService { get; private set; }
         public static X509Certificate2 CaCert { get; private set; }
         public static string HelperVersion { get; private set; }
@@ -33,11 +34,11 @@ namespace USBHelperInjector
 
             LauncherService.SendInjectorSettings();
 
-            var harmony = new Harmony("me.failedshack.usbhelperinjector");
+            Harmony = new Harmony("me.failedshack.usbhelperinjector");
             var assembly = Assembly.GetExecutingAssembly();
             assembly.GetTypes()
                 .Where(type => VersionSpecific.Applies(type, HelperVersion) && !(Overrides.DisableOptionalPatches && Optional.IsOptional(type)))
-                .Do(type => harmony.CreateClassProcessor(type).Patch());
+                .Do(type => Harmony.CreateClassProcessor(type).Patch());
         }
 
         public void ForceKeySiteForm()
