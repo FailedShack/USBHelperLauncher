@@ -77,15 +77,13 @@ namespace USBHelperLauncher
 
         public async Task<string> PublishAsync(TimeSpan? timeout = null)
         {
+            var content = new StringContent(await Build(), Encoding.UTF8, "application/x-www-form-urlencoded");
             using (var client = new HttpClient())
+            using (var cancel = new CancellationTokenSource(timeout ?? TimeSpan.FromMilliseconds(-1)))
             {
-                var content = new StringContent(await Build(), Encoding.UTF8, "application/x-www-form-urlencoded");
-                using (var cancel = new CancellationTokenSource(timeout ?? TimeSpan.FromMilliseconds(-1)))
-                {
-                    var response = await client.PostAsync("https://hastebin.com/documents", content, cancel.Token);
-                    var json = JObject.Parse(await response.Content.ReadAsStringAsync());
-                    return "https://hastebin.com/" + (string)json["key"];
-                }
+                var response = await client.PostAsync("https://hastebin.com/documents", content, cancel.Token);
+                var json = JObject.Parse(await response.Content.ReadAsStringAsync());
+                return "https://hastebin.com/" + (string)json["key"];
             }
         }
 
