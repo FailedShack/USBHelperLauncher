@@ -616,6 +616,7 @@ namespace USBHelperLauncher
             if (Control.ModifierKeys == Keys.Shift)
             {
                 await toFile();
+                return;
             }
 
             try
