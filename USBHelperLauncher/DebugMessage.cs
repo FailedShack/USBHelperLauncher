@@ -80,10 +80,12 @@ namespace USBHelperLauncher
             using (var client = new HttpClient())
             {
                 var content = new StringContent(await Build(), Encoding.UTF8, "application/x-www-form-urlencoded");
-                var cancel = new CancellationTokenSource(timeout ?? TimeSpan.FromMilliseconds(-1));
-                var response = await client.PostAsync("https://hastebin.com/documents", content, cancel.Token);
-                var json = JObject.Parse(await response.Content.ReadAsStringAsync());
-                return "https://hastebin.com/" + (string)json["key"];
+                using (var cancel = new CancellationTokenSource(timeout ?? TimeSpan.FromMilliseconds(-1)))
+                {
+                    var response = await client.PostAsync("https://hastebin.com/documents", content, cancel.Token);
+                    var json = JObject.Parse(await response.Content.ReadAsStringAsync());
+                    return "https://hastebin.com/" + (string)json["key"];
+                }
             }
         }
 
@@ -135,7 +137,8 @@ namespace USBHelperLauncher
 
         private static string Get45or451FromRegistry()
         {
-            using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\"))
+            using (RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
+            using (RegistryKey ndpKey = baseKey.OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\"))
             {
                 if (ndpKey != null && ndpKey.GetValue("Release") != null)
                 {
@@ -150,13 +153,15 @@ namespace USBHelperLauncher
 
         private static void GetAntiVirus(ref Dictionary<string, bool> antivirus)
         {
-            var searcher = new ManagementObjectSearcher(@"root\SecurityCenter2", "SELECT * FROM AntiVirusProduct");
-            var collection = searcher.Get();
-            foreach (ManagementObject obj in collection)
+            using (var searcher = new ManagementObjectSearcher(@"root\SecurityCenter2", "SELECT * FROM AntiVirusProduct"))
             {
-                var name = obj["displayName"].ToString();
-                var state = (uint)obj["productState"];
-                antivirus.Add(name, (state & 0x1000) != 0);
+                var collection = searcher.Get();
+                foreach (ManagementObject obj in collection)
+                {
+                    var name = obj["displayName"].ToString();
+                    var state = (uint)obj["productState"];
+                    antivirus.Add(name, (state & 0x1000) != 0);
+                }
             }
         }
 
