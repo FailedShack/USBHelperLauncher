@@ -613,21 +613,24 @@ namespace USBHelperLauncher
                     File.WriteAllText(dialog.FileName, await debug.Build());
                 }
             }
+
             if (Control.ModifierKeys == Keys.Shift)
             {
                 await toFile();
             }
-
-            try
+            else
             {
-                var url = await debug.PublishAsync(timeout: TimeSpan.FromSeconds(5));
-                Dispatcher.Invoke(new Action(() => Clipboard.SetText(url)));
-                MessageBox.Show("Debug message created and published, the link has been stored in your clipboard.\nProvide this link when reporting an issue.", "Debug message", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex) when (ex is HttpRequestException || ex is JsonReaderException || ex is TaskCanceledException)
-            {
-                Logger.WriteLine("Could not submit log to Hastebin: {0}", ex);
-                await toFile();
+                try
+                {
+                    var url = await debug.PublishAsync(timeout: TimeSpan.FromSeconds(5));
+                    Dispatcher.Invoke(new Action(() => Clipboard.SetText(url)));
+                    MessageBox.Show("Debug message created and published, the link has been stored in your clipboard.\nProvide this link when reporting an issue.", "Debug message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex) when (ex is HttpRequestException || ex is JsonReaderException || ex is TaskCanceledException)
+                {
+                    Logger.WriteLine("Could not submit log to Hastebin: {0}", ex);
+                    await toFile();
+                }
             }
         }
 
