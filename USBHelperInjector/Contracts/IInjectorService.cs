@@ -46,5 +46,8 @@ namespace USBHelperInjector.Contracts
 
         [OperationContract]
         void SetLocaleFile(string localeFile);
+
+        [OperationContract]
+        void SetEshopRegion(string eshopRegion);
     }
 }

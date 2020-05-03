@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -26,17 +25,33 @@ namespace USBHelperInjector.Patches
         static IEnumerable<CodeInstruction> Transpiler(MethodBase original, IEnumerable<CodeInstruction> instructions)
         {
             var codes = new List<CodeInstruction>(instructions);
+            var index = codes.FindIndex(i => i.opcode == OpCodes.Ldloc_0);
+            var getRegion = codes.Find(i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand).Name == "get_Region");
+            var toInsert = codes.GetRange(index - 2, 2); // ldarg.0, ldfld {title}
 
-            var cultureGetter = typeof(CultureInfo).GetProperty("CurrentCulture").GetGetMethod();
-            var uiCultureGetter = typeof(CultureInfo).GetProperty("CurrentUICulture").GetGetMethod();
-
-            var index = codes.FindIndex(i => i.opcode == OpCodes.Call && ((MethodBase)i.operand) == cultureGetter);
-            if (index != -1)
+            // Skip from first check to title data method call
+            codes.RemoveRange(4, index - 6);
+            toInsert.ForEach(x => x.labels.Clear());
+            toInsert.AddRange(new List<CodeInstruction>
             {
-                codes[index].operand = uiCultureGetter;
-            }
+                getRegion,
+                new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(LanguagePatch), nameof(GetEshopRegion))),
+                new CodeInstruction(OpCodes.Stloc_0)
+            });
+            codes.InsertRange(4, toInsert);
 
             return codes;
+        }
+
+        static string GetEshopRegion(string region)
+        {
+            // Keep Japanese and Korean title regions as title IDs differ
+            if (region == "JPN")
+                return "JP";
+            if (region == "KOR")
+                return "KR";
+
+            return InjectorService.EshopRegion;
         }
     }
 }
