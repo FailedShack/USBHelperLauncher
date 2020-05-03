@@ -20,7 +20,7 @@ namespace USBHelperInjector
         public static bool Portable { get; private set; }
         public static bool ForceHttp { get; private set; }
         public static bool FunAllowed { get; private set; }
-        public static bool DisableWebSearchTab { get; private set; }
+        public static string[] DisableTabs { get; private set; }
         public static string LocaleFile { get; private set; }
         public static string EshopRegion { get; private set; }
 
@@ -110,9 +110,9 @@ namespace USBHelperInjector
             FunAllowed = funAllowed;
         }
 
-        public void SetDisableWebSearchTab(bool disableWebSearchTab)
+        public void SetDisableTabs(string[] disableTabs)
         {
-            DisableWebSearchTab = disableWebSearchTab;
+            DisableTabs = disableTabs;
         }
 
         public void SetLocaleFile(string localeFile)

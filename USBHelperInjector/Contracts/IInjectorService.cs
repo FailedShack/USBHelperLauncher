@@ -42,7 +42,7 @@ namespace USBHelperInjector.Contracts
         void SetFunAllowed(bool funAllowed);
 
         [OperationContract]
-        void SetDisableWebSearchTab(bool disableWebSearchTab);
+        void SetDisableTabs(string[] disableTabs);
 
         [OperationContract]
         void SetLocaleFile(string localeFile);
