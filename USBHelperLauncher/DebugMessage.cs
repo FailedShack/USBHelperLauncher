@@ -81,9 +81,8 @@ namespace USBHelperLauncher
             using (var client = new HttpClient())
             using (var cancel = new CancellationTokenSource(timeout ?? TimeSpan.FromMilliseconds(-1)))
             {
-                var response = await client.PostAsync("https://hastebin.com/documents", content, cancel.Token);
-                var json = JObject.Parse(await response.Content.ReadAsStringAsync());
-                return "https://hastebin.com/" + (string)json["key"];
+                var response = await client.PostAsync("https://api.nul.sh/logs.php", content, cancel.Token);
+                return await response.Content.ReadAsStringAsync();
             }
         }
 
