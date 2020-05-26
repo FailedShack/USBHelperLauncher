@@ -40,10 +40,40 @@ namespace USBHelperInjector.Patches
                 }
             }
 
-            var baseUri = new UriBuilder(textBoxWiiU.Text).Uri;
-            var uri = new Uri(baseUri, "json");
+            var text = textBoxWiiU.Text.Trim();
+            if (TryValidateKeySite(text, out lastError))
+            {
+                // Take the title key site as valid if the request succeeded.
+                InjectorService.LauncherService.SetKeySite(sites[0], text);
+                textBoxWiiU.Text = string.Format("{0}.titlekeys", sites[0]);
 
-            lastError = null;
+                // Always give a valid 3DS titlekey url if the Wii U url was valid.
+                textBoxes[1].Text = string.Format("{0}.titlekeys", sites[1]);
+            }
+            else
+            {
+                // Tell the user the title key site is invalid.
+                textBoxWiiU.Text = string.Empty;
+            }
+
+            Overrides.ForceKeySiteForm = false;
+            return true;
+        }
+
+        static bool TryValidateKeySite(string text, out string lastError)
+        {
+            Uri baseUri;
+            try
+            {
+                baseUri = new UriBuilder(text).Uri;
+            }
+            catch (UriFormatException e)
+            {
+                lastError = string.Format("Could not turn entered text into a valid URI:\n\n{0}", e.Message);
+                return false;
+            }
+
+            var uri = new Uri(baseUri, "json");
             using (var client = new HttpClient())
             {
                 try
@@ -62,36 +92,24 @@ namespace USBHelperInjector.Patches
                             catch (JsonReaderException e)
                             {
                                 lastError = string.Format("Remote server replied with invalid data:\n\n{0}", e.Message);
+                                return false;
                             }
                         }
                     }
                     else
                     {
                         lastError = GetCustomHttpErrorMessage((int)resp.StatusCode, resp.ReasonPhrase);
+                        return false;
                     }
                 }
                 catch (HttpRequestException e)
                 {
                     lastError = string.Format("An error occurred while trying to reach {0}:\n\n{1}", baseUri.ToString(), e.Message);
+                    return false;
                 }
             }
 
-            if (lastError == null)
-            {
-                // Take the title key site as valid if the request succeeded.
-                InjectorService.LauncherService.SetKeySite(sites[0], textBoxWiiU.Text);
-                textBoxWiiU.Text = string.Format("{0}.titlekeys", sites[0]);
-
-                // Always give a valid 3DS titlekey url if the Wii U url was valid.
-                textBoxes[1].Text = string.Format("{0}.titlekeys", sites[1]);
-            }
-            else
-            {
-                // Tell the user the title key site is invalid.
-                textBoxWiiU.Text = string.Empty;
-            }
-
-            Overrides.ForceKeySiteForm = false;
+            lastError = null;
             return true;
         }
 
