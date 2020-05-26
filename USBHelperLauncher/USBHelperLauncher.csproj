@@ -129,6 +129,7 @@
     <Compile Include="LocaleProvider.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ModuleInitInjector.cs" />
+    <Compile Include="Utils\MOTD.cs" />
     <Compile Include="Net\CloudEndpoint.cs" />
     <Compile Include="Net\Titlekeys3DSEndpoint.cs" />
     <Compile Include="Net\WiiUShopEndpoint.cs" />

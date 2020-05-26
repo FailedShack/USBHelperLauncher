@@ -56,6 +56,9 @@ namespace USBHelperLauncher.Configuration
         [Setting("Launcher")]
         public static string TranslationsBuild { get; set; }
 
+        [Setting("Launcher")]
+        public static string LastMessage { get; set; }
+
         [Setting("Launcher", forgetful: true)]
         public static Dictionary<string, string> EndpointFallbacks { get; set; } = new Dictionary<string, string>()
         {
