@@ -321,6 +321,8 @@ namespace USBHelperLauncher
             var process = new Process() { StartInfo = startInfo };
             process.EnableRaisingEvents = true;
             process.Exited += async (sender, e) =>
+            // Not raised in the main thread, must invoke there to interact with UI
+            await Dispatcher.InvokeAsync(async () =>
             {
                 if (killed) return;
                 if (process.ExitCode != 0)
@@ -334,7 +336,7 @@ namespace USBHelperLauncher
                 }
                 Cleanup();
                 Application.Exit();
-            };
+            });
             process.Start();
             HelperProcess = process;
 
@@ -631,7 +633,7 @@ namespace USBHelperLauncher
             try
             {
                 var url = await debug.PublishAsync(timeout: TimeSpan.FromSeconds(5));
-                Dispatcher.Invoke(new Action(() => Clipboard.SetText(url)));
+                Clipboard.SetText(url);
                 MessageBox.Show("Debug message created and published, the link has been stored in your clipboard.\nProvide this link when reporting an issue.", "Debug message", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex) when (ex is HttpRequestException || ex is JsonReaderException || ex is TaskCanceledException)
