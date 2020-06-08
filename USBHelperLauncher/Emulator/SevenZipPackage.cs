@@ -1,4 +1,5 @@
 ﻿using SharpCompress.Archives.SevenZip;
+using SharpCompress.Common;
 using SharpCompress.Readers;
 using System;
 using System.IO;
