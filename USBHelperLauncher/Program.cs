@@ -282,7 +282,7 @@ namespace USBHelperLauncher
             }).Wait();
 
             ServiceHost host = new ServiceHost(typeof(LauncherService), new Uri("net.pipe://localhost/LauncherService"));
-            host.AddServiceEndpoint(typeof(ILauncherService), new NetNamedPipeBinding(), "");
+            host.AddServiceEndpoint(typeof(ILauncherService), new NetNamedPipeBinding(""), "");
             host.Open();
 
             // Patching

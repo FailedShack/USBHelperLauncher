@@ -26,11 +26,11 @@ namespace USBHelperInjector
 
         public static void Init()
         {
-            var factory = new ChannelFactory<ILauncherService>(new NetNamedPipeBinding(), "net.pipe://localhost/LauncherService");
+            var factory = new ChannelFactory<ILauncherService>(new NetNamedPipeBinding(""), "net.pipe://localhost/LauncherService");
             LauncherService = factory.CreateChannel();
 
             ServiceHost host = new ServiceHost(typeof(InjectorService), new Uri("net.pipe://localhost/InjectorService"));
-            host.AddServiceEndpoint(typeof(IInjectorService), new NetNamedPipeBinding(), "");
+            host.AddServiceEndpoint(typeof(IInjectorService), new NetNamedPipeBinding(""), "");
             host.Open();
 
             LauncherService.SendInjectorSettings();
