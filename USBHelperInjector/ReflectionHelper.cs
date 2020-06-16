@@ -64,5 +64,25 @@ namespace USBHelperInjector
             );
             public static List<FieldInfo> TextBoxes => _textBoxes.Value;
         }
+
+        public static class TitleTypes
+        {
+            private static readonly Lazy<Type> _game = new Lazy<Type>(
+                () => (from type in Types
+                       where type.GetProperty("Dlc", BindingFlags.Public | BindingFlags.Instance) != null
+                       select type).FirstOrDefault()
+            );
+            public static Type Game => _game.Value;
+
+            private static readonly Lazy<Type> _update = new Lazy<Type>(
+                () => Game.GetProperty("Updates", BindingFlags.Public | BindingFlags.Instance).PropertyType.GenericTypeArguments[0]
+            );
+            public static Type Update => _update.Value;
+
+            private static readonly Lazy<Type> _dlc = new Lazy<Type>(
+                () => Game.GetProperty("Dlc", BindingFlags.Public | BindingFlags.Instance).PropertyType
+            );
+            public static Type Dlc => _dlc.Value;
+        }
     }
 }

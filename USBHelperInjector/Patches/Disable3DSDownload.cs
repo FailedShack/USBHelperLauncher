@@ -54,7 +54,7 @@ namespace USBHelperInjector.Patches
         {
             return (from method in ReflectionHelper.NusGrabberForm.Type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
                     where method.GetParameters().Length == 1
-                    && method.GetParameters()[0].ParameterType.GetProperty("Dlc") != null
+                    && method.GetParameters()[0].ParameterType == ReflectionHelper.TitleTypes.Game
                     && method.GetMethodBody().LocalVariables.Count == 0
                     && !method.IsSpecialName
                     select method).FirstOrDefault();
@@ -75,7 +75,7 @@ namespace USBHelperInjector.Patches
         {
             return (from method in ReflectionHelper.NusGrabberForm.Type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
                     where method.GetParameters().Length == 1
-                    && method.GetParameters()[0].ParameterType.GetProperty("Dlc") != null
+                    && method.GetParameters()[0].ParameterType == ReflectionHelper.TitleTypes.Game
                     && method.GetMethodBody().LocalVariables.Count == 2
                     && method.GetMethodBody().LocalVariables.Any(info => info.LocalType == ReflectionHelper.MainModule.GetType("NusHelper.DataSize"))
                     select method).FirstOrDefault();
