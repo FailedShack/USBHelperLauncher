@@ -23,6 +23,7 @@ namespace USBHelperInjector
         public static string[] DisableTabs { get; private set; }
         public static string LocaleFile { get; private set; }
         public static string EshopRegion { get; private set; }
+        public static bool SplitUnpackDirectories { get; private set; }
 
         public static void Init()
         {
@@ -123,6 +124,11 @@ namespace USBHelperInjector
         public void SetEshopRegion(string eshopRegion)
         {
             EshopRegion = eshopRegion;
+        }
+
+        public void SetSplitUnpackDirectories(bool splitUnpackDirectories)
+        {
+            SplitUnpackDirectories = splitUnpackDirectories;
         }
     }
 }

@@ -49,5 +49,8 @@ namespace USBHelperInjector.Contracts
 
         [OperationContract]
         void SetEshopRegion(string eshopRegion);
+
+        [OperationContract]
+        void SetSplitUnpackDirectories(bool splitUnpackDirectories);
     }
 }
