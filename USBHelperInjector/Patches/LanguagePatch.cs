@@ -14,10 +14,8 @@ namespace USBHelperInjector.Patches
         static MethodBase TargetMethod()
         {
             // v0.6.1.655: GClass32.Class43.method_0
-            return (from type in ReflectionHelper.Types
-                    where type.GetProperty("Dlc", BindingFlags.Public | BindingFlags.Instance) != null
-                    from nested in type.GetNestedTypes(BindingFlags.NonPublic | BindingFlags.Instance)
-                    where nested.GetFields(BindingFlags.Public | BindingFlags.Instance).Any(p => p.FieldType == type)
+            return (from nested in ReflectionHelper.TitleTypes.Game.GetNestedTypes(BindingFlags.NonPublic | BindingFlags.Instance)
+                    where nested.GetFields(BindingFlags.Public | BindingFlags.Instance).Any(p => p.FieldType == ReflectionHelper.TitleTypes.Game)
                     from method in nested.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
                     select method).FirstOrDefault();
         }
