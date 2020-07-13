@@ -255,6 +255,7 @@ namespace USBHelperLauncher
                 running.Kill();
             }
 
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
             Proxy.Start();
 
             // Update translations
