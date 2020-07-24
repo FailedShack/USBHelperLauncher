@@ -66,6 +66,7 @@
     <Compile Include="Patches\DownloaderPatch.cs" />
     <Compile Include="Patches\DownloaderQueuePatch.cs" />
     <Compile Include="Patches\EasterEggFontPatch.cs" />
+    <Compile Include="Patches\InvalidConfigPatch.cs" />
     <Compile Include="Patches\MoviePlaybackPatch.cs" />
     <Compile Include="Patches\NusGrabberFormPatch.cs" />
     <Compile Include="Patches\PortablePatches.cs" />
