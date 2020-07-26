@@ -132,7 +132,6 @@
     <Compile Include="Utils\MOTD.cs" />
     <Compile Include="Net\CloudEndpoint.cs" />
     <Compile Include="Net\Titlekeys3DSEndpoint.cs" />
-    <Compile Include="Net\WiiUShopEndpoint.cs" />
     <Compile Include="Net\SiteEndpoint.cs" />
     <Compile Include="Net\TitlekeysWiiUEndpoint.cs" />
     <Compile Include="ProgressDialog.cs">

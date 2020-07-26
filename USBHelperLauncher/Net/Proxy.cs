@@ -25,7 +25,6 @@ namespace USBHelperLauncher.Net
             new RegistrationEndpoint(),
             new CloudEndpoint(),
             new SiteEndpoint(),
-            new WiiUShopEndpoint(),
             new TitlekeysWiiUEndpoint(),
             new Titlekeys3DSEndpoint()
         };
