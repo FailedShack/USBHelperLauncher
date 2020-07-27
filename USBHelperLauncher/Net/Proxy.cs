@@ -68,9 +68,20 @@ namespace USBHelperLauncher.Net
                 policy.RevocationMode = X509RevocationMode.NoCheck;
                 policy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
                 policy.ExtraStore.AddRange(CertificateStore);
-                if (chain.Build(remoteChain.ChainElements[0].Certificate))
+
+                if (!chain.Build(remoteChain.ChainElements[0].Certificate))
                 {
+                    return;
+                }
+                var chainRoot = chain.ChainElements[chain.ChainElements.Count - 1].Certificate;
+                foreach (var trusted in CertificateStore)
+                {
+                    if (!chainRoot.RawData.SequenceEqual(trusted.RawData))
+                    {
+                        continue;
+                    }
                     args.ValidityState = CertificateValidity.ForceValid;
+                    break;
                 }
             };
             FiddlerApplication.Prefs.SetBoolPref("fiddler.certmaker.CleanupServerCertsOnExit", true);
