@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using USBHelperInjector.IPC;
 using USBHelperLauncher.Net;
 
 namespace USBHelperLauncher.Configuration
@@ -91,6 +92,9 @@ namespace USBHelperLauncher.Configuration
 
         [Setting("Injector", true)]
         public static bool SplitUnpackDirectories { get; set; }
+
+        [Setting("Launcher", IPCType.TCP)]
+        public static IPCType IPCType { get; set; }
 
         public static void Save()
         {

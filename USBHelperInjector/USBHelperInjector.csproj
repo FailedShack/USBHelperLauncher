@@ -52,11 +52,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Contracts\ILauncherService.cs" />
+    <Compile Include="IPC\ILauncherService.cs" />
     <Compile Include="InjectorService.cs" />
+    <Compile Include="IPC\IPCType.cs" />
+    <Compile Include="IPC\IPCUtils.cs" />
     <Compile Include="Patches\Attributes\Optional.cs" />
     <Compile Include="Overrides.cs" />
     <Compile Include="Patches\CemuPathPatches.cs" />
+    <Compile Include="Patches\CommandLineArgsPatch.cs" />
     <Compile Include="Patches\Disable3DSDownload.cs" />
     <Compile Include="Patches\Attributes\VersionSpecific.cs" />
     <Compile Include="Patches\DisableWebTabPatch.cs" />
@@ -82,7 +85,7 @@
     <Compile Include="Patches\SettingsDonationKeyPatches.cs" />
     <Compile Include="Patches\SettingsProxyPatches.cs" />
     <Compile Include="Patches\SpeedChartPatch.cs" />
-    <Compile Include="Contracts\IInjectorService.cs" />
+    <Compile Include="IPC\IInjectorService.cs" />
     <Compile Include="Patches\StringLocalizationPatch.cs" />
     <Compile Include="Patches\SystemUpdateWarningPatch.cs" />
     <Compile Include="Patches\KeySiteFormEnterPatch.cs" />

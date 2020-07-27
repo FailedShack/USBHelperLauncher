@@ -1,7 +1,7 @@
-﻿using System.ServiceModel;
-using System.Threading.Tasks;
+﻿using System;
+using System.ServiceModel;
 
-namespace USBHelperInjector.Contracts
+namespace USBHelperInjector.IPC
 {
     [ServiceContract]
     public interface ILauncherService
@@ -10,6 +10,6 @@ namespace USBHelperInjector.Contracts
         void SetKeySite(string site, string url);
 
         [OperationContract]
-        void SendInjectorSettings();
+        void SendInjectorSettings(Uri uri);
     }
 }

@@ -13,14 +13,13 @@ using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.ServiceModel;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Threading;
-using USBHelperInjector.Contracts;
+using USBHelperInjector.IPC;
 using USBHelperLauncher.Configuration;
 using USBHelperLauncher.Emulator;
 using USBHelperLauncher.Utils;
@@ -282,9 +281,13 @@ namespace USBHelperLauncher
                 }
             }).Wait();
 
-            ServiceHost host = new ServiceHost(typeof(LauncherService), new Uri("net.pipe://localhost/LauncherService"));
-            host.AddServiceEndpoint(typeof(ILauncherService), new NetNamedPipeBinding(""), "");
-            host.Open();
+            IPCUtils.CreateService(
+                Settings.IPCType,
+                typeof(LauncherService),
+                typeof(ILauncherService),
+                out var serviceUri
+            );
+            Logger.WriteLine($"WCF host uri: {serviceUri}");
 
             // Patching
             dialog.Invoke(new Action(() =>
@@ -314,7 +317,7 @@ namespace USBHelperLauncher
             var startInfo = new ProcessStartInfo()
             {
                 FileName = executable,
-                Arguments = HelperVersion,
+                Arguments = string.Join(" ", HelperVersion, Settings.IPCType, serviceUri),
                 UseShellExecute = false,
                 RedirectStandardError = true,
                 StandardErrorEncoding = Encoding.Default
