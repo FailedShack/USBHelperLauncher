@@ -247,7 +247,8 @@ namespace USBHelperLauncher
 
             string executable = Path.Combine(GetLauncherPath(), "WiiU_USB_Helper.exe");
 
-            var running = Process.GetProcessesByName("Patched").FirstOrDefault(p => p.GetMainModuleFileName().StartsWith(GetLauncherPath(), StringComparison.OrdinalIgnoreCase));
+            var running = Process.GetProcessesByName("WiiU_USB_Helper_")
+                .FirstOrDefault(p => p.GetMainModuleFileName().StartsWith(GetLauncherPath(), StringComparison.OrdinalIgnoreCase));
 
             if (running != default(Process))
             {
