@@ -199,9 +199,14 @@ namespace USBHelperLauncher
                 Environment.Exit(-1);
             }
 
-            if (!File.Exists("ver") || !File.Exists("WiiU_USB_Helper.exe"))
+            if (!File.Exists("WiiU_USB_Helper.exe"))
             {
-                MessageBox.Show("Could not find Wii U USB Helper, please make sure this executable is in the correct folder.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    File.Exists("ver")
+                        ? $"Could not find Wii U USB Helper, your Antivirus software probably deleted it. Try adding the install directory ({GetLauncherPath()}) to your Antivirus' exclusions or disable your Antivirus, then reinstall USB Helper."
+                        : "Could not find Wii U USB Helper, please make sure you unpacked the launcher's files (e.g. USBHelperLauncher.exe) and Wii U USB Helper's files (e.g. WiiU_USB_Helper.exe) into the same directory.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error
+                );
                 Environment.Exit(-1);
             }
             HelperVersion = File.ReadAllLines("ver")[0];
