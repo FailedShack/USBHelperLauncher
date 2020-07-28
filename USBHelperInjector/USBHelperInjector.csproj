@@ -56,6 +56,7 @@
     <Compile Include="InjectorService.cs" />
     <Compile Include="IPC\IPCType.cs" />
     <Compile Include="IPC\IPCUtils.cs" />
+    <Compile Include="ModuleInitInjectedAttribute.cs" />
     <Compile Include="Patches\Attributes\Optional.cs" />
     <Compile Include="Overrides.cs" />
     <Compile Include="Patches\CemuPathPatches.cs" />

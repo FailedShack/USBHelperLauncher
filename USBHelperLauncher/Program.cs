@@ -303,8 +303,15 @@ namespace USBHelperLauncher
             }));
             var injector = new ModuleInitInjector(executable);
             executable = Path.Combine(GetLauncherPath(), "WiiU_USB_Helper_.exe");
-            injector.Inject(executable);
-            Logger.WriteLine("Injected module initializer.");
+            if (injector.RequiresInject(executable))
+            {
+                injector.Inject(executable);
+                Logger.WriteLine("Injected module initializer.");
+            }
+            else
+            {
+                Logger.WriteLine("Module initializer already injected.");
+            }
             dialog.Invoke(new Action(() => dialog.Close()));
 
             if (OverridePublicKey)
