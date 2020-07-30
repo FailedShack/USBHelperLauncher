@@ -59,14 +59,5 @@ namespace USBHelperInjector.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Busca una cadena traducida similar a &lt;html&gt;&lt;span style=&quot;font-size: medium&quot;&gt;&lt;b&gt;Disclaimer:&lt;/b&gt;&lt;/span&gt;&lt;br&gt;This software is brought to you, free of charge, by FailedShack and contributors to the development of USBHelperLauncher.&lt;br&gt;Wii U USB Helper originally developed by Hikari06. The only official place to download USBHelperLauncher is from GitHub.&lt;/html&gt;.
-        /// </summary>
-        internal static string Disclaimer {
-            get {
-                return ResourceManager.GetString("Disclaimer", resourceCulture);
-            }
-        }
     }
 }

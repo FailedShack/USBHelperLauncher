@@ -117,7 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Disclaimer" xml:space="preserve">
-    <value>&lt;html&gt;&lt;span style="font-size: medium"&gt;&lt;b&gt;Disclaimer:&lt;/b&gt;&lt;/span&gt;&lt;br&gt;This software is brought to you, free of charge, by FailedShack and contributors to the development of USBHelperLauncher.&lt;br&gt;Wii U USB Helper originally developed by Hikari06. The only official place to download USBHelperLauncher is from GitHub.&lt;/html&gt;</value>
-  </data>
 </root>

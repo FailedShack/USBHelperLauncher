@@ -77,11 +77,11 @@ namespace USBHelperLauncher
             SetConsoleVisibility(showConsole);
             Application.EnableVisualStyles();
 
-            // TODO: add en-US.local.json to project as fallback
-
             // Update translations
             var dialog = new ProgressDialog();
             dialog.SetHeader("Updating translations...");
+            dialog.SetStyle(ProgressBarStyle.Marquee);
+            dialog.GetProgressBar().MarqueeAnimationSpeed = 30;
             new Thread(() => dialog.ShowDialog()).Start();
             Task.Run(async () =>
             {
@@ -110,40 +110,17 @@ namespace USBHelperLauncher
 
             if (Settings.ShowUpdateNag)
             {
-                Task.Run(async () =>
-                {
-                    JObject release;
-                    try
-                    {
-                        release = await GithubUtil.GetRelease("FailedShack", "USBHelperLauncher", "latest");
-                    }
-                    catch
-                    {
-                        return;
-                    }
-                    string newVersion = (string)release["tag_name"];
-                    string version = GetVersion();
-                    if (newVersion.CompareTo(version) > 0)
-                    {
-                        var updateNag = new CheckboxDialog("New version found: " + newVersion + "\nCurrent version: " + version + "\nDo you want to open the download site?", "Do not show this again.", "Update Checker", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-                        DialogResult result = updateNag.ShowDialog();
-                        if (result == DialogResult.Yes)
-                        {
-                            Process.Start((string)release["html_url"]);
-                        }
-                        Settings.ShowUpdateNag = !updateNag.Checked;
-                        Settings.Save();
-                    }
-                }).Wait();
+                Task.Run(async () => await CheckUpdates(false)).Wait();
             }
 
             if (Settings.ShowTranslateNag && Locale.ChosenLocale != Localization.DefaultLocale)
             {
                 var localeInfo = Locale.KnownLocales[Locale.ChosenLocale];
                 var translateNag = MessageBox.Show(
-                    string.Format("We are currently looking for volunteers to translate Wii U USB Helper to other languages. " +
-                    "You may be able to contribute by submitting translations for {0} on Crowdin.\nWould you like to open the site?", localeInfo.Name),
-                    "Appeal to Translate", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                    string.Format("dialog.crowdin".Localize(), localeInfo.Name),
+                    "dialog.crowdin.title".Localize(),
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Information
+                );
                 if (translateNag == DialogResult.Yes)
                 {
                     Process.Start("https://crowdin.com/project/wii-u-usb-helper");
@@ -172,7 +149,11 @@ namespace USBHelperLauncher
                     }
                     catch (CryptographicException)
                     {
-                        MessageBox.Show(string.Format("{0} is not a valid certificate file.", file.Name, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error));
+                        MessageBox.Show(
+                            string.Format("dialog.invalidcertificate".Localize(), file.Name),
+                            "common.error".Localize(),
+                            MessageBoxButtons.OK, MessageBoxIcon.Error
+                        );
                         Environment.Exit(-1);
                     }
                 }
@@ -187,7 +168,11 @@ namespace USBHelperLauncher
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("Could not load hosts file: " + e.Message, "Malformed hosts file", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(
+                        string.Format("dialog.malformedhosts".Localize(), e.Message),
+                        "dialog.malformedhosts.title".Localize(),
+                        MessageBoxButtons.OK, MessageBoxIcon.Error
+                    );
                     Hosts = new Hosts();
                 }
 
@@ -195,9 +180,11 @@ namespace USBHelperLauncher
                 if (!Settings.HostsExpert && conflicting.Count > 0)
                 {
                     var hostsConflictWarning = new CheckboxDialog(
-                        "The following hostnames specified in the hosts file are normally handled by USBHelperLauncher:\n\n" + string.Join("\n", conflicting) +
-                        "\n\nIf you override them the program may not function properly." +
-                        "\nDo you want to exclude them?", "Do not show this again.", "Conflicting hosts", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                        string.Format("dialog.hostsconflict".Localize(), string.Join("\n", conflicting)),
+                        "common.dontshowagain".Localize(),
+                        "dialog.hostsconflict.title".Localize(),
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Warning
+                    );
                     DialogResult result = hostsConflictWarning.ShowDialog();
                     if (result == DialogResult.Yes)
                     {
@@ -213,9 +200,11 @@ namespace USBHelperLauncher
                 if (Settings.ShowHostsWarning)
                 {
                     var hostsWarning = new CheckboxDialog(
-                        "It appears you don't currently have a hosts redirector file. This file may be required to route obsolete hostnames to their correct destination.\n" +
-                        "If you intended to use this feature, make sure a file named 'hosts.json' is located in the same directory as this executable.\n" +
-                        "You may also use the built-in editor located in the Advanced section in the tray icon's context menu.", "Do not show this again.", "Hosts file missing", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        "dialog.hostswarning".Localize(),
+                        "common.dontshowagain".Localize(),
+                        "dialog.hostswarning.title".Localize(),
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning
+                    );
                     hostsWarning.ShowDialog();
                     Settings.ShowHostsWarning = !hostsWarning.Checked;
                     Settings.Save();
@@ -228,13 +217,21 @@ namespace USBHelperLauncher
             }
             catch (FileNotFoundException e)
             {
-                MessageBox.Show(e.Message + "\nMake sure this file is under the data directory.", "Initialization error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    string.Format("dialog.databaseloadfailure".Localize(), e.Message),
+                    "dialog.databaseloadfailure.title".Localize(),
+                    MessageBoxButtons.OK, MessageBoxIcon.Error
+                );
                 Environment.Exit(-1);
             }
 
             if (!File.Exists("ver") || !File.Exists("WiiU_USB_Helper.exe"))
             {
-                MessageBox.Show("Could not find Wii U USB Helper, please make sure this executable is in the correct folder.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    "dialog.usbhelpernotfound".Localize(),
+                    "common.error".Localize(),
+                    MessageBoxButtons.OK, MessageBoxIcon.Error
+                );
                 Environment.Exit(-1);
             }
             HelperVersion = File.ReadAllLines("ver")[0];
@@ -253,7 +250,7 @@ namespace USBHelperLauncher
                     catch (JsonReaderException)
                     {
                         File.Delete(path);
-                        Logger.WriteLine(string.Format("Removed bad cache file: {0}", file));
+                        Logger.WriteLine("Removed bad cache file: {0}", file);
                     }
                 }
             }
@@ -269,7 +266,11 @@ namespace USBHelperLauncher
             CertMaker.oCertProvider = new BCCertMaker.BCCertMaker(); // Don't try to load CertMaker.dll
             if (!Settings.ForceHttp && !CertMaker.rootCertExists() && !CertMaker.createRootCert())
             {
-                MessageBox.Show("Creation of the interception certificate failed.", "Unable to generate certificate.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    "dialog.certcreationfailure".Localize(),
+                    "dialog.certcreationfailure.title".Localize(),
+                    MessageBoxButtons.OK, MessageBoxIcon.Error
+                );
                 Environment.Exit(-1);
             }
 
@@ -279,7 +280,11 @@ namespace USBHelperLauncher
 
             if (running != default(Process))
             {
-                DialogResult result = MessageBox.Show("An instance of Wii U USB Helper is already running.\nWould you like to close it?", "Already running", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+                DialogResult result = MessageBox.Show(
+                    "dialog.alreadyrunning".Localize(),
+                    "dialog.alreadyrunning.title".Localize(),
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation
+                );
                 if (result == DialogResult.No)
                 {
                     Environment.Exit(0);
@@ -296,9 +301,7 @@ namespace USBHelperLauncher
             // Patching
             dialog.Invoke(new Action(() =>
             {
-                dialog.SetStyle(ProgressBarStyle.Marquee);
-                dialog.GetProgressBar().MarqueeAnimationSpeed = 30;
-                dialog.SetHeader("Injecting...");
+                dialog.SetHeader("progress.injecting".Localize());
             }));
             var injector = new ModuleInitInjector(executable);
             executable = Path.Combine(GetLauncherPath(), "WiiU_USB_Helper_.exe");
@@ -335,8 +338,12 @@ namespace USBHelperLauncher
                 if (killed) return;
                 if (process.ExitCode != 0)
                 {
-                    Logger.WriteLine("Wii U USB Helper returned non-zero exit code 0x{0:x}:\n{1}", process.ExitCode, process.StandardError.ReadToEnd().Trim()); ;
-                    var result = MessageBox.Show(string.Format("Uh-oh. Wii U USB Helper has crashed unexpectedly.\nDo you want to generate a debug log?\n\nError code: 0x{0:x}", process.ExitCode), "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                    Logger.WriteLine("Wii U USB Helper returned non-zero exit code 0x{0:x}:\n{1}", process.ExitCode, process.StandardError.ReadToEnd().Trim());
+                    var result = MessageBox.Show(
+                        string.Format("dialog.usbhelpercrashed".Localize(), process.ExitCode),
+                        "common.error".Localize(),
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Error
+                    );
                     if (result == DialogResult.Yes)
                     {
                         await GenerateDebugLog();
@@ -359,35 +366,40 @@ namespace USBHelperLauncher
             }
 
             ContextMenu trayMenu = new ContextMenu();
-            MenuItem dlEmulator = new MenuItem("Download Emulator");
+            MenuItem dlEmulator = new MenuItem("menu.downloademulator".Localize());
             foreach (EmulatorConfiguration.Emulator emulator in Enum.GetValues(typeof(EmulatorConfiguration.Emulator)))
             {
                 EmulatorConfiguration config = EmulatorConfiguration.GetConfiguration(emulator);
                 dlEmulator.MenuItems.Add(config.GetName(), (sender, e) => OnDownloadEmulator(config));
             }
-            MenuItem language = new MenuItem("Language") { RadioCheck = true };
+            MenuItem language = new MenuItem("menu.language".Localize()) { RadioCheck = true };
             foreach (var lang in Locale.AvailableLocales)
             {
                 language.MenuItems.Add(lang.Value.Native, (sender, e) =>
                 {
                     Settings.Locale = lang.Key;
                     Settings.Save();
-                    MessageBox.Show("Your language choice has been saved.\nPlease restart USBHelperLauncher for changes to take effect.", "Restart required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(
+                        "dialog.languagechanged".Localize(),
+                        "dialog.languagechanged.title".Localize(),
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
                 }).Checked = lang.Key == Locale.ChosenLocale;
             }
             if (language.MenuItems.Count == 0)
             {
-                language.MenuItems.Add("No translations found").Enabled = false;
+                language.MenuItems.Add("menu.language.empty".Localize()).Enabled = false;
             }
-            MenuItem advanced = new MenuItem("Advanced");
-            advanced.MenuItems.Add("Toggle Console", OnVisibilityChange);
-            advanced.MenuItems.Add("Clear Install", OnClearInstall);
-            advanced.MenuItems.Add("Generate Donation Key", OnGenerateKey).Enabled = OverridePublicKey;
-            advanced.MenuItems.Add("Hosts Editor", OnOpenHostsEditor);
-            advanced.MenuItems.Add("Export Sessions", OnExportSessions);
-            trayMenu.MenuItems.Add("Exit", OnExit);
-            trayMenu.MenuItems.Add("Check for Updates", OnUpdateCheck);
-            trayMenu.MenuItems.Add("Report Issue", async (sender, e) => await GenerateDebugLog());
+            MenuItem advanced = new MenuItem("menu.advanced".Localize());
+            advanced.MenuItems.Add("menu.toggleconsole".Localize(), OnVisibilityChange);
+            advanced.MenuItems.Add("menu.clearinstall".Localize(), OnClearInstall);
+            advanced.MenuItems.Add("menu.generatekey".Localize(), OnGenerateKey).Enabled = OverridePublicKey;
+            advanced.MenuItems.Add("menu.hostseditor".Localize(), OnOpenHostsEditor);
+            advanced.MenuItems.Add("menu.exportsessions".Localize(), OnExportSessions);
+            trayMenu.MenuItems.Add("menu.exit".Localize(), OnExit);
+            trayMenu.MenuItems.Add("menu.updatecheck".Localize(), async (sender, e) => await CheckUpdates(true));
+            trayMenu.MenuItems.Add("menu.reportissue".Localize(), async (sender, e) => await GenerateDebugLog());
             trayMenu.MenuItems.Add(dlEmulator);
             trayMenu.MenuItems.Add(language);
             trayMenu.MenuItems.Add(advanced);
@@ -407,7 +419,7 @@ namespace USBHelperLauncher
             Environment.Exit(0);
         }
 
-        private async static void OnUpdateCheck(object sender, EventArgs e)
+        private static async Task CheckUpdates(bool userRequested)
         {
             JObject release;
             try
@@ -416,22 +428,56 @@ namespace USBHelperLauncher
             }
             catch (WebException ex)
             {
-                MessageBox.Show("Could not check for updates.\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (userRequested)
+                {
+                    MessageBox.Show(
+                        string.Format("dialog.updatecheck.failed".Localize(), ex.Message),
+                        "common.error".Localize(),
+                        MessageBoxButtons.OK, MessageBoxIcon.Error
+                    );
+                }
                 return;
             }
-            string newVersion = (string) release["tag_name"];
-            string version = GetVersion();
-            if (newVersion.CompareTo(version) > 0)
+            var newVersion = (string)release["tag_name"];
+            var version = GetVersion();
+            if (string.Compare(newVersion, version, StringComparison.Ordinal) > 0)
             {
-                DialogResult result = MessageBox.Show("New version found: " + newVersion + "\nCurrent version: " + version + "\nDo you want to open the download site?", "Update Checker", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                DialogResult result;
+                if (userRequested)
+                {
+                    result = MessageBox.Show(
+                        string.Format("dialog.updatecheck".Localize(), newVersion, version),
+                        "dialog.updatecheck.title".Localize(),
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Information
+                    );
+                }
+                else
+                {
+                    var updateNag = new CheckboxDialog(
+                        string.Format("dialog.updatecheck".Localize(), newVersion, version),
+                        "common.dontshowagain".Localize(),
+                        "dialog.updatecheck.title".Localize(),
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Information
+                    );
+                    result = updateNag.ShowDialog();
+                    Settings.ShowUpdateNag = !updateNag.Checked;
+                    Settings.Save();
+                }
                 if (result == DialogResult.Yes)
                 {
-                    Process.Start((string) release["html_url"]);
+                    Process.Start((string)release["html_url"]);
                 }
             }
             else
             {
-                MessageBox.Show("No update found.", "Update Checker", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (userRequested)
+                {
+                    MessageBox.Show(
+                        "dialog.updatecheck.latest".Localize(),
+                        "dialog.updatecheck.title".Localize(),
+                        MessageBoxButtons.OK, MessageBoxIcon.Information
+                    );
+                }
             }
         }
 
@@ -442,7 +488,11 @@ namespace USBHelperLauncher
 
         private static void OnClearInstall(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Are you sure you want to clear your current Wii U USB Helper install data?\nThis action cannot be undone.", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            DialogResult result = MessageBox.Show(
+                "dialog.clearinstall".Localize(),
+                "common.warning".Localize(),
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning
+            );
             if (result == DialogResult.Yes)
             {
                 Cleanup();
@@ -462,7 +512,7 @@ namespace USBHelperLauncher
 
                             foreach (FileInfo file in files)
                             {
-                                dialog.BeginInvoke(new Action(() => dialog.SetHeader("Removing: " + file.Name)));
+                                dialog.BeginInvoke(new Action(() => dialog.SetHeader(string.Format("progress.removing".Localize(), file.Name))));
                                 file.Delete();
                                 dialog.BeginInvoke(new Action(() => progressBar.PerformStep()));
                             }
@@ -472,7 +522,7 @@ namespace USBHelperLauncher
 
                             foreach (DirectoryInfo subDir in subDirs)
                             {
-                                dialog.BeginInvoke(new Action(() => dialog.SetHeader("Removing: " + subDir.Name)));
+                                dialog.BeginInvoke(new Action(() => dialog.SetHeader(string.Format("progress.removing".Localize(), subDir.Name))));
                                 subDir.Delete(true);
                                 dialog.BeginInvoke(new Action(() => progressBar.PerformStep()));
                             }
@@ -517,14 +567,22 @@ namespace USBHelperLauncher
                 };
                 FiddlerApplication.DoExport("HTTPArchive v1.2", sessions, options, null);
 
-                MessageBox.Show("Session export successful.", "Session export", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(
+                    "dialog.exportsessions".Localize(),
+                    "dialog.exportsessions.title".Localize(),
+                    MessageBoxButtons.OK, MessageBoxIcon.Information
+                );
             }
         }
 
         private static void OnGenerateKey(object sender, EventArgs e)
         {
             Clipboard.SetText(GenerateDonationKey());
-            MessageBox.Show("Donation key generated and stored in your clipboard!", "Donation key", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(
+                "dialog.generatekey".Localize(),
+                "dialog.generatekey.title".Localize(),
+                MessageBoxButtons.OK, MessageBoxIcon.Information
+            );
         }
 
         private static void OnOpenHostsEditor(object sender, EventArgs e)
@@ -544,7 +602,11 @@ namespace USBHelperLauncher
             string emulatorPath = Path.Combine("emulators", config.GetName() + ".zip");
             if (File.Exists(emulatorPath))
             {
-                DialogResult result = MessageBox.Show("This emulator has already been downloaded. Do you want to replace it?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                DialogResult result = MessageBox.Show(
+                    "dialog.emulatoralreadydownloaded".Localize(),
+                    "common.warning".Localize(),
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning
+                );
                 if (result == DialogResult.No)
                 {
                     return;
@@ -642,11 +704,15 @@ namespace USBHelperLauncher
             {
                 var url = await debug.PublishAsync(timeout: TimeSpan.FromSeconds(5));
                 Clipboard.SetText(url);
-                MessageBox.Show("Debug message created and published, the link has been stored in your clipboard.\nProvide this link when reporting an issue.", "Debug message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(
+                    "dialog.debugloguploaded".Localize(),
+                    "dialog.debugloguploaded.title".Localize(),
+                    MessageBoxButtons.OK, MessageBoxIcon.Information
+                );
             }
             catch (Exception ex) when (ex is HttpRequestException || ex is JsonReaderException || ex is TaskCanceledException)
             {
-                Logger.WriteLine("Could not submit log to Hastebin: {0}", ex);
+                Logger.WriteLine("Could not submit debug log: {0}", ex);
                 await toFile();
             }
         }

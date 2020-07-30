@@ -54,7 +54,8 @@ namespace USBHelperLauncher
                     if (Directory.Exists("locale"))
                     {
                         locales = Directory.GetFiles("locale", "*.json")
-                            .Select(x => Path.GetFileNameWithoutExtension(x));
+                            .Select(Path.GetFileNameWithoutExtension)
+                            .Where(x => !x.EndsWith(".local"));
                     }
                     _availableLocales = KnownLocales
                         .Where(x => locales.Contains(x.Key))
