@@ -101,6 +101,7 @@ namespace USBHelperLauncher
                     Logger.WriteLine("Could not update translations: {0}", e.Message);
                 }
             }).Wait();
+            Localization.Namespace = "launcher";
             Localization.Load(
                 Path.Combine("locale", $"{Locale.ChosenLocale}.local.json"),
                 Path.Combine("locale", $"{Localization.DefaultLocale}.local.json")
@@ -151,7 +152,7 @@ namespace USBHelperLauncher
                     {
                         MessageBox.Show(
                             string.Format("dialog.invalidcertificate".Localize(), file.Name),
-                            "common.error".Localize(),
+                            "common:error".Localize(),
                             MessageBoxButtons.OK, MessageBoxIcon.Error
                         );
                         Environment.Exit(-1);
@@ -181,7 +182,7 @@ namespace USBHelperLauncher
                 {
                     var hostsConflictWarning = new CheckboxDialog(
                         string.Format("dialog.hostsconflict".Localize(), string.Join("\n", conflicting)),
-                        "common.dontshowagain".Localize(),
+                        "dontshowagain".Localize(),
                         "dialog.hostsconflict.title".Localize(),
                         MessageBoxButtons.YesNo, MessageBoxIcon.Warning
                     );
@@ -201,7 +202,7 @@ namespace USBHelperLauncher
                 {
                     var hostsWarning = new CheckboxDialog(
                         "dialog.hostswarning".Localize(),
-                        "common.dontshowagain".Localize(),
+                        "dontshowagain".Localize(),
                         "dialog.hostswarning.title".Localize(),
                         MessageBoxButtons.OK, MessageBoxIcon.Warning
                     );
@@ -229,7 +230,7 @@ namespace USBHelperLauncher
             {
                 MessageBox.Show(
                     "dialog.usbhelpernotfound".Localize(),
-                    "common.error".Localize(),
+                    "common:error".Localize(),
                     MessageBoxButtons.OK, MessageBoxIcon.Error
                 );
                 Environment.Exit(-1);
@@ -341,7 +342,7 @@ namespace USBHelperLauncher
                     Logger.WriteLine("Wii U USB Helper returned non-zero exit code 0x{0:x}:\n{1}", process.ExitCode, process.StandardError.ReadToEnd().Trim());
                     var result = MessageBox.Show(
                         string.Format("dialog.usbhelpercrashed".Localize(), process.ExitCode),
-                        "common.error".Localize(),
+                        "common:error".Localize(),
                         MessageBoxButtons.YesNo, MessageBoxIcon.Error
                     );
                     if (result == DialogResult.Yes)
@@ -432,7 +433,7 @@ namespace USBHelperLauncher
                 {
                     MessageBox.Show(
                         string.Format("dialog.updatecheck.failed".Localize(), ex.Message),
-                        "common.error".Localize(),
+                        "common:error".Localize(),
                         MessageBoxButtons.OK, MessageBoxIcon.Error
                     );
                 }
@@ -455,7 +456,7 @@ namespace USBHelperLauncher
                 {
                     var updateNag = new CheckboxDialog(
                         string.Format("dialog.updatecheck".Localize(), newVersion, version),
-                        "common.dontshowagain".Localize(),
+                        "dontshowagain".Localize(),
                         "dialog.updatecheck.title".Localize(),
                         MessageBoxButtons.YesNo, MessageBoxIcon.Information
                     );
@@ -490,7 +491,7 @@ namespace USBHelperLauncher
         {
             DialogResult result = MessageBox.Show(
                 "dialog.clearinstall".Localize(),
-                "common.warning".Localize(),
+                "common:warning".Localize(),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning
             );
             if (result == DialogResult.Yes)
@@ -604,7 +605,7 @@ namespace USBHelperLauncher
             {
                 DialogResult result = MessageBox.Show(
                     "dialog.emulatoralreadydownloaded".Localize(),
-                    "common.warning".Localize(),
+                    "common:warning".Localize(),
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning
                 );
                 if (result == DialogResult.No)
@@ -756,13 +757,5 @@ namespace USBHelperLauncher
 
         const int SW_HIDE = 0;
         const int SW_SHOW = 5;
-    }
-
-    internal static class LocalizeExtension
-    {
-        internal static string Localize(this string str)
-        {
-            return Localization.GetString($"launcher:{str}");
-        }
     }
 }

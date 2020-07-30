@@ -10,6 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
+using USBHelperInjector;
 using USBHelperLauncher.Configuration;
 using USBHelperLauncher.Emulator;
 using USBHelperLauncher.Utils;
@@ -222,7 +223,7 @@ namespace USBHelperLauncher.Net
                 shownCloudWarning = true;
                 var cloudWarning = new CheckboxDialog(
                     "dialog.cloudwarning".Localize(),
-                    "common.dontshowagain".Localize(),
+                    "dontshowagain".Localize(),
                     "dialog.cloudwarning.title".Localize(),
                     MessageBoxButtons.OK, MessageBoxIcon.Warning
                 );

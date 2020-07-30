@@ -11,12 +11,17 @@ namespace USBHelperInjector
     {
         public const string DefaultLocale = "en-US";
 
+        public static string Namespace;
+
         private static readonly Dictionary<string, string> _overrides = new Dictionary<string, string>();
         private static readonly Dictionary<string, string> _locale = new Dictionary<string, string>();
 
-        public static string GetString(string key) => GetString(key, key);
-        public static string GetString(string key, string def)
+        public static string GetString(string key, string def, bool addNamespace = true)
         {
+            if (addNamespace)
+            {
+                key = AddNamespace(key);
+            }
             if (_locale.Count == 0)
             {
                 Debug.Assert(false, $"{nameof(GetString)}(\"{key}\") called with no initialized locale");
@@ -75,6 +80,22 @@ namespace USBHelperInjector
                 Debug.Assert(false, e.Message);
             }
             return obj;
+        }
+
+        private static string AddNamespace(string key)
+        {
+            return Namespace != null && !key.Contains(":")
+                ? $"{Namespace}:{key}"
+                : key;
+        }
+    }
+
+
+    public static class LocalizeExtension
+    {
+        public static string Localize(this string str)
+        {
+            return Localization.GetString(str, str);
         }
     }
 }

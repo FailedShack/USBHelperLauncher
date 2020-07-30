@@ -9,7 +9,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using USBHelperInjector.Contracts;
 using USBHelperInjector.Patches.Attributes;
-using USBHelperInjector.Properties;
 
 namespace USBHelperInjector
 {
@@ -120,6 +119,7 @@ namespace USBHelperInjector
         public void SetLocale(string locale)
         {
             Localization.Clear();
+            Localization.Namespace = "injector";
             Localization.Load(Path.Combine("locale", $"{locale}.json"));
             Localization.Load(
                 Path.Combine("locale", $"{locale}.local.json"),
@@ -136,14 +136,6 @@ namespace USBHelperInjector
         public void SetSplitUnpackDirectories(bool splitUnpackDirectories)
         {
             SplitUnpackDirectories = splitUnpackDirectories;
-        }
-    }
-
-    internal static class LocalizeExtension
-    {
-        internal static string Localize(this string str)
-        {
-            return Localization.GetString($"injector:{str}");
         }
     }
 }

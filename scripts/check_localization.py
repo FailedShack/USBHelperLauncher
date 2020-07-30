@@ -24,7 +24,7 @@ def main():
     code_ids = set()
     for prefix, directory in PREFIXES.items():
         for path in Path(directory).rglob('*.cs'):
-            code_ids |= {prefix + id for id in find_ids(path)}
+            code_ids |= {(prefix + id if ':' not in id else id) for id in find_ids(path)}
 
     with open('USBHelperLauncher/locale/en-US.local.json', 'r', encoding='utf-8') as f:
         json_ids = set(json.load(f).keys())

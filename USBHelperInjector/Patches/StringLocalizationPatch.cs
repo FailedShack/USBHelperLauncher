@@ -62,7 +62,7 @@ namespace USBHelperInjector.Patches
             }
             if (_index.TryGetValue(hash, out var key))
             {
-                __result = Localization.GetString(key, __result);
+                __result = Localization.GetString(key, __result, false);
             }
         }
     }
