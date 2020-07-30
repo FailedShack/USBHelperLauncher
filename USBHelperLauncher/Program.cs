@@ -20,6 +20,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Threading;
+using USBHelperInjector;
 using USBHelperInjector.Contracts;
 using USBHelperLauncher.Configuration;
 using USBHelperLauncher.Emulator;
@@ -76,6 +77,37 @@ namespace USBHelperLauncher
             SetConsoleVisibility(showConsole);
             Application.EnableVisualStyles();
 
+            // TODO: add en-US.local.json to project as fallback
+
+            // Update translations
+            var dialog = new ProgressDialog();
+            dialog.SetHeader("Updating translations...");
+            new Thread(() => dialog.ShowDialog()).Start();
+            Task.Run(async () =>
+            {
+                try
+                {
+                    if (await Locale.UpdateIfNeeded(dialog))
+                    {
+                        Logger.WriteLine("Updated translations: {0}", Settings.TranslationsBuild);
+                    }
+                    else
+                    {
+                        Logger.WriteLine("Translations were up to date.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.WriteLine("Could not update translations: {0}", e.Message);
+                }
+            }).Wait();
+            Localization.Load(
+                Path.Combine("locale", $"{Locale.ChosenLocale}.local.json"),
+                Path.Combine("locale", $"{Localization.DefaultLocale}.local.json")
+            );
+
+            dialog.Invoke(new Action(() => dialog.SetHeader("progress.initializing".Localize())));
+
             if (Settings.ShowUpdateNag)
             {
                 Task.Run(async () =>
@@ -105,7 +137,7 @@ namespace USBHelperLauncher
                 }).Wait();
             }
 
-            if (Settings.ShowTranslateNag && Locale.ChosenLocale != LocaleProvider.DefaultLocale)
+            if (Settings.ShowTranslateNag && Locale.ChosenLocale != Localization.DefaultLocale)
             {
                 var localeInfo = Locale.KnownLocales[Locale.ChosenLocale];
                 var translateNag = MessageBox.Show(
@@ -256,30 +288,6 @@ namespace USBHelperLauncher
             }
 
             Proxy.Start();
-
-            // Update translations
-            var dialog = new ProgressDialog();
-            var worker = dialog.GetWorker();
-            dialog.SetHeader("Updating translations...");
-            new Thread(() => dialog.ShowDialog()).Start();
-            Task.Run(async () =>
-            {
-                try
-                {
-                    if (await Locale.UpdateIfNeeded(dialog))
-                    {
-                        Logger.WriteLine("Updated translations: {0}", Settings.TranslationsBuild);
-                    }
-                    else
-                    {
-                        Logger.WriteLine("Translations were up to date.");
-                    }
-                }
-                catch (Exception e)
-                {
-                    Logger.WriteLine("Could not update translations: {0}", e.Message);
-                }
-            }).Wait();
 
             ServiceHost host = new ServiceHost(typeof(LauncherService), new Uri("net.pipe://localhost/LauncherService"));
             host.AddServiceEndpoint(typeof(ILauncherService), new NetNamedPipeBinding(""), "");
@@ -682,5 +690,13 @@ namespace USBHelperLauncher
 
         const int SW_HIDE = 0;
         const int SW_SHOW = 5;
+    }
+
+    internal static class LocalizeExtension
+    {
+        internal static string Localize(this string str)
+        {
+            return Localization.GetString($"launcher:{str}");
+        }
     }
 }

@@ -7,6 +7,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using USBHelperInjector;
 using USBHelperLauncher.Configuration;
 using USBHelperLauncher.Properties;
 
@@ -22,7 +23,6 @@ namespace USBHelperLauncher
         }
 #pragma warning restore 0649
 
-        public const string DefaultLocale = "en-US";
         private Dictionary<string, LocaleInfo> _knownLocales, _availableLocales;
 
         public string ChosenLocale
@@ -30,13 +30,8 @@ namespace USBHelperLauncher
             get
             {
                 var userLocale = Settings.Locale ?? CultureInfo.CurrentUICulture.Name;
-                return AvailableLocales.ContainsKey(userLocale) ? userLocale : DefaultLocale;
+                return AvailableLocales.ContainsKey(userLocale) ? userLocale : Localization.DefaultLocale;
             }
-        }
-
-        public string LocaleFile
-        {
-            get { return Path.Combine("locale", string.Format("{0}.json", ChosenLocale)); }
         }
 
         public Dictionary<string, LocaleInfo> KnownLocales

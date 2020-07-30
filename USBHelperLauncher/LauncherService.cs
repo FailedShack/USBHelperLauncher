@@ -33,7 +33,7 @@ namespace USBHelperLauncher
             channel.SetDownloaderRetryDelay(Settings.DelayBetweenRetries);
             channel.SetDisableOptionalPatches(Settings.DisableOptionalPatches);
             channel.SetDisableTabs(Settings.DisableTabs);
-            channel.SetLocaleFile(Program.Locale.LocaleFile);
+            channel.SetLocale(Program.Locale.ChosenLocale);
             channel.SetEshopRegion(Program.Locale.ChosenLocale.Split('-')[1]);
             channel.SetHelperVersion(Program.HelperVersion);
             channel.SetPortable(Settings.Portable);

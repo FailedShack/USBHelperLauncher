@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
@@ -8,6 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using USBHelperInjector.Contracts;
 using USBHelperInjector.Patches.Attributes;
+using USBHelperInjector.Properties;
 
 namespace USBHelperInjector
 {
@@ -21,7 +23,6 @@ namespace USBHelperInjector
         public static bool ForceHttp { get; private set; }
         public static bool FunAllowed { get; private set; }
         public static string[] DisableTabs { get; private set; }
-        public static string LocaleFile { get; private set; }
         public static string EshopRegion { get; private set; }
         public static bool SplitUnpackDirectories { get; private set; }
 
@@ -116,9 +117,15 @@ namespace USBHelperInjector
             DisableTabs = disableTabs;
         }
 
-        public void SetLocaleFile(string localeFile)
+        public void SetLocale(string locale)
         {
-            LocaleFile = localeFile;
+            Localization.Clear();
+            Localization.Load(Path.Combine("locale", $"{locale}.json"));
+            Localization.Load(
+                Path.Combine("locale", $"{locale}.local.json"),
+                Path.Combine("locale", $"{Localization.DefaultLocale}.local.json")
+            );
+            Localization.Override("welcome.disclaimer.unused", "overrides.customdisclaimer".Localize());
         }
 
         public void SetEshopRegion(string eshopRegion)
@@ -129,6 +136,14 @@ namespace USBHelperInjector
         public void SetSplitUnpackDirectories(bool splitUnpackDirectories)
         {
             SplitUnpackDirectories = splitUnpackDirectories;
+        }
+    }
+
+    internal static class LocalizeExtension
+    {
+        internal static string Localize(this string str)
+        {
+            return Localization.GetString($"injector:{str}");
         }
     }
 }

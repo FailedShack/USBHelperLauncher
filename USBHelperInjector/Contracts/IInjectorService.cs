@@ -45,7 +45,7 @@ namespace USBHelperInjector.Contracts
         void SetDisableTabs(string[] disableTabs);
 
         [OperationContract]
-        void SetLocaleFile(string localeFile);
+        void SetLocale(string locale);
 
         [OperationContract]
         void SetEshopRegion(string eshopRegion);
