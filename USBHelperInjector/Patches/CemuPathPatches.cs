@@ -50,7 +50,11 @@ namespace USBHelperInjector.Patches
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show(string.Format("Unable to move directory \"{0}\" to \"{1}\":\n\n{2}", originalPath, newPath, e), "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(
+                        string.Format("patch.cemupaths.moveerror".Localize(), originalPath, newPath, e),
+                        "common:error".Localize(),
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning
+                    );
                 }
             }
 

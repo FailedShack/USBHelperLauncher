@@ -1,7 +1,10 @@
 {
     "common:error": "Error",
     "common:warning": "Warning",
-    "injector:overrides.customdisclaimer": "<html><span style=\"font-size: medium\"><b>Disclaimer:</b></span><br>This software is brought to you, free of charge, by FailedShack and contributors to the development of USBHelperLauncher.<br>Wii U USB Helper originally developed by Hikari06. The only official place to download USBHelperLauncher is from GitHub.</html>",
+    "injector:override.customdisclaimer": "<html><span style=\"font-size: medium\"><b>Disclaimer:</b></span><br>This software is brought to you, free of charge, by FailedShack and contributors to the development of USBHelperLauncher.<br>Wii U USB Helper was originally developed by Hikari06. The only official place to download USBHelperLauncher is from GitHub.</html>",
+    "injector:patch.cemupaths.moveerror": "Unable to move directory \"{0}\" to \"{1}\":\n\n{2}",
+    "injector:patch.disable3dsdownload.warning": "Downloading 3DS titles is not possible anymore, as Nintendo patched the 3DS eShop servers and implemented additional security measures.",
+    "injector:patch.keysitevalidation.titlekey": "The text you entered looks like a title key.\nMake sure that you enter the title key website's *address*, not a single title key.\n\nDo you want to continue anyway?",
     "launcher:dontshowagain": "Do not show this again.",
     "launcher:progress.initializing": "Initializing...",
     "launcher:progress.injecting": "Injecting...",

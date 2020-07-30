@@ -125,7 +125,7 @@ namespace USBHelperInjector
                 Path.Combine("locale", $"{locale}.local.json"),
                 Path.Combine("locale", $"{Localization.DefaultLocale}.local.json")
             );
-            Localization.Override("welcome.disclaimer.unused", "overrides.customdisclaimer".Localize());
+            Localization.Override("welcome.disclaimer.unused", "override.customdisclaimer".Localize());
         }
 
         public void SetEshopRegion(string eshopRegion)

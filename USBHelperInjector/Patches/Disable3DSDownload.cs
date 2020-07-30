@@ -41,7 +41,11 @@ namespace USBHelperInjector.Patches
 
         internal static void ShowWarning()
         {
-            MessageBox.Show("Downloading 3DS titles is not possible anymore, as Nintendo patched the 3DS eShop servers and implemented additional security measures.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(
+                "patch.disable3dsdownload.warning".Localize(),
+                "common:error".Localize(),
+                MessageBoxButtons.OK, MessageBoxIcon.Error
+            );
         }
     }
 

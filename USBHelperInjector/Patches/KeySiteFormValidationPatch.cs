@@ -32,7 +32,11 @@ namespace USBHelperInjector.Patches
 
             if (Regex.IsMatch(textBoxWiiU.Text.Trim(), "^[0-9a-fA-F]{32}$"))
             {
-                DialogResult result = MessageBox.Show("The text you entered looks like a title key.\nMake sure that you enter the title key website's *address*, not a single title key.\n\nDo you want to continue anyway?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                DialogResult result = MessageBox.Show(
+                    "patch.keysitevalidation.titlekey".Localize(),
+                    "common:warning".Localize(),
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2
+                );
                 if (result == DialogResult.No)
                 {
                     textBoxWiiU.Text = string.Empty;
