@@ -180,7 +180,12 @@ namespace USBHelperLauncher.Net
                                 Thread.Sleep(30);
                             }
                             WinUtil.CloseWindow(WinUtil.GetForegroundWindow());
-                            DialogResult result = MessageBox.Show("It appears you are trying to set-up a game with " + noExt + ", but it has not been downloaded yet.\nWould you like to download it?", "Emulator missing", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                            DialogResult result = MessageBox.Show(
+                                string.Format("dialog.downloademulator".Localize(), noExt),
+                                "dialog.downloademulator.title".Localize(),
+                                MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                                MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly
+                            );
                             if (result == DialogResult.Yes)
                             {
                                 EmulatorConfiguration config = EmulatorConfiguration.GetConfiguration(emulator);
@@ -192,7 +197,11 @@ namespace USBHelperLauncher.Net
                 }
                 else if (path == "/res/prerequisites/java.exe")
                 {
-                    DialogResult result = MessageBox.Show("To download this game you need Java installed on your computer. Install now?\nCancel the download to prevent additional messages.", "Java required", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    DialogResult result = MessageBox.Show(
+                        "dialog.downloadjava".Localize(),
+                        "dialog.downloadjava.title".Localize(),
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Warning
+                    );
                     if (result == DialogResult.Yes)
                     {
                         Process.Start("https://www.java.com/en/download/");
@@ -201,12 +210,22 @@ namespace USBHelperLauncher.Net
             }
             else if (oS.HostnameIs("application.wiiuusbhelper.com") && oS.PathAndQuery == "/res/db/data.usb")
             {
-                MessageBox.Show("You're using a legacy version of Wii U USB Helper.\nSupport for this version is limited which means some features may not work correctly.\nPlease update to a more recent version for better stability.", "Legacy version detected", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                MessageBox.Show(
+                    "dialog.legacyversion".Localize(),
+                    "dialog.legacyversion.title".Localize(),
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly
+                );
             }
             else if (oS.HostnameIs("cloud.wiiuusbhelper.com") && oS.PathAndQuery == "/saves/login.php" && Settings.ShowCloudWarning && !shownCloudWarning)
             {
                 shownCloudWarning = true;
-                var cloudWarning = new CheckboxDialog("The cloud save backup service is hosted by Willzor and is in no way affiliated to USBHelperLauncher. We cannot guarantee the continuity of these services and as such advise against relying on them.", "Do not show this again.", "Cloud service warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                var cloudWarning = new CheckboxDialog(
+                    "dialog.cloudwarning".Localize(),
+                    "common.dontshowagain".Localize(),
+                    "dialog.cloudwarning.title".Localize(),
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning
+                );
                 new Thread(() => Program.ShowChildDialog(cloudWarning)).Start();
                 Settings.ShowCloudWarning = !cloudWarning.Checked;
                 Settings.Save();
