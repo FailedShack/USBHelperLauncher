@@ -107,7 +107,11 @@ namespace USBHelperLauncher
                 Path.Combine("locale", $"{Localization.DefaultLocale}.local.json")
             );
 
-            dialog.Invoke(new Action(() => dialog.SetHeader("progress.initializing".Localize())));
+            dialog.Invoke(new Action(() =>
+            {
+                dialog.Text = "dialog.progress.title".Localize();
+                dialog.SetHeader("progress.initializing".Localize());
+            }));
 
             if (Settings.ShowUpdateNag)
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Media;
 using System.Windows.Forms;
+using USBHelperInjector;
 
 namespace USBHelperLauncher
 {
@@ -31,6 +32,18 @@ namespace USBHelperLauncher
             new int[] { 6, 7, 2 }, new int[] { 0, 6, 7 }, new int[] { 0, 4, 2 }
         };
 
+        private static readonly string[] btnTexts =
+        {
+            null,
+            "common:ok".Localize(),
+            "common:cancel".Localize(),
+            "common:abort".Localize(),
+            "common:retry".Localize(),
+            "common:ignore".Localize(),
+            "common:yes".Localize(),
+            "common:no".Localize()
+        };
+
         private SystemSound sound;
 
         public bool Checked
@@ -55,7 +68,7 @@ namespace USBHelperLauncher
                     btns[i].Visible = false;
                     continue;
                 }
-                btns[i].Text = Enum.GetName(typeof(DialogResult), result);
+                btns[i].Text = btnTexts[(int)result];
                 btns[i].DialogResult = result;
             }
             if (icon == MessageBoxIcon.None)
