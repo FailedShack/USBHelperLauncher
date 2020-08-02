@@ -44,9 +44,9 @@ namespace USBHelperInjector.Patches
             foreach (var index in stringFormatIndices)
             {
                 var readAllBytesIndex = codes.FindIndex(index, 10, i => i.opcode == OpCodes.Call && ((MethodInfo)i.operand) == AccessTools.Method(typeof(System.IO.File), "ReadAllBytes", new[] { typeof(string) }));
-                string message = readAllBytesIndex == -1
-                    ? "No backup was found. Unfortunately the app cannot work without it."
-                    : "Wii U USB Helper will now try to use a backup version. Please note that some features might not work as expected.";
+                var message = readAllBytesIndex == -1
+                    ? "patch.keysiteerrormessage.nobackup".Localize()
+                    : "patch.keysiteerrormessage.usebackup".Localize();
 
                 codes.RemoveAt(index);
                 codes.InsertRange(index, new List<CodeInstruction>
@@ -102,7 +102,7 @@ namespace USBHelperInjector.Patches
             }
 
             var urlType = url.Contains("wiiu") ? "WiiU" : "3DS";
-            return string.Format("An error occurred while trying to retrieve the title keys for {0}:\n\n{1}\n\n{2}", urlType, exceptionMessage, postfix);
+            return string.Format("patch.keysiteerrormessage.error".Localize(), urlType, exceptionMessage, postfix);
         }
     }
 }

@@ -73,7 +73,7 @@ namespace USBHelperInjector.Patches
             }
             catch (UriFormatException e)
             {
-                lastError = string.Format("Could not turn entered text into a valid URI:\n\n{0}", e.Message);
+                lastError = string.Format("patch.keysitevalidation.invaliduri".Localize(), e.Message);
                 return false;
             }
 
@@ -95,7 +95,7 @@ namespace USBHelperInjector.Patches
                             }
                             catch (JsonReaderException e)
                             {
-                                lastError = string.Format("Remote server replied with invalid data:\n\n{0}", e.Message);
+                                lastError = string.Format("patch.keysitevalidation.invalidjson".Localize(), e.Message);
                                 return false;
                             }
                         }
@@ -108,7 +108,7 @@ namespace USBHelperInjector.Patches
                 }
                 catch (HttpRequestException e)
                 {
-                    lastError = string.Format("An error occurred while trying to reach {0}:\n\n{1}", baseUri.ToString(), e.Message);
+                    lastError = string.Format("patch.keysitevalidation.networkerror".Localize(), baseUri, e.Message);
                     return false;
                 }
             }
@@ -140,7 +140,7 @@ namespace USBHelperInjector.Patches
 
         internal static string GetCustomHttpErrorMessage(int statusCode, string statusDescription)
         {
-            return string.Format("Remote server replied with status: ({0}) {1}", statusCode, statusDescription);
+            return string.Format("patch.keysitevalidation.httperror".Localize(), statusCode, statusDescription);
         }
     }
 }
