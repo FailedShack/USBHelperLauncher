@@ -41,6 +41,7 @@ namespace USBHelperLauncher
             channel.SetForceHttp(Settings.ForceHttp);
             channel.SetFunAllowed(!Settings.NoFunAllowed);
             channel.SetSplitUnpackDirectories(Settings.SplitUnpackDirectories);
+            channel.SetWineCompat(Program.WineCompat);
         }
     }
 }

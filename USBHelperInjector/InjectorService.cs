@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using USBHelperInjector.IPC;
+using System.Windows.Interop;
+using System.Windows.Media;
 using USBHelperInjector.Patches.Attributes;
 
 namespace USBHelperInjector
@@ -25,6 +27,7 @@ namespace USBHelperInjector
         public static string LocaleFile { get; private set; }
         public static string EshopRegion { get; private set; }
         public static bool SplitUnpackDirectories { get; private set; }
+        public static bool WineCompat { get; private set; }
 
         public static void Init()
         {
@@ -45,8 +48,17 @@ namespace USBHelperInjector
             Harmony = new Harmony("me.failedshack.usbhelperinjector");
             var assembly = Assembly.GetExecutingAssembly();
             assembly.GetTypes()
-                .Where(type => VersionSpecific.Applies(type, HelperVersion) && !(Overrides.DisableOptionalPatches && Optional.IsOptional(type)))
+                .Where(type =>
+                       VersionSpecific.Applies(type, HelperVersion)
+                    && !(Overrides.DisableOptionalPatches && Optional.IsOptional(type))
+                    && (!WineOnly.IsWineOnly(type) || WineCompat)
+                )
                 .Do(type => Harmony.CreateClassProcessor(type).Patch());
+
+            if (WineCompat)
+            {
+                RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
+            }
         }
 
         public void ForceKeySiteForm()
@@ -135,6 +147,11 @@ namespace USBHelperInjector
         public void SetSplitUnpackDirectories(bool splitUnpackDirectories)
         {
             SplitUnpackDirectories = splitUnpackDirectories;
+        }
+
+        public void SetWineCompat(bool wineCompat)
+        {
+            WineCompat = wineCompat;
         }
     }
 }
