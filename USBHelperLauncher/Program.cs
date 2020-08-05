@@ -67,6 +67,10 @@ namespace USBHelperLauncher
                         case "showconsole":
                             showConsole = true;
                             break;
+                        case "portable":
+                            Settings.Portable = true;
+                            Settings.Save();
+                            break;
                     }
                 }
             }
