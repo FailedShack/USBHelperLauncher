@@ -32,14 +32,14 @@ namespace USBHelperInjector
             var ipcType = (IPCType)Enum.Parse(typeof(IPCType), args[2]);
             var launcherUri = args[3];
 
-            IPCUtils.CreateService(
+            IPCUtil.CreateService(
                 ipcType,
                 typeof(InjectorService),
                 typeof(IInjectorService),
                 out var serviceUri
             );
 
-            LauncherService = IPCUtils.CreateChannel<ILauncherService>(ipcType, launcherUri);
+            LauncherService = IPCUtil.CreateChannel<ILauncherService>(ipcType, launcherUri);
             LauncherService.SendInjectorSettings(serviceUri);
 
             Harmony = new Harmony("me.failedshack.usbhelperinjector");

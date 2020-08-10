@@ -15,7 +15,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return ReflectionHelper.Settings.GetConstructor(new Type[] { });
+            return ReflectionHelper.Settings.GetConstructor(Type.EmptyTypes);
         }
 
         static void Postfix()
@@ -33,7 +33,7 @@ namespace USBHelperInjector.Patches
                 var configPaths = AccessTools.Property(configPathsType, "Current").GetValue(null);
                 var fileName = (string)AccessTools.Property(configPathsType, "LocalConfigFilename").GetValue(configPaths);
                 File.Delete(fileName);
-                MessageBox.Show("A corrupted configuration file has been deleted, you'll need to go through the setup again.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("The configuration file has been corrupted. You'll need to go through the setup again.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
     }

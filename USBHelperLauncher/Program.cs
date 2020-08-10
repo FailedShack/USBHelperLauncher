@@ -264,7 +264,9 @@ namespace USBHelperLauncher
                 running.Kill();
             }
 
+            // The target .NET version (4.5) only uses TLS 1.0 and 1.1 by default
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
             Proxy.Start();
 
             // Update translations
@@ -291,7 +293,7 @@ namespace USBHelperLauncher
                 }
             }).Wait();
 
-            IPCUtils.CreateService(
+            IPCUtil.CreateService(
                 Settings.IPCType,
                 typeof(LauncherService),
                 typeof(ILauncherService),

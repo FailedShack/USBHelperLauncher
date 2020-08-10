@@ -7,7 +7,7 @@ using System.ServiceModel.Description;
 
 namespace USBHelperInjector.IPC
 {
-    public class IPCUtils
+    public class IPCUtil
     {
         public static ServiceHost CreateService(IPCType ipcType, Type serviceType, Type contractType, out Uri uri)
         {
@@ -26,7 +26,7 @@ namespace USBHelperInjector.IPC
         {
             var guid = Guid.NewGuid().ToString("D");
             var host = new ServiceHost(serviceType, new Uri($"net.pipe://localhost/{guid}"));
-            host.AddServiceEndpoint(contractType, GetNamedPipeBinding(), "");
+            host.AddServiceEndpoint(contractType, new NetNamedPipeBinding(""), "");
             host.Open();
             uri = host.ChannelDispatchers.First().Listener.Uri;
             return host;
@@ -34,8 +34,16 @@ namespace USBHelperInjector.IPC
 
         public static ServiceHost CreateTcpService(Type serviceType, Type contractType, out Uri uri)
         {
-            var host = new ServiceHost(serviceType, new Uri("net.tcp://127.0.0.1:0"));
-            var endpoint = host.AddServiceEndpoint(contractType, GetTcpBinding(), "", new Uri("net.tcp://127.0.0.1"));
+            var localUri = new Uri("net.tcp://127.0.0.1");
+            var host = new ServiceHost(serviceType, localUri);
+            var binding = new NetTcpBinding("")
+            {
+                Security =
+                {
+                    Mode = SecurityMode.None
+                }
+            };
+            var endpoint = host.AddServiceEndpoint(contractType, binding, "", localUri);
             endpoint.ListenUriMode = ListenUriMode.Unique;
             host.Open();
             uri = host.ChannelDispatchers.First().Listener.Uri;
@@ -49,10 +57,16 @@ namespace USBHelperInjector.IPC
             switch (ipcType)
             {
                 case IPCType.NamedPipe:
-                    binding = GetNamedPipeBinding();
+                    binding = new NetNamedPipeBinding("");
                     break;
                 case IPCType.TCP:
-                    binding = GetTcpBinding();
+                    binding = new NetTcpBinding("")
+                    {
+                        Security =
+                        {
+                            Mode = SecurityMode.None
+                        }
+                    };
                     break;
                 default:
                     throw new InvalidEnumArgumentException(nameof(ipcType), (int)ipcType, ipcType.GetType());
@@ -60,19 +74,6 @@ namespace USBHelperInjector.IPC
 
             var factory = new ChannelFactory<TContract>(binding, address);
             return factory.CreateChannel();
-        }
-
-
-        private static NetNamedPipeBinding GetNamedPipeBinding()
-        {
-            return new NetNamedPipeBinding("");
-        }
-        private static NetTcpBinding GetTcpBinding()
-        {
-            return new NetTcpBinding("")
-            {
-                Security = { Mode = SecurityMode.None }
-            };
         }
     }
 }

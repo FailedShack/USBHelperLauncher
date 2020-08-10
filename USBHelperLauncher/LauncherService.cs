@@ -18,7 +18,7 @@ namespace USBHelperLauncher
         public void SendInjectorSettings(Uri uri)
         {
             Program.Logger.WriteLine($"Sending information to injector ({uri})...");
-            var channel = IPCUtils.CreateChannel<IInjectorService>(Settings.IPCType, uri.ToString());
+            var channel = IPCUtil.CreateChannel<IInjectorService>(Settings.IPCType, uri.ToString());
             if (Program.OverridePublicKey)
             {
                 channel.SetDonationKey(Program.GenerateDonationKey());
