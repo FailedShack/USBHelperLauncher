@@ -22,20 +22,13 @@ namespace USBHelperLauncher
             {
                 return true;
             }
-            try
+            using (var module = ModuleDefMD.Load(outputPath))
             {
-                using (var module = ModuleDefMD.Load(outputPath))
-                {
-                    // skip injection if file already exists and is up-to-date
-                    var attr = module.Assembly.CustomAttributes.FirstOrDefault(
-                        a => a.TypeFullName == typeof(ModuleInitInjectedAttribute).FullName
-                    );
-                    return attr == null || (attr.ConstructorArguments[0].Value as UTF8String).String != Program.GetVersion();
-                }
-            }
-            catch
-            {
-                return true;
+                // skip injection if file already exists and is up-to-date
+                var attr = module.Assembly.CustomAttributes.FirstOrDefault(
+                    a => a.TypeFullName == typeof(ModuleInitInjectedAttribute).FullName
+                );
+                return attr == null || (attr.ConstructorArguments[0].Value as UTF8String).String != Program.GetVersion();
             }
         }
 
