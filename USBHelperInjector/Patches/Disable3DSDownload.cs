@@ -73,12 +73,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return (from method in ReflectionHelper.NusGrabberForm.Type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
-                    where method.GetParameters().Length == 1
-                    && method.GetParameters()[0].ParameterType == ReflectionHelper.TitleTypes.Game
-                    && method.GetMethodBody().LocalVariables.Count == 2
-                    && method.GetMethodBody().LocalVariables.Any(info => info.LocalType == ReflectionHelper.MainModule.GetType("NusHelper.DataSize"))
-                    select method).FirstOrDefault();
+            return ReflectionHelper.NusGrabberForm.Methods.PlayGame;
         }
 
         static IEnumerable<CodeInstruction> Transpiler(MethodBase original, IEnumerable<CodeInstruction> instructions, ILGenerator generator)

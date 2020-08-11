@@ -45,6 +45,7 @@ namespace USBHelperLauncher
         public static DateTime SessionStart { get; private set; }
         public static string PublicKey { get; private set; }
         public static bool OverridePublicKey { get; private set; } = true;
+        public static bool WineCompat { get; private set; } = false;
 
         [STAThread]
         static void Main(string[] args)
@@ -71,6 +72,9 @@ namespace USBHelperLauncher
                             Settings.Portable = true;
                             Settings.Save();
                             break;
+                        case "wine":
+                            WineCompat = true;
+                            break;
                     }
                 }
             }
@@ -78,6 +82,24 @@ namespace USBHelperLauncher
             Logger.WriteLine("Made by FailedShack");
             SetConsoleVisibility(showConsole);
             Application.EnableVisualStyles();
+
+            if (!WineCompat && WineUtil.IsRunningInWine())
+            {
+                var result = MessageBox.Show(
+                    "Detected Wine environment.\nWould you like to enable settings/patches to improve Wine compatibility?\n(To enable this by default, run USBHelperLauncher with the \"--wine\" flag)",
+                    "Question",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+                WineCompat = result == DialogResult.Yes;
+            }
+            if (WineCompat)
+            {
+                Logger.WriteLine("Wine compatibility settings enabled");
+                Settings.ForceHttp = true;
+                Settings.IPCType = IPCType.TCP;
+                Settings.Save();
+            }
 
             if (Settings.ShowUpdateNag)
             {

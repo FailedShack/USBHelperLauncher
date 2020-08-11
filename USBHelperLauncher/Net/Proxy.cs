@@ -52,6 +52,13 @@ namespace USBHelperLauncher.Net
             sessions = new Buffer<Session>(Settings.SessionBufferSize);
             FiddlerApplication.OnValidateServerCertificate += (sender, args) =>
             {
+                if (Program.WineCompat)
+                {
+                    // required, as WineCompat sets ForceHttp = true and invalid certificates significantly impact performance in Wine
+                    args.ValidityState = CertificateValidity.ForceValid;
+                    return;
+                }
+
                 var errors = args.CertificatePolicyErrors;
 
                 // No need to re-verify

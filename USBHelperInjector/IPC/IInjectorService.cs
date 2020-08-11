@@ -52,5 +52,8 @@ namespace USBHelperInjector.IPC
 
         [OperationContract]
         void SetSplitUnpackDirectories(bool splitUnpackDirectories);
+
+        [OperationContract]
+        void SetWineCompat(bool wineCompat);
     }
 }

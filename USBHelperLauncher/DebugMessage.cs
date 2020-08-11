@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using USBHelperLauncher.Configuration;
+using USBHelperLauncher.Utils;
 
 namespace USBHelperLauncher
 {
@@ -51,6 +52,8 @@ namespace USBHelperLauncher
             sb.AppendLine("System Language: " + CultureInfo.CurrentUICulture.Name);
             sb.AppendLine("Total Memory: " + info.TotalPhysicalMemory);
             sb.AppendLine("Available Memory: " + info.AvailablePhysicalMemory);
+            sb.AppendLine("Command-line Arguments: " + string.Join(" ", Environment.GetCommandLineArgs().Skip(1)));
+            if (WineUtil.IsRunningInWine()) sb.AppendLine("Wine version: " + WineUtil.TryGetVersion());
             TryCatch(() => GetAntiVirus(ref av), e => sb.AppendLine("Antivirus Software: Error (" + e.Message + ")"));
             AppendDictionary(sb, "Antivirus Software", av.ToDictionary(x => x.Key, x => x.Value ? "Enabled" : "Disabled"));
             AppendDictionary(sb, "Hosts", hosts.GetHosts().ToDictionary(x => x, x => hosts.Get(x).ToString()));

@@ -173,6 +173,7 @@
     <Compile Include="Utils\IOUtil.cs" />
     <Compile Include="Utils\RedirectRequest.cs" />
     <Compile Include="Utils\SourceforgeUtil.cs" />
+    <Compile Include="Utils\WineUtil.cs" />
     <Compile Include="Utils\WinUtil.cs" />
   </ItemGroup>
   <ItemGroup>

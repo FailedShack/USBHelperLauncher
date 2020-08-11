@@ -35,6 +35,20 @@ namespace USBHelperInjector
                 () => Type.GetConstructor(Type.EmptyTypes)
             );
             public static ConstructorInfo Constructor => _constructor.Value;
+
+            public static class Methods
+            {
+                private static readonly Lazy<MethodBase> _playGame = new Lazy<MethodBase>(
+                    () => (from method in NusGrabberForm.Type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+                           where method.GetParameters().Length == 1
+                              && method.GetParameters()[0].ParameterType == ReflectionHelper.TitleTypes.Game
+                              && method.GetMethodBody().LocalVariables.Count == 2
+                              && method.GetMethodBody().LocalVariables.Any(info => info.LocalType == ReflectionHelper.MainModule.GetType("NusHelper.DataSize"))
+                           select method).FirstOrDefault()
+                );
+
+                public static MethodBase PlayGame => _playGame.Value;
+            }
         }
 
         public static class FrmAskTicket
