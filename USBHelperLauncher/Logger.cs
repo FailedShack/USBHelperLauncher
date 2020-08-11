@@ -19,6 +19,8 @@ namespace USBHelperLauncher
 
         override public void Write(string output)
         {
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            output = $"[{timestamp}] {output}";
             // Capture the output and also send it to StdOut
             Captured.Write(output);
             stdOutWriter.Write(output);
@@ -26,9 +28,7 @@ namespace USBHelperLauncher
 
         override public void WriteLine(string output)
         {
-            // Capture the output and also send it to StdOut
-            Captured.WriteLine(output);
-            stdOutWriter.WriteLine(output);
+            Write(output + Environment.NewLine);
         }
 
         public string GetLog()

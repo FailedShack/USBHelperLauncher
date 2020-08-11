@@ -1,7 +1,9 @@
-﻿using dnlib.DotNet;
+﻿using System.IO;
+using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.Writer;
 using System.Linq;
+using USBHelperInjector;
 
 namespace USBHelperLauncher
 {
@@ -12,6 +14,22 @@ namespace USBHelperLauncher
         public ModuleInitInjector(string path)
         {
             this.path = path;
+        }
+
+        public bool RequiresInject(string outputPath)
+        {
+            if (!File.Exists(outputPath))
+            {
+                return true;
+            }
+            using (var module = ModuleDefMD.Load(outputPath))
+            {
+                // skip injection if file already exists and is up-to-date
+                var attr = module.Assembly.CustomAttributes.FirstOrDefault(
+                    a => a.TypeFullName == typeof(ModuleInitInjectedAttribute).FullName
+                );
+                return attr == null || (attr.ConstructorArguments[0].Value as UTF8String).String != Program.GetVersion();
+            }
         }
 
         public void Inject(string outputPath)
@@ -51,6 +69,15 @@ namespace USBHelperLauncher
                 {
                     cctor.Body.Instructions.Insert(0, OpCodes.Call.ToInstruction(testMethodRef));
                 }
+
+                // add injected ModuleInitInjected attribute
+                var injectAttrDef = typeof(ModuleInitInjectedAttribute).GetConstructor(new[] { typeof(string) });
+                var injectAttrRef = module.Import(injectAttrDef);
+                var newAttribute = new CustomAttribute(injectAttrRef as MemberRef, new[]
+                {
+                    new CAArgument(injectAttrRef.GetParam(0), Program.GetVersion())
+                });
+                module.Assembly.CustomAttributes.Add(newAttribute);
 
                 // write new file
                 var options = new ModuleWriterOptions(module);

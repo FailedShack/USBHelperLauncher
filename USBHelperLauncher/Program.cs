@@ -13,14 +13,13 @@ using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.ServiceModel;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Threading;
-using USBHelperInjector.Contracts;
+using USBHelperInjector.IPC;
 using USBHelperLauncher.Configuration;
 using USBHelperLauncher.Emulator;
 using USBHelperLauncher.Utils;
@@ -67,6 +66,10 @@ namespace USBHelperLauncher
                             break;
                         case "showconsole":
                             showConsole = true;
+                            break;
+                        case "portable":
+                            Settings.Portable = true;
+                            Settings.Save();
                             break;
                     }
                 }
@@ -200,9 +203,14 @@ namespace USBHelperLauncher
                 Environment.Exit(-1);
             }
 
-            if (!File.Exists("ver") || !File.Exists("WiiU_USB_Helper.exe"))
+            if (!File.Exists("WiiU_USB_Helper.exe"))
             {
-                MessageBox.Show("Could not find Wii U USB Helper, please make sure this executable is in the correct folder.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    File.Exists("ver")
+                        ? $"Could not find Wii U USB Helper, your Antivirus software probably deleted it. Try adding the install directory ({GetLauncherPath()}) to your Antivirus' exclusions or disable your Antivirus, then reinstall USB Helper."
+                        : "Could not find Wii U USB Helper, please make sure you unpacked the launcher's files (e.g. USBHelperLauncher.exe) and Wii U USB Helper's files (e.g. WiiU_USB_Helper.exe) into the same directory.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error
+                );
                 Environment.Exit(-1);
             }
             HelperVersion = File.ReadAllLines("ver")[0];
@@ -243,7 +251,8 @@ namespace USBHelperLauncher
 
             string executable = Path.Combine(GetLauncherPath(), "WiiU_USB_Helper.exe");
 
-            var running = Process.GetProcessesByName("Patched").FirstOrDefault(p => p.GetMainModuleFileName().StartsWith(GetLauncherPath(), StringComparison.OrdinalIgnoreCase));
+            var running = Process.GetProcessesByName("WiiU_USB_Helper_")
+                .FirstOrDefault(p => p.GetMainModuleFileName().StartsWith(GetLauncherPath(), StringComparison.OrdinalIgnoreCase));
 
             if (running != default(Process))
             {
@@ -254,6 +263,9 @@ namespace USBHelperLauncher
                 }
                 running.Kill();
             }
+
+            // The target .NET version (4.5) only uses TLS 1.0 and 1.1 by default
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             Proxy.Start();
 
@@ -281,9 +293,13 @@ namespace USBHelperLauncher
                 }
             }).Wait();
 
-            ServiceHost host = new ServiceHost(typeof(LauncherService), new Uri("net.pipe://localhost/LauncherService"));
-            host.AddServiceEndpoint(typeof(ILauncherService), new NetNamedPipeBinding(""), "");
-            host.Open();
+            IPCUtil.CreateService(
+                Settings.IPCType,
+                typeof(LauncherService),
+                typeof(ILauncherService),
+                out var serviceUri
+            );
+            Logger.WriteLine($"WCF host uri: {serviceUri}");
 
             // Patching
             dialog.Invoke(new Action(() =>
@@ -294,8 +310,15 @@ namespace USBHelperLauncher
             }));
             var injector = new ModuleInitInjector(executable);
             executable = Path.Combine(GetLauncherPath(), "WiiU_USB_Helper_.exe");
-            injector.Inject(executable);
-            Logger.WriteLine("Injected module initializer.");
+            if (injector.RequiresInject(executable))
+            {
+                injector.Inject(executable);
+                Logger.WriteLine("Injected module initializer.");
+            }
+            else
+            {
+                Logger.WriteLine("Module initializer already injected.");
+            }
             dialog.Invoke(new Action(() => dialog.Close()));
 
             if (OverridePublicKey)
@@ -313,7 +336,7 @@ namespace USBHelperLauncher
             var startInfo = new ProcessStartInfo()
             {
                 FileName = executable,
-                Arguments = HelperVersion,
+                Arguments = string.Join(" ", HelperVersion, Settings.IPCType, serviceUri),
                 UseShellExecute = false,
                 RedirectStandardError = true,
                 StandardErrorEncoding = Encoding.Default

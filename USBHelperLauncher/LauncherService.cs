@@ -1,10 +1,12 @@
-﻿using Fiddler;
+﻿using System;
+using Fiddler;
 using System.ServiceModel;
-using USBHelperInjector.Contracts;
+using USBHelperInjector.IPC;
 using USBHelperLauncher.Configuration;
 
 namespace USBHelperLauncher
 {
+    [ServiceBehavior(AddressFilterMode = AddressFilterMode.Any)]
     class LauncherService : ILauncherService
     {
         public void SetKeySite(string site, string url)
@@ -13,11 +15,10 @@ namespace USBHelperLauncher
             Settings.Save();
         }
 
-        public void SendInjectorSettings()
+        public void SendInjectorSettings(Uri uri)
         {
-            Program.Logger.WriteLine("Sending information to injector...");
-            var factory = new ChannelFactory<IInjectorService>(new NetNamedPipeBinding(""), "net.pipe://localhost/InjectorService");
-            var channel = factory.CreateChannel();
+            Program.Logger.WriteLine($"Sending information to injector ({uri})...");
+            var channel = IPCUtil.CreateChannel<IInjectorService>(Settings.IPCType, uri.ToString());
             if (Program.OverridePublicKey)
             {
                 channel.SetDonationKey(Program.GenerateDonationKey());

@@ -6,11 +6,12 @@ using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
-using USBHelperInjector.Contracts;
+using USBHelperInjector.IPC;
 using USBHelperInjector.Patches.Attributes;
 
 namespace USBHelperInjector
 {
+    [ServiceBehavior(AddressFilterMode = AddressFilterMode.Any)]
     public class InjectorService : IInjectorService
     {
         public static Harmony Harmony { get; private set; }
@@ -27,14 +28,19 @@ namespace USBHelperInjector
 
         public static void Init()
         {
-            var factory = new ChannelFactory<ILauncherService>(new NetNamedPipeBinding(""), "net.pipe://localhost/LauncherService");
-            LauncherService = factory.CreateChannel();
+            var args = Environment.GetCommandLineArgs();
+            var ipcType = (IPCType)Enum.Parse(typeof(IPCType), args[2]);
+            var launcherUri = args[3];
 
-            ServiceHost host = new ServiceHost(typeof(InjectorService), new Uri("net.pipe://localhost/InjectorService"));
-            host.AddServiceEndpoint(typeof(IInjectorService), new NetNamedPipeBinding(""), "");
-            host.Open();
+            IPCUtil.CreateService(
+                ipcType,
+                typeof(InjectorService),
+                typeof(IInjectorService),
+                out var serviceUri
+            );
 
-            LauncherService.SendInjectorSettings();
+            LauncherService = IPCUtil.CreateChannel<ILauncherService>(ipcType, launcherUri);
+            LauncherService.SendInjectorSettings(serviceUri);
 
             Harmony = new Harmony("me.failedshack.usbhelperinjector");
             var assembly = Assembly.GetExecutingAssembly();

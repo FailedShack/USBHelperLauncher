@@ -1,6 +1,6 @@
 ﻿using System.ServiceModel;
 
-namespace USBHelperInjector.Contracts
+namespace USBHelperInjector.IPC
 {
     [ServiceContract]
     public interface IInjectorService
