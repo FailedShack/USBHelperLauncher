@@ -193,7 +193,8 @@
     <None Include="emulators\meta.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <Content Include="BasicFormatsForCore.dll">
+    <Content Include="..\packages\FiddlerCore.Trial.5.0.0\contentFiles\any\net45\BasicFormatsForCore.dll">
+      <Link>BasicFormatsForCore.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Icon.ico" />
