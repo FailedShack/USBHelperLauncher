@@ -8,7 +8,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return AccessTools.DeclaredProperty(ReflectionHelper.Settings, "TicketsPath").GetGetMethod(true);
+            return AccessTools.DeclaredProperty(ReflectionHelper.Settings.Type, "TicketsPath").GetGetMethod(true);
         }
 
         static bool Prefix(ref string __result)

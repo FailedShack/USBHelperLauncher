@@ -14,7 +14,7 @@ namespace USBHelperInjector.Patches
     {
         internal static MethodBase TargetMethod()
         {
-            var shwGetter = ReflectionHelper.Settings.GetProperty("ShowHaxchiWarning").GetGetMethod();
+            var shwGetter = ReflectionHelper.Settings.Type.GetProperty("ShowHaxchiWarning").GetGetMethod();
             return (from method in ReflectionHelper.NusGrabberForm.Type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
                     where method.GetParameters().Length == 1
                     && method.GetParameters()[0].ParameterType.IsAbstract

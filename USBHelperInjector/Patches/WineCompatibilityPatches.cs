@@ -11,7 +11,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return AccessTools.DeclaredProperty(ReflectionHelper.Settings, "ShowDownloadManagerTip").GetGetMethod(true);
+            return AccessTools.DeclaredProperty(ReflectionHelper.Settings.Type, "ShowDownloadManagerTip").GetGetMethod(true);
         }
 
         static bool Prefix(ref bool __result)

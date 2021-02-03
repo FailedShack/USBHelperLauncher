@@ -8,7 +8,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return AccessTools.DeclaredProperty(ReflectionHelper.Settings, "DonationKey").GetGetMethod(true);
+            return AccessTools.DeclaredProperty(ReflectionHelper.Settings.Type, "DonationKey").GetGetMethod(true);
         }
 
         static bool Prefix(ref string __result)
@@ -27,7 +27,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return AccessTools.DeclaredProperty(ReflectionHelper.Settings, "DonationKey").GetSetMethod(true);
+            return AccessTools.DeclaredProperty(ReflectionHelper.Settings.Type, "DonationKey").GetSetMethod(true);
         }
 
         static bool Prefix(ref string value)

@@ -8,7 +8,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return AccessTools.DeclaredProperty(ReflectionHelper.Settings, "Show552Warning").GetGetMethod(true);
+            return AccessTools.DeclaredProperty(ReflectionHelper.Settings.Type, "Show552Warning").GetGetMethod(true);
         }
 
         static bool Prefix(ref bool __result)

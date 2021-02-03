@@ -15,7 +15,7 @@ namespace USBHelperInjector.Patches
     {
         static MethodBase TargetMethod()
         {
-            return ReflectionHelper.Settings.GetConstructor(Type.EmptyTypes);
+            return ReflectionHelper.Settings.Type.GetConstructor(Type.EmptyTypes);
         }
 
         static void Postfix()
