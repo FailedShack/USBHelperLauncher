@@ -120,7 +120,7 @@
   <data name="Credits" xml:space="preserve">
     <value>USBHelperLauncher brought to you by
 !FailedShack
-!shiftinv
+!arcticdiv
 Special thanks to
 !agilly1989
 !ElectroJo
@@ -129,6 +129,7 @@ Special thanks to
 !php interpreter
 !RadicalR
 !Renn
+!S★ Urαηυs
 and all our translators!</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />

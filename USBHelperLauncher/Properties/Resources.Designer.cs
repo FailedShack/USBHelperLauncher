@@ -63,7 +63,7 @@ namespace USBHelperLauncher.Properties {
         /// <summary>
         ///   Busca una cadena traducida similar a USBHelperLauncher brought to you by
         ///!FailedShack
-        ///!shiftinv
+        ///!arcticdiv
         ///Special thanks to
         ///!agilly1989
         ///!ElectroJo
@@ -72,6 +72,7 @@ namespace USBHelperLauncher.Properties {
         ///!php interpreter
         ///!RadicalR
         ///!Renn
+        ///!S★ Urαηυs
         ///and all our translators!.
         /// </summary>
         internal static string Credits {
