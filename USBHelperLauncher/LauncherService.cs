@@ -36,6 +36,7 @@ namespace USBHelperLauncher
             channel.SetDisableTabs(Settings.DisableTabs);
             channel.SetLocaleFile(Program.Locale.LocaleFile);
             channel.SetEshopRegion(Program.Locale.ChosenLocale.Split('-')[1]);
+            channel.SetDefaultFont(Settings.DefaultFont);
             channel.SetHelperVersion(Program.HelperVersion);
             channel.SetPortable(Settings.Portable);
             channel.SetForceHttp(Settings.ForceHttp);

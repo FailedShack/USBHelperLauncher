@@ -93,6 +93,9 @@ namespace USBHelperLauncher.Configuration
         [Setting("Injector", true)]
         public static bool SplitUnpackDirectories { get; set; }
 
+        [Setting("Injector", "fonts/NotoSans/NotoSans-Regular.ttf")]
+        public static string DefaultFont { get; set; }
+
         [Setting("Launcher", IPCType.TCP)]
         public static IPCType IPCType { get; set; }
 

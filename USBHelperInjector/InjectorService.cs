@@ -26,6 +26,7 @@ namespace USBHelperInjector
         public static string[] DisableTabs { get; private set; }
         public static string LocaleFile { get; private set; }
         public static string EshopRegion { get; private set; }
+        public static string DefaultFont { get; private set; }
         public static bool SplitUnpackDirectories { get; private set; }
         public static bool WineCompat { get; private set; }
 
@@ -142,6 +143,11 @@ namespace USBHelperInjector
         public void SetEshopRegion(string eshopRegion)
         {
             EshopRegion = eshopRegion;
+        }
+
+        public void SetDefaultFont(string defaultFont)
+        {
+            DefaultFont = defaultFont;
         }
 
         public void SetSplitUnpackDirectories(bool splitUnpackDirectories)

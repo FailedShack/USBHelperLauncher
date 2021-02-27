@@ -77,7 +77,7 @@ namespace USBHelperInjector.Patches
             {
                 "enable='between(t,0,5)'",
                 "text='PRESS ESC TO EXIT'",
-                "fontfile=/Windows/Fonts/segoeui.ttf",
+                "fontfile=" + InjectorService.DefaultFont,
                 "fontcolor=white",
                 "fontsize=48",
                 "box=1",

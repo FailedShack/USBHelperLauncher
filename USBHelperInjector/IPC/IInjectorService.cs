@@ -51,6 +51,9 @@ namespace USBHelperInjector.IPC
         void SetEshopRegion(string eshopRegion);
 
         [OperationContract]
+        void SetDefaultFont(string defaultFont);
+
+        [OperationContract]
         void SetSplitUnpackDirectories(bool splitUnpackDirectories);
 
         [OperationContract]
