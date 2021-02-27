@@ -19,7 +19,7 @@ namespace USBHelperInjector.Patches
     {
         const int GWL_HWNDPARENT = -8;
         static readonly Process PROCESS = Process.GetCurrentProcess();
-        static readonly string FFMPEG_URL = "https://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-latest-win32-static.zip";
+        static readonly string FFMPEG_URL = "http://dl.nul.sh/ffmpeg/win32/ffmpeg-release-essentials.zip";
         static readonly object FFPLAY_CHECK = new object();
         static Process player;
 
