@@ -26,6 +26,11 @@ namespace USBHelperInjector.Patches
 
         static void Prefix(object __instance, ref string __0)
         {
+            // only modify paths to the configured unpack directory, not for builtin emulators
+            if (__0 != ReflectionHelper.Settings.GetValue<string>("ExtractFolder"))
+            {
+                return;
+            }
             var unpackDir = new[] { ReflectionHelper.TitleTypes.Update, ReflectionHelper.TitleTypes.Dlc }.Contains(__instance.GetType())
                 ? "Updates and DLC"
                 : "Base Games";

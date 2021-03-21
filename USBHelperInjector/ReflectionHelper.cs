@@ -18,7 +18,26 @@ namespace USBHelperInjector
 
         public static readonly MethodInfo EntryPoint = assembly.EntryPoint;
 
-        public static readonly Type Settings = assembly.GetType("WIIU_Downloader.Properties.Settings");
+        public static class Settings
+        {
+            public static readonly Type Type = assembly.GetType("WIIU_Downloader.Properties.Settings");
+
+            private static readonly Lazy<object> _default = new Lazy<object>(
+                () => Type.GetProperty("Default").GetValue(null)
+            );
+            public static object Default => _default.Value;
+
+
+            public static T GetValue<T>(string name, object instance = null)
+            {
+                return (T)Type.GetProperty(name).GetValue(instance ?? Default);
+            }
+
+            public static void SetValue<T>(string name, T value, object instance = null)
+            {
+                Type.GetProperty(name).SetValue(instance ?? Default, value);
+            }
+        }
 
         public static class NusGrabberForm
         {
