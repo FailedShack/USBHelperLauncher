@@ -6,10 +6,14 @@ using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
-using USBHelperInjector.IPC;
+using System.Windows.Forms;
 using System.Windows.Interop;
 using System.Windows.Media;
+using USBHelperInjector.IPC;
+using USBHelperInjector.Media;
+using USBHelperInjector.Patches;
 using USBHelperInjector.Patches.Attributes;
+using USBHelperInjector.Properties;
 
 namespace USBHelperInjector
 {
@@ -23,6 +27,7 @@ namespace USBHelperInjector
         public static bool Portable { get; private set; }
         public static bool ForceHttp { get; private set; }
         public static bool FunAllowed { get; private set; }
+        public static bool PlayMusic { get; private set; }
         public static string[] DisableTabs { get; private set; }
         public static string LocaleFile { get; private set; }
         public static string EshopRegion { get; private set; }
@@ -60,6 +65,32 @@ namespace USBHelperInjector
             {
                 RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
             }
+
+            NusGrabberFormPatch.Shown += (form, e) =>
+            {
+                FF player = null;
+                var button = new OnOffButton()
+                {
+                    OnImage = Resources.AudioOn,
+                    OffImage = Resources.AudioOff,
+                    State = PlayMusic
+                };
+                button.StateChanged += (sender, e1) =>
+                {
+                    // avoid preloading ffplay
+                    // TODO: make this not so hackish
+                    if (player == null)
+                    {
+                        if (!button.State) return;
+                        player = FF.Play("-loop 0 -nodisp loop.ogg");
+                    }
+                    player.Pause = !button.State;
+                    LauncherService.SetPlayMusic(button.State);
+                };
+                var toolWindow = ((Form)form).Controls.Find("toolWindow5", true)[0];
+                toolWindow.Controls.Add(button);
+                button.BringToFront();
+            };
         }
 
         public void ForceKeySiteForm()
@@ -128,6 +159,11 @@ namespace USBHelperInjector
         public void SetFunAllowed(bool funAllowed)
         {
             FunAllowed = funAllowed;
+        }
+
+        public void SetPlayMusic(bool playMusic)
+        {
+            PlayMusic = playMusic;
         }
 
         public void SetDisableTabs(string[] disableTabs)

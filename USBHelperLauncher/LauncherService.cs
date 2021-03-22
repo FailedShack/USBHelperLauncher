@@ -15,6 +15,12 @@ namespace USBHelperLauncher
             Settings.Save();
         }
 
+        public void SetPlayMusic(bool playMusic)
+        {
+            Settings.BackgroundMusic = playMusic;
+            Settings.Save();
+        }
+
         public void SendInjectorSettings(Uri uri)
         {
             Program.Logger.WriteLine($"Sending information to injector ({uri})...");
@@ -41,6 +47,7 @@ namespace USBHelperLauncher
             channel.SetPortable(Settings.Portable);
             channel.SetForceHttp(Settings.ForceHttp);
             channel.SetFunAllowed(!Settings.NoFunAllowed);
+            channel.SetPlayMusic(Settings.BackgroundMusic);
             channel.SetSplitUnpackDirectories(Settings.SplitUnpackDirectories);
             channel.SetWineCompat(Program.WineCompat);
         }

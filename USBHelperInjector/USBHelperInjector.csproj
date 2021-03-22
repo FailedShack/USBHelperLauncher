@@ -63,6 +63,11 @@
     <Compile Include="InjectorService.cs" />
     <Compile Include="IPC\IPCType.cs" />
     <Compile Include="IPC\IPCUtil.cs" />
+    <Compile Include="Media\FF.cs" />
+    <Compile Include="Media\OnOffButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Media\ProcessExtensions.cs" />
     <Compile Include="ModuleInitInjectedAttribute.cs" />
     <Compile Include="Patches\Attributes\Optional.cs" />
     <Compile Include="Overrides.cs" />
@@ -116,9 +121,17 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="loop.ogg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\audio-on.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\audio-off.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.6.0.0\build\Fody.targets" Condition="Exists('..\packages\Fody.6.0.0\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

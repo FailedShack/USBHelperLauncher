@@ -42,6 +42,9 @@ namespace USBHelperInjector.IPC
         void SetFunAllowed(bool funAllowed);
 
         [OperationContract]
+        void SetPlayMusic(bool playMusic);
+
+        [OperationContract]
         void SetDisableTabs(string[] disableTabs);
 
         [OperationContract]

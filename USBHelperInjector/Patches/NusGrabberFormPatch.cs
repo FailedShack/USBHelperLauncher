@@ -9,6 +9,7 @@ namespace USBHelperInjector.Patches
     [HarmonyPatch]
     class NusGrabberFormPatch
     {
+        public static event EventHandler Shown;
         public static event FormClosingEventHandler FormClosing;
 
         static MethodBase TargetMethod()
@@ -35,6 +36,7 @@ namespace USBHelperInjector.Patches
                 __instance.ShowInTaskbar = false;
                 __instance.ShowInTaskbar = true;
             };
+            __instance.Shown += (sender, e) => Shown?.Invoke(sender, e);
             __instance.FormClosing += (sender, e) => FormClosing?.Invoke(sender, e);
         }
     }

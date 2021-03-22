@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using USBHelperInjector.Media;
 
 namespace USBHelperInjector.Patches
 {
@@ -19,16 +20,14 @@ namespace USBHelperInjector.Patches
     {
         const int GWL_HWNDPARENT = -8;
         static readonly Process PROCESS = Process.GetCurrentProcess();
-        static readonly string FFMPEG_URL = "http://dl.nul.sh/ffmpeg/win32/ffmpeg-release-essentials.zip";
-        static readonly object FFPLAY_CHECK = new object();
-        static Process player;
+        static FF PLAYER;
 
         [DllImport("user32.dll")]
         static extern IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
         static bool Prepare()
         {
-            NusGrabberFormPatch.FormClosing += (sender, e) => Stop();
+            NusGrabberFormPatch.FormClosing += (sender, e) => PLAYER?.Stop();
             return true;
         }
 
@@ -55,24 +54,6 @@ namespace USBHelperInjector.Patches
             {
                 headers.AppendFormat("{0}: {1}\r\n", header, request.Headers[header]);
             }
-            Stop();
-            lock (FFPLAY_CHECK)
-            {
-                if (!File.Exists("ffplay.exe"))
-                {
-                    var temp = Path.GetTempFileName();
-                    using (var client = new WebClient())
-                    {
-                        client.DownloadFile(FFMPEG_URL, temp);
-                    }
-                    using (var archive = ZipFile.OpenRead(temp))
-                    {
-                        var entry = archive.Entries.Where(file => file.Name == "ffplay.exe").FirstOrDefault();
-                        entry.ExtractToFile(entry.Name, true);
-                    }
-                    File.Delete(temp);
-                }
-            }
             var drawText = new[]
             {
                 "enable='between(t,0,5)'",
@@ -86,35 +67,19 @@ namespace USBHelperInjector.Patches
                 "x=(w-tw)/2",
                 "y=h-(2*lh)"
             };
-            var startInfo = new ProcessStartInfo()
-            {
-                FileName = "ffplay.exe",
-                Arguments = string.Format(
+            PLAYER?.Stop();
+            PLAYER = FF.Play(string.Format(
                     "{0} -noborder -autoexit -reconnect 1 -http_proxy {1} -headers \"{2}\" -vf \"drawtext={3}\"",
-                    uri, Overrides.Proxy.Address, headers, string.Join(":", drawText)),
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-            player = new Process() { StartInfo = startInfo };
-            player.Start();
-            while (player.MainWindowHandle == IntPtr.Zero)
+                    uri, Overrides.Proxy.Address, headers, string.Join(":", drawText)));
+            while (PLAYER.Process.MainWindowHandle == IntPtr.Zero)
             {
                 Thread.Sleep(20);
-                player.Refresh();
+                PLAYER.Process.Refresh();
             }
 
             // Set the owner of the player to the main window
-            SetWindowLong(player.MainWindowHandle, GWL_HWNDPARENT, PROCESS.MainWindowHandle);
+            SetWindowLong(PLAYER.Process.MainWindowHandle, GWL_HWNDPARENT, PROCESS.MainWindowHandle);
             return false;
-        }
-
-        static void Stop()
-        {
-            if (player != null && !player.HasExited)
-            {
-                player.Kill();
-                player.WaitForExit();
-            }
         }
     }
 }

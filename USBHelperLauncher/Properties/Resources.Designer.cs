@@ -73,6 +73,7 @@ namespace USBHelperLauncher.Properties {
         ///!RadicalR
         ///!Renn
         ///!S★ Urαηυs
+        ///!Percevalko
         ///and all our translators!.
         /// </summary>
         internal static string Credits {

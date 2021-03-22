@@ -10,6 +10,9 @@ namespace USBHelperInjector.IPC
         void SetKeySite(string site, string url);
 
         [OperationContract]
+        void SetPlayMusic(bool playMusic);
+
+        [OperationContract]
         void SendInjectorSettings(Uri uri);
     }
 }
