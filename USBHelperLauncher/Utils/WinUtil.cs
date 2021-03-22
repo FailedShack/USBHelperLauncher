@@ -108,5 +108,49 @@ namespace USBHelperLauncher.Utils
                     throw new Win32Exception(Marshal.GetLastWin32Error());
             }
         }
+
+        // source: winnt.h
+        public enum ImageFileMachine
+        {
+            Unknown    = 0,
+            I860       = 0x014D,
+            I386       = 0x014C,
+            R3000      = 0x0162,
+            R4000      = 0x0166,
+            R10000     = 0x0168,
+            WCEMIPSV2  = 0x0169,
+            ALPHA      = 0x0184,
+            SH3        = 0x01A2,
+            SH3DSP     = 0x01A3,
+            SH3E       = 0x01A4,
+            SH4        = 0x01A6,
+            SH5        = 0x01A8,
+            ARM        = 0x01C0,
+            THUMB      = 0x01C2,
+            ARMNT      = 0x01C4,
+            AM33       = 0x01D3,
+            POWERPC    = 0x01F0,
+            POWERPCFP  = 0x01F1,
+            IA64       = 0x0200,
+            MIPS16     = 0x0266,
+            ALPHA64    = 0x0284,
+            MIPSFPU    = 0x0366,
+            MIPSFPU16  = 0x0466,
+            AXP64      = 0x0284,
+            TRICORE    = 0x0520,
+            INFINEON   = 0x0520,
+            CEF        = 0x0CEF,
+            EBC        = 0x0EBC,
+            AMD64      = 0x8664,
+            M32R       = 0x9041,
+            AA64       = 0xAA64
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool IsWow64Process2(
+            IntPtr process,
+            out ImageFileMachine processMachine,
+            out ImageFileMachine nativeMachine
+        );
     }
 }

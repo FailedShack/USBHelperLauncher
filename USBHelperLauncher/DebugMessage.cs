@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Management;
@@ -15,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using USBHelperLauncher.Configuration;
 using USBHelperLauncher.Utils;
+using static USBHelperLauncher.Utils.WinUtil;
 
 namespace USBHelperLauncher
 {
@@ -37,6 +39,7 @@ namespace USBHelperLauncher
             var hosts = Program.Hosts;
             var locale = Program.Locale;
             var av = new Dictionary<string, bool>();
+            IsWow64Process2(Process.GetCurrentProcess().Handle, out ImageFileMachine processMachine, out ImageFileMachine nativeMachine);
             sb.Append('-', 13).Append(" USBHelperLauncher Debug Information ").Append('-', 13).AppendLine();
             sb.AppendLine("Debug Time: " + now + " (UTC)");
             sb.AppendLine("Session Length: " + (now - Program.SessionStart).ToString(@"hh\:mm\:ss"));
@@ -47,7 +50,8 @@ namespace USBHelperLauncher
             sb.AppendLine("Helper Version: " + Program.HelperVersion);
             sb.AppendLine(".NET Framework Version: " + Get45or451FromRegistry());
             sb.AppendFormat("Operating System: {0} ({1}-bit)", info.OSFullName, Environment.Is64BitOperatingSystem ? 64 : 32).AppendLine();
-            sb.AppendLine("Platform: " + info.OSPlatform);
+            sb.AppendFormat("Native Architecture: {0}", Enum.GetName(typeof(ImageFileMachine), nativeMachine)).AppendLine();
+            sb.AppendFormat("Process Architecture: {0}", Enum.GetName(typeof(ImageFileMachine), processMachine)).AppendLine();
             sb.AppendLine("Used Locale: " + locale.ChosenLocale);
             sb.AppendLine("System Language: " + CultureInfo.CurrentUICulture.Name);
             sb.AppendLine("Total Memory: " + info.TotalPhysicalMemory);
