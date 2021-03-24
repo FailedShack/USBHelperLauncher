@@ -1,0 +1,39 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Clone main repository
+      uses: actions/checkout@v2
+
+    - name: Clone nuget dependencies repository
+      uses: actions/checkout@v2
+      with:
+        # this repository contains the following `.nupkg` files:
+        #   - BCMakeCert.2.0.9.nupkg
+        #   - FiddlerCore.Trial.5.0.0.nupkg
+        #   - Telerik.NetworkConnections.0.2.0.nupkg
+        repository: FailedShack/usbhelperlauncher-deps
+        path: usbhelperlauncher-deps
+        ssh-key: ${{ secrets.usbhelperlauncher_deps_deploy_key }}
+
+    - name: Set up MSBuild
+      uses: microsoft/setup-msbuild@v1
+    - name: Set up NuGet
+      uses: nuget/setup-nuget@v1
+    - name: Add local NuGet repository
+      run: nuget sources add -name local -source "$(pwd)\usbhelperlauncher-deps"
+    - name: Install dependencies
+      run: nuget restore USBHelperLauncher.sln
+
+    - name: Build Solution
+      run: msbuild USBHelperLauncher.sln -p:Configuration=Release -p:DebugType=none -p:DebugSymbols=false -p:AllowedReferenceRelatedFileExtensions=none
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: USBHelperLauncher
+        path: USBHelperLauncher\bin\Release
