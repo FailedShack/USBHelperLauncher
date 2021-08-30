@@ -208,6 +208,9 @@
     <Content Include="BasicFormatsForCore.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="extern\ffmpeg\ffplay.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="extern\innounp\innounp.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

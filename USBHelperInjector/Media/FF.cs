@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Net;
 
 namespace USBHelperInjector.Media
 {
     class FF : IDisposable
     {
-        static readonly string FFMPEG_URL = "http://dl.nul.sh/ffmpeg/win32/ffmpeg-release-essentials.zip";
-        static readonly object FFPLAY_CHECK = new object();
+        const string FFPLAY_PATH = "extern/ffmpeg/ffplay.exe";
+
         static readonly LinkedList<FF> PLAYERS = new LinkedList<FF>();
 
         private bool _pause;
@@ -90,26 +86,9 @@ namespace USBHelperInjector.Media
 
         public static FF Play(string args)
         {
-            lock (FFPLAY_CHECK)
-            {
-                if (!File.Exists("ffplay.exe"))
-                {
-                    var temp = Path.GetTempFileName();
-                    using (var client = new WebClient())
-                    {
-                        client.DownloadFile(FFMPEG_URL, temp);
-                    }
-                    using (var archive = ZipFile.OpenRead(temp))
-                    {
-                        var entry = archive.Entries.Where(file => file.Name == "ffplay.exe").FirstOrDefault();
-                        entry.ExtractToFile(entry.Name, true);
-                    }
-                    File.Delete(temp);
-                }
-            }
             var startInfo = new ProcessStartInfo()
             {
-                FileName = "ffplay.exe",
+                FileName = FFPLAY_PATH,
                 Arguments = args,
                 UseShellExecute = false,
                 CreateNoWindow = true
