@@ -208,13 +208,13 @@
     <Content Include="BasicFormatsForCore.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="extern\innounp\innounp.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="fonts\NotoSans\LICENSE.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Icon.ico" />
-    <Content Include="innounp.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="redist\vcredist_x64.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
