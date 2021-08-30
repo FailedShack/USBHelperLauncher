@@ -24,6 +24,7 @@ namespace USBHelperInjector.Media
                 StateChanged?.Invoke(this, null);
             }
         }
+        public bool Hover { get; private set; }
 
         public Image OnImage { get; set; }
         public Image OffImage { get; set; }
@@ -32,9 +33,6 @@ namespace USBHelperInjector.Media
         {
             StateChanged?.Invoke(this, null);
             Image = _state ? OnImage : OffImage;
-            FlatStyle = FlatStyle.Flat;
-            FlatAppearance.BorderSize = 0;
-            BackColor = Color.Transparent;
             base.OnCreateControl();
         }
 
@@ -44,13 +42,26 @@ namespace USBHelperInjector.Media
             base.OnMouseClick(e);
         }
 
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            Hover = true;
+            base.OnMouseEnter(e);
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            Hover = false;
+            base.OnMouseLeave(e);
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            var path = new GraphicsPath();
-            path.AddEllipse(0, 0, ClientSize.Width, ClientSize.Height);
-            Region = new Region(path);
-            base.OnPaint(e);
+            var g = e.Graphics;
+            var rect = new Rectangle(0, 0, ClientSize.Width, ClientSize.Height);
+            ButtonRenderer.DrawParentBackground(g, rect, this);
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            if (Hover) g.FillEllipse(Brushes.White, rect);
+            g.DrawImage(Image, rect);
         }
     }
 }
