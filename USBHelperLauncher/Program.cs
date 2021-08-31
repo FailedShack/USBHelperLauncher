@@ -683,7 +683,7 @@ namespace USBHelperLauncher
             }
             catch (Exception ex) when (ex is HttpRequestException || ex is JsonReaderException || ex is TaskCanceledException)
             {
-                Logger.WriteLine("Could not submit log to Hastebin: {0}", ex);
+                Logger.WriteLine("Could not submit log: {0}", ex);
                 await toFile();
             }
         }
