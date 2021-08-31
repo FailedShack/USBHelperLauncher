@@ -31,6 +31,7 @@ namespace USBHelperInjector.Media
 
         public static void Suspend(this Process process)
         {
+            process.Refresh(); // Refresh thread list
             foreach (ProcessThread thread in process.Threads)
             {
                 var pOpenThread = OpenThread(ThreadAccess.SUSPEND_RESUME, false, (uint)thread.Id);

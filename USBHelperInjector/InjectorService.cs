@@ -68,7 +68,7 @@ namespace USBHelperInjector
 
             NusGrabberFormPatch.Shown += (form, e) =>
             {
-                FF player = null;
+                var player = FF.Play("-loop 0 -nodisp loop.ogg");
                 var button = new OnOffButton()
                 {
                     OnImage = Resources.AudioOn,
@@ -77,13 +77,6 @@ namespace USBHelperInjector
                 };
                 button.StateChanged += (sender, e1) =>
                 {
-                    // avoid preloading ffplay
-                    // TODO: make this not so hackish
-                    if (player == null)
-                    {
-                        if (!button.State) return;
-                        player = FF.Play("-loop 0 -nodisp loop.ogg");
-                    }
                     player.Pause = !button.State;
                     LauncherService.SetPlayMusic(button.State);
                 };
