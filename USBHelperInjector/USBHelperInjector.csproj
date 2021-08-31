@@ -104,6 +104,7 @@
     <Compile Include="Patches\StringLocalizationPatch.cs" />
     <Compile Include="Patches\SystemUpdateWarningPatch.cs" />
     <Compile Include="Patches\KeySiteFormEnterPatch.cs" />
+    <Compile Include="Patches\TaskUnhandledExceptionPatch.cs" />
     <Compile Include="Patches\UnpackDirectoryPatch.cs" />
     <Compile Include="Patches\WineCompatibilityPatches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
