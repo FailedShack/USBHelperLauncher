@@ -72,7 +72,7 @@ namespace USBHelperLauncher.Configuration
         [Setting("Injector", false)]
         public static bool DisableOptionalPatches { get; set; }
 
-        [Setting("Injector", new string[] { "toolWeb", "toolMods", "toolChat" })]
+        [Setting("Injector", new string[] { "toolWeb", "toolMods", "toolChat", "toolContribute" })]
         public static string[] DisableTabs { get; set; }
 
         [Setting("Injector", 5)]
