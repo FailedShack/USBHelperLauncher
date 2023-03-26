@@ -69,6 +69,7 @@
     </Compile>
     <Compile Include="Media\ProcessExtensions.cs" />
     <Compile Include="ModuleInitInjectedAttribute.cs" />
+    <Compile Include="Patches\AllowOnlyFipsAlgorithmsPatch.cs" />
     <Compile Include="Patches\Attributes\Optional.cs" />
     <Compile Include="Overrides.cs" />
     <Compile Include="Patches\Attributes\WineOnly.cs" />
