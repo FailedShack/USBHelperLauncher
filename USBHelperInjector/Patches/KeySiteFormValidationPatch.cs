@@ -83,7 +83,7 @@ namespace USBHelperInjector.Patches
                     {
                         // Ensure that we actually got a JSON response
                         var content = resp.Content;
-                        if (content.Headers.ContentType.MediaType != "application/json")
+                        if (content.Headers.ContentType?.MediaType != "application/json")
                         {
                             try
                             {
