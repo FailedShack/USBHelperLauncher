@@ -152,5 +152,37 @@ namespace USBHelperLauncher.Utils
             out ImageFileMachine processMachine,
             out ImageFileMachine nativeMachine
         );
+
+        [DllImport("kernel32.dll")]
+        internal static extern void GetNativeSystemInfo(ref SystemInfo lpSystemInfo);
+
+        [DllImport("kernel32.dll")]
+        internal static extern void GetSystemInfo(ref SystemInfo lpSystemInfo);
+
+        public enum ProcessorArchitecture : ushort
+        {
+            Unknown = 0xFFFF,
+            I386    = 0,
+            ARM     = 5,
+            IA64    = 6,
+            AMD64   = 9,
+            ARM64   = 12
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct SystemInfo
+        {
+            public ProcessorArchitecture wProcessorArchitecture;
+            public ushort wReserved;
+            public uint dwPageSize;
+            public IntPtr lpMinimumApplicationAddress;
+            public IntPtr lpMaximumApplicationAddress;
+            public UIntPtr dwActiveProcessorMask;
+            public uint dwNumberOfProcessors;
+            public uint dwProcessorType;
+            public uint dwAllocationGranularity;
+            public ushort wProcessorLevel;
+            public ushort wProcessorRevision;
+        }
     }
 }

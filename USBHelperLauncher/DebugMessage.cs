@@ -39,7 +39,7 @@ namespace USBHelperLauncher
             var hosts = Program.Hosts;
             var locale = Program.Locale;
             var av = new Dictionary<string, bool>();
-            IsWow64Process2(Process.GetCurrentProcess().Handle, out ImageFileMachine processMachine, out ImageFileMachine nativeMachine);
+            GetProcessAndNativeArchitecture(out var processArchitecture, out var nativeArchitecture);
             sb.Append('-', 13).Append(" USBHelperLauncher Debug Information ").Append('-', 13).AppendLine();
             sb.AppendLine("Debug Time: " + now + " (UTC)");
             sb.AppendLine("Session Length: " + (now - Program.SessionStart).ToString(@"hh\:mm\:ss"));
@@ -50,8 +50,8 @@ namespace USBHelperLauncher
             sb.AppendLine("Helper Version: " + Program.HelperVersion);
             sb.AppendLine(".NET Framework Version: " + Get45or451FromRegistry());
             sb.AppendFormat("Operating System: {0} ({1}-bit)", info.OSFullName, Environment.Is64BitOperatingSystem ? 64 : 32).AppendLine();
-            sb.AppendFormat("Native Architecture: {0}", Enum.GetName(typeof(ImageFileMachine), nativeMachine)).AppendLine();
-            sb.AppendFormat("Process Architecture: {0}", Enum.GetName(typeof(ImageFileMachine), processMachine)).AppendLine();
+            sb.AppendFormat("Native Architecture: {0}", nativeArchitecture).AppendLine();
+            sb.AppendFormat("Process Architecture: {0}", processArchitecture).AppendLine();
             sb.AppendLine("Used Locale: " + locale.ChosenLocale);
             sb.AppendLine("System Language: " + CultureInfo.CurrentUICulture.Name);
             sb.AppendLine("Total Memory: " + info.TotalPhysicalMemory);
@@ -190,6 +190,24 @@ namespace USBHelperLauncher
                     var state = (uint)obj["productState"];
                     antivirus.Add(name, (state & 0x1000) != 0);
                 }
+            }
+        }
+
+        private static void GetProcessAndNativeArchitecture(out string processArchitecture, out string nativeArchitecture)
+        {
+            try
+            {
+                IsWow64Process2(Process.GetCurrentProcess().Handle, out var processMachine, out var nativeMachine);
+                processArchitecture = Enum.GetName(typeof(ImageFileMachine), processMachine);
+                nativeArchitecture = Enum.GetName(typeof(ImageFileMachine), nativeMachine);
+            }
+            catch (EntryPointNotFoundException)
+            {
+                // IsWow64Process2 is not available (ie. on anything older than Windows 10 version 1709)
+                SystemInfo processSystemInfo = default, nativeSystemInfo = default;
+                GetSystemInfo(ref processSystemInfo); GetNativeSystemInfo(ref nativeSystemInfo);
+                processArchitecture = Enum.GetName(typeof(ProcessorArchitecture), processSystemInfo.wProcessorArchitecture);
+                nativeArchitecture = Enum.GetName(typeof(ProcessorArchitecture), nativeSystemInfo.wProcessorArchitecture);
             }
         }
 
