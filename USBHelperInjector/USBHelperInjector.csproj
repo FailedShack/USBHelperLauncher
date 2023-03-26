@@ -88,6 +88,7 @@
     <Compile Include="Patches\InvalidConfigPatch.cs" />
     <Compile Include="Patches\MoviePlaybackPatch.cs" />
     <Compile Include="Patches\NusGrabberFormPatch.cs" />
+    <Compile Include="Patches\NvidiaDriverCheckPatch.cs" />
     <Compile Include="Patches\PortablePatches.cs" />
     <Compile Include="Patches\ForceKeySiteFormPatch.cs" />
     <Compile Include="Patches\KeySiteFormHideObsoletePatch.cs" />
