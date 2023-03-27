@@ -90,7 +90,7 @@ namespace USBHelperLauncher.Configuration
         [Setting("Injector", false)]
         public static bool NoFunAllowed { get; set; }
 
-        [Setting("Injector", false)]
+        [Setting("Injector", true)]
         public static bool BackgroundMusic { get; set; }
 
         [Setting("Injector", true)]
