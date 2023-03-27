@@ -430,7 +430,7 @@ namespace USBHelperLauncher
             trayMenu.MenuItems.Add(advanced);
             trayIcon = new NotifyIcon
             {
-                Text = "Wii U USB Helper Launcher",
+                Text = "USBHelperLauncher",
                 Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath),
                 ContextMenu = trayMenu,
                 Visible = true
